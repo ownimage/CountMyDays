@@ -124,12 +124,20 @@
     .btn-add { background: #27ae60; width: 100%; margin-top: 10px; }
     .btn-done { background: #2980b9; width: 200px; margin-top: 20px; }
 
-    .edit-fields input,
-    .edit-fields select,
-    .add-item input,
-    .add-item select {
-      margin: 4px 0;
-      width: 95%;
+    .field-row {
+      display: flex;
+      align-items: center;
+      margin: 6px 0;
+    }
+
+    .field-row label {
+      width: 80px;
+      font-weight: bold;
+    }
+
+    .field-row input,
+    .field-row select {
+      flex: 1;
       padding: 6px;
     }
   </style>
@@ -173,19 +181,33 @@
     <div class="add-item">
       <h3>Add New Event</h3>
 
-      <input id="newName" type="text" placeholder="Name">
-
-      <select id="newType" onchange="updateTypeUI()">
-        <option value="annual">Annual Event</option>
-        <option value="once">One-off Event</option>
-      </select>
-
-      <div id="yearRow" style="display:none;">
-        <input id="newYear" type="number" placeholder="Year" min="1900" max="3000">
+      <div class="field-row">
+        <label>Name:</label>
+        <input id="newName" type="text">
       </div>
 
-      <input id="newMonth" type="number" placeholder="Month (1-12)" min="1" max="12">
-      <input id="newDay" type="number" placeholder="Day (1-31)" min="1" max="31">
+      <div class="field-row">
+        <label>Type:</label>
+        <select id="newType" onchange="updateTypeUI()">
+          <option value="annual">Annual</option>
+          <option value="once">One-off</option>
+        </select>
+      </div>
+
+      <div id="yearRow" class="field-row" style="display:none;">
+        <label>Year:</label>
+        <input id="newYear" type="number" min="1900" max="3000">
+      </div>
+
+      <div class="field-row">
+        <label>Month:</label>
+        <input id="newMonth" type="number" min="1" max="12">
+      </div>
+
+      <div class="field-row">
+        <label>Day:</label>
+        <input id="newDay" type="number" min="1" max="31">
+      </div>
 
       <button class="btn btn-add" onclick="addDate()">Add Event</button>
     </div>
@@ -295,19 +317,35 @@
             <button class="btn btn-delete" onclick="deleteDate(${index})">Delete</button>
           </div>
 
-          <div id="editFields${index}" class="edit-fields" style="display:none;">
-            <input id="editName${index}" type="text" value="${item.name}">
-            <select id="editType${index}" onchange="updateEditTypeUI(${index})">
-              <option value="annual" ${item.type === "annual" ? "selected" : ""}>Annual</option>
-              <option value="once" ${item.type === "once" ? "selected" : ""}>One-off</option>
-            </select>
+          <div id="editFields${index}" class="edit-fields" style="display:none; margin-top:10px;">
 
-            <div id="editYearRow${index}" style="display:${item.type === "once" ? "block" : "none"};">
+            <div class="field-row">
+              <label>Name:</label>
+              <input id="editName${index}" type="text" value="${item.name}">
+            </div>
+
+            <div class="field-row">
+              <label>Type:</label>
+              <select id="editType${index}" onchange="updateEditTypeUI(${index})">
+                <option value="annual" ${item.type === "annual" ? "selected" : ""}>Annual</option>
+                <option value="once" ${item.type === "once" ? "selected" : ""}>One-off</option>
+              </select>
+            </div>
+
+            <div id="editYearRow${index}" class="field-row" style="display:${item.type === "once" ? "flex" : "none"};">
+              <label>Year:</label>
               <input id="editYear${index}" type="number" value="${item.year || ""}">
             </div>
 
-            <input id="editMonth${index}" type="number" value="${item.month}">
-            <input id="editDay${index}" type="number" value="${item.day}">
+            <div class="field-row">
+              <label>Month:</label>
+              <input id="editMonth${index}" type="number" value="${item.month}">
+            </div>
+
+            <div class="field-row">
+              <label>Day:</label>
+              <input id="editDay${index}" type="number" value="${item.day}">
+            </div>
 
             <div class="editor-buttons">
               <button class="btn btn-save" onclick="saveEdit(${index})">Save</button>
@@ -331,7 +369,7 @@
     function updateEditTypeUI(index) {
       const type = document.getElementById(`editType${index}`).value;
       document.getElementById(`editYearRow${index}`).style.display =
-        type === "once" ? "block" : "none";
+        type === "once" ? "flex" : "none";
     }
 
     function saveEdit(index) {
@@ -370,7 +408,7 @@
     function updateTypeUI() {
       const type = document.getElementById("newType").value;
       document.getElementById("yearRow").style.display =
-        type === "once" ? "block" : "none";
+        type === "once" ? "flex" : "none";
     }
 
     function addDate() {
