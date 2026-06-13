@@ -1,7 +1,3 @@
-/* -------------------------
-   DATES EDITOR
-------------------------- */
-
 function renderDatesEditor() {
   const list = document.getElementById("editorList");
   const addTile = document.getElementById("addDateTile");
@@ -10,176 +6,93 @@ function renderDatesEditor() {
   addTile.innerHTML = "";
 
   const dates = loadDates();
-  const categories = getAllCategories();
+  const images = loadImages();
 
-  /* -------------------------
-     RENDER EXISTING DATES
-  ------------------------- */
+  dates.forEach((d, index) => {
+    const item = document.createElement("div");
+    item.className = "date-item";
 
-  dates.forEach((item, index) => {
-    const row = document.createElement("div");
-    row.className = "editor-item";
+    const img = images.find(i => i.category === d.category);
+    const imgSrc = img ? img.data : "";
 
-    const label = item.type === "annual"
-      ? `${item.name} — ${item.category} — ${item.month}/${item.day} — annual`
-      : `${item.name} — ${item.category} — ${item.year}/${item.month}/${item.day} — once`;
-
-    row.innerHTML = `
-      <div class="editor-name">${label}</div>
-
-      <div class="editor-buttons">
-        <button class="btn btn-edit" onclick="editDate(${index})">Edit</button>
-        <button class="btn btn-delete" onclick="deleteDate(${index})">Delete</button>
+    item.innerHTML = `
+      <div class="date-image">
+        <img src="${imgSrc}" class="date-thumb">
       </div>
 
-      <div id="editFields${index}" style="display:none; margin-top:10px;">
+      <input class="edit-name" value="${d.name}"
+             onchange="updateDateName(${index}, this.value)">
 
-        <div class="field-row">
-          <label>Name:</label>
-          <input id="editName${index}" type="text" value="${item.name}">
-        </div>
+      <select class="edit-category" onchange="updateDateCategory(${index}, this.value)">
+        ${getAllCategories().map(c => `
+          <option value="${c}" ${c === d.category ? "selected" : ""}>${c}</option>
+        `).join("")}
+      </select>
 
-        <div class="field-row">
-          <label>Category:</label>
-          <input id="editCategory${index}" list="categoryList" value="${item.category}">
-        </div>
+      <select class="edit-type" onchange="updateDateType(${index}, this.value)">
+        <option value="annual" ${d.type === "annual" ? "selected" : ""}>Annual</option>
+        <option value="once" ${d.type === "once" ? "selected" : ""}>Once</option>
+      </select>
 
-        <div class="field-row">
-          <label>Type:</label>
-          <select id="editType${index}" onchange="updateEditTypeUI(${index})">
-            <option value="annual" ${item.type === "annual" ? "selected" : ""}>Annual</option>
-            <option value="once" ${item.type === "once" ? "selected" : ""}>One-off</option>
-          </select>
-        </div>
+      <input type="number" class="edit-year" value="${d.year || ""}"
+             onchange="updateDateYear(${index}, this.value)">
+      <input type="number" class="edit-month" value="${d.month}"
+             onchange="updateDateMonth(${index}, this.value)">
+      <input type="number" class="edit-day" value="${d.day}"
+             onchange="updateDateDay(${index}, this.value)}">
 
-        <div id="editYearRow${index}" class="field-row" style="display:${item.type === "once" ? "flex" : "none"};">
-          <label>Year:</label>
-          <input id="editYear${index}" type="number" value="${item.year || ""}">
-        </div>
-
-        <div class="field-row">
-          <label>Month:</label>
-          <input id="editMonth${index}" type="number" value="${item.month}">
-        </div>
-
-        <div class="field-row">
-          <label>Day:</label>
-          <input id="editDay${index}" type="number" value="${item.day}">
-        </div>
-
-        <div class="editor-buttons">
-          <button class="btn btn-save" onclick="saveDateEdit(${index})">Save</button>
-          <button class="btn btn-cancel" onclick="cancelDateEdit(${index})">Cancel</button>
-        </div>
-      </div>
+      <button class="btn btn-delete" onclick="deleteDate(${index})">Delete</button>
     `;
 
-    list.appendChild(row);
+    list.appendChild(item);
   });
 
-  /* -------------------------
-     ADD NEW DATE TILE
-  ------------------------- */
-
-  const add = document.createElement("div");
-  add.className = "add-item";
-
-  add.innerHTML = `
-    <h3>Add New Event</h3>
-
-    <div class="field-row">
-      <label>Name:</label>
-      <input id="newName" type="text">
-    </div>
-
-    <div class="field-row">
-      <label>Category:</label>
-      <input id="newCategory" list="categoryList">
-    </div>
-
-    <datalist id="categoryList">
-      ${categories.map(c => `<option value="${c}"></option>`).join("")}
-    </datalist>
-
-    <div class="field-row">
-      <label>Type:</label>
-      <select id="newType" onchange="updateNewTypeUI()">
-        <option value="annual">Annual</option>
-        <option value="once">One-off</option>
-      </select>
-    </div>
-
-    <div id="newYearRow" class="field-row" style="display:none;">
-      <label>Year:</label>
-      <input id="newYear" type="number" min="1900" max="3000">
-    </div>
-
-    <div class="field-row">
-      <label>Month:</label>
-      <input id="newMonth" type="number" min="1" max="12">
-    </div>
-
-    <div class="field-row">
-      <label>Day:</label>
-      <input id="newDay" type="number" min="1" max="31">
-    </div>
-
-    <button class="btn btn-add" onclick="addDate()">Add Event</button>
+  addTile.innerHTML = `
+    <button class="btn btn-add" onclick="addNewDate()">Add Date</button>
   `;
-
-  addTile.appendChild(add);
 }
 
 /* -------------------------
-   EDIT EXISTING DATE
+   UPDATE FUNCTIONS
 ------------------------- */
 
-function editDate(index) {
-  document.getElementById(`editFields${index}`).style.display = "block";
-}
-
-function cancelDateEdit(index) {
-  document.getElementById(`editFields${index}`).style.display = "none";
-}
-
-function updateEditTypeUI(index) {
-  const type = document.getElementById(`editType${index}`).value;
-  document.getElementById(`editYearRow${index}`).style.display =
-    type === "once" ? "flex" : "none";
-}
-
-function saveDateEdit(index) {
+function updateDateName(index, value) {
   const dates = loadDates();
+  dates[index].name = value;
+  saveDates(dates);
+}
 
-  const name = document.getElementById(`editName${index}`).value.trim();
-  const category = document.getElementById(`editCategory${index}`).value.trim();
-  const type = document.getElementById(`editType${index}`).value;
-  const month = parseInt(document.getElementById(`editMonth${index}`).value);
-  const day = parseInt(document.getElementById(`editDay${index}`).value);
+function updateDateCategory(index, value) {
+  const dates = loadDates();
+  dates[index].category = value;
+  saveDates(dates);
+  renderDatesEditor(); // refresh to update image
+}
 
-  if (!name || !category || !month || !day) {
-    alert("Please fill all fields");
-    return;
-  }
-
-  if (type === "annual") {
-    dates[index] = { name, category, month, day, type };
-  } else {
-    const year = parseInt(document.getElementById(`editYear${index}`).value);
-    if (!year) {
-      alert("Please enter a year for one-off events");
-      return;
-    }
-    dates[index] = { name, category, year, month, day, type };
-  }
-
+function updateDateType(index, value) {
+  const dates = loadDates();
+  dates[index].type = value;
   saveDates(dates);
   renderDatesEditor();
 }
 
-/* -------------------------
-   DELETE DATE
-------------------------- */
+function updateDateYear(index, value) {
+  const dates = loadDates();
+  dates[index].year = Number(value);
+  saveDates(dates);
+}
+
+function updateDateMonth(index, value) {
+  const dates = loadDates();
+  dates[index].month = Number(value);
+  saveDates(dates);
+}
+
+function updateDateDay(index, value) {
+  const dates = loadDates();
+  dates[index].day = Number(value);
+  saveDates(dates);
+}
 
 function deleteDate(index) {
   const dates = loadDates();
@@ -188,44 +101,15 @@ function deleteDate(index) {
   renderDatesEditor();
 }
 
-/* -------------------------
-   ADD NEW DATE
-------------------------- */
-
-function updateNewTypeUI() {
-  const type = document.getElementById("newType").value;
-  document.getElementById("newYearRow").style.display =
-    type === "once" ? "flex" : "none";
-}
-
-function addDate() {
-  const name = document.getElementById("newName").value.trim();
-  const category = document.getElementById("newCategory").value.trim();
-  const type = document.getElementById("newType").value;
-  const month = parseInt(document.getElementById("newMonth").value);
-  const day = parseInt(document.getElementById("newDay").value);
-
-  if (!name || !category || !month || !day) {
-    alert("Please fill all fields");
-    return;
-  }
-
-  let newItem;
-
-  if (type === "annual") {
-    newItem = { name, category, month, day, type };
-  } else {
-    const year = parseInt(document.getElementById("newYear").value);
-    if (!year) {
-      alert("Please enter a year for one-off events");
-      return;
-    }
-    newItem = { name, category, year, month, day, type };
-  }
-
+function addNewDate() {
   const dates = loadDates();
-  dates.push(newItem);
+  dates.push({
+    name: "New Event",
+    category: "Event",
+    type: "annual",
+    month: 1,
+    day: 1
+  });
   saveDates(dates);
-
   renderDatesEditor();
 }

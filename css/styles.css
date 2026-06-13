@@ -192,3 +192,27 @@ body {
   display: flex;
   gap: 6px;
 }
+
+.count-image {
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.count-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.date-image {
+  width: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.date-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}

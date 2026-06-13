@@ -15,7 +15,6 @@ function initStorage() {
   }
 
   if (!localStorage.getItem("countdownImages")) {
-    // Load cartoon theme by default
     if (typeof sampleImages !== "undefined") {
       const cartoonSet = sampleImages.cartoon;
       const avatarSet = sampleImages.avatars;
@@ -145,15 +144,23 @@ function renderCountdowns() {
 
   dates.sort((a, b) => a.daysRemaining - b.daysRemaining);
 
+  const images = loadImages();
+
   dates.forEach(item => {
     const box = document.createElement("div");
     box.className = "count-box";
+
+    const img = images.find(i => i.category === item.category);
+    const imgSrc = img ? img.data : "";
 
     const label = item.type === "annual"
       ? `${item.name} (${item.category})`
       : `${item.name} (${item.category}, ${item.year})`;
 
     box.innerHTML = `
+      <div class="count-image">
+        <img src="${imgSrc}" class="count-thumb">
+      </div>
       <div class="count-title">${label}</div>
       <div class="count-number">${item.daysRemaining}</div>
     `;
