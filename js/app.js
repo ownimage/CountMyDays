@@ -1,6 +1,6 @@
-/* -------------------------
+/* ---------------------------------------------------------
    STORAGE INITIALISATION
-------------------------- */
+--------------------------------------------------------- */
 
 const defaultDates = [
   { name: "Christmas", category: "Holiday", month: 12, day: 25, type: "annual" },
@@ -63,9 +63,9 @@ function getAllCategories() {
   return Array.from(categories);
 }
 
-/* -------------------------
+/* ---------------------------------------------------------
    VIEW SWITCHING
-------------------------- */
+--------------------------------------------------------- */
 
 function hideAll() {
   document.getElementById("countdownContainer").style.display = "none";
@@ -104,9 +104,9 @@ function closeImagesEditor() {
   renderCountdowns();
 }
 
-/* -------------------------
+/* ---------------------------------------------------------
    COUNTDOWN CALCULATION
-------------------------- */
+--------------------------------------------------------- */
 
 function daysUntil(item) {
   const today = new Date();
@@ -126,9 +126,9 @@ function daysUntil(item) {
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
 
-/* -------------------------
-   COUNTDOWN RENDERING
-------------------------- */
+/* ---------------------------------------------------------
+   COUNTDOWN RENDERING (FULL-WIDTH TILES)
+--------------------------------------------------------- */
 
 function renderCountdowns() {
   hideAll();
@@ -174,9 +174,29 @@ function renderCountdowns() {
   });
 }
 
-/* -------------------------
+/* ---------------------------------------------------------
+   CLICK-TO-OPEN MENUS
+--------------------------------------------------------- */
+
+document.querySelectorAll(".menu-item").forEach(item => {
+  item.addEventListener("click", e => {
+    e.stopPropagation();
+
+    document.querySelectorAll(".menu-item").forEach(i => {
+      if (i !== item) i.classList.remove("active");
+    });
+
+    item.classList.toggle("active");
+  });
+});
+
+document.addEventListener("click", () => {
+  document.querySelectorAll(".menu-item").forEach(i => i.classList.remove("active"));
+});
+
+/* ---------------------------------------------------------
    INITIALISE APP
-------------------------- */
+--------------------------------------------------------- */
 
 initStorage();
 renderCountdowns();

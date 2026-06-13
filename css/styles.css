@@ -1,4 +1,6 @@
-/* BASIC PAGE LAYOUT */
+/* -----------------------------------------
+   GLOBAL PAGE LAYOUT
+----------------------------------------- */
 
 body {
   margin: 0;
@@ -6,11 +8,15 @@ body {
   background: #f3f4f6;
 }
 
+/* -----------------------------------------
+   TOP MENU BAR
+----------------------------------------- */
+
 .menu {
   display: flex;
   gap: 16px;
   padding: 10px 16px;
-  background: #333;
+  background: #222;
   color: #fff;
   font-size: 14px;
 }
@@ -18,56 +24,75 @@ body {
 .menu-item {
   position: relative;
   cursor: pointer;
+  user-select: none;
 }
 
+/* -----------------------------------------
+   SUBMENU — BLACK BACKGROUND (restored)
+----------------------------------------- */
+
 .submenu {
-  display: none;
+  display: none;                 /* hidden until .active */
   position: absolute;
   top: 24px;
   left: 0;
-  background: #fff;
-  color: #333;
+  background: #000;              /* BLACK background */
+  color: #fff;                   /* White text */
   border-radius: 4px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  min-width: 120px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  min-width: 140px;
   z-index: 10;
 }
 
-.menu-item:hover .submenu {
-  display: block;
-}
-
 .submenu-item {
-  padding: 6px 10px;
-  font-size: 13px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 .submenu-item:hover {
-  background: #eee;
+  background: #333;              /* Dark grey hover */
 }
 
+/* -----------------------------------------
+   ACTIVE MENU (click to open)
+----------------------------------------- */
+
+.menu-item.active .submenu {
+  display: block;
+}
+
+/* -----------------------------------------
+   MAIN CONTENT CONTAINER
+----------------------------------------- */
+
 .container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 16px auto;
   padding: 0 12px 24px;
 }
 
-/* MAIN COUNTDOWN TILES */
+/* -----------------------------------------
+   COUNTDOWN TILES (full width, one line)
+----------------------------------------- */
 
 .count-tile {
   width: 100%;
   background: #ffffff;
   border-radius: 10px;
-  padding: 10px 14px;
-  margin-bottom: 10px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
 
   box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
+
+/* LEFT SIDE — ICON */
 
 .tile-left {
   flex: 0 0 auto;
@@ -80,13 +105,15 @@ body {
   display: block;
 }
 
+/* MIDDLE — TEXT */
+
 .tile-middle {
   flex: 1 1 auto;
   min-width: 0;
 }
 
 .tile-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: #222;
   white-space: nowrap;
@@ -94,23 +121,28 @@ body {
   text-overflow: ellipsis;
 }
 
+/* RIGHT SIDE — DAYS REMAINING */
+
 .tile-right {
   flex: 0 0 auto;
   text-align: right;
 }
 
 .tile-days {
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 700;
   color: #0078d4;
+  min-width: 80px;
 }
 
-/* EDITORS (minimal, keep your existing if you prefer) */
+/* -----------------------------------------
+   DATE EDITOR
+----------------------------------------- */
 
 .date-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   padding: 6px 0;
 }
 
@@ -138,6 +170,10 @@ body {
 .edit-day {
   width: 80px;
 }
+
+/* -----------------------------------------
+   BUTTONS
+----------------------------------------- */
 
 .btn {
   padding: 4px 8px;
