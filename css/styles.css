@@ -1,4 +1,7 @@
-/* GLOBAL */
+/* -------------------------
+   GLOBAL
+------------------------- */
+
 body {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -10,7 +13,10 @@ body {
   padding: 40px;
 }
 
-/* MENU BAR */
+/* -------------------------
+   TOP MENU
+------------------------- */
+
 .menu {
   background: #333;
   color: white;
@@ -19,22 +25,27 @@ body {
   gap: 20px;
   font-size: 1.1rem;
   position: relative;
+  z-index: 50;
 }
 
 .menu-item {
   cursor: pointer;
-  position: relative;
   user-select: none;
+  position: relative;
+  padding: 4px 6px;
 }
 
 .menu-item:hover {
   text-decoration: underline;
 }
 
-/* SUBMENUS */
+/* -------------------------
+   SUBMENUS (fixed + anchored)
+------------------------- */
+
 .submenu {
   position: absolute;
-  top: 36px;
+  top: 100%;              /* sits directly under the menu item */
   left: 0;
   background: #444;
   padding: 10px;
@@ -42,22 +53,27 @@ body {
   display: none;
   flex-direction: column;
   gap: 8px;
-  z-index: 20;
-  min-width: 140px;
+  z-index: 100;
+  min-width: 150px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
 }
 
 .submenu-item {
   color: white;
   cursor: pointer;
-  padding: 4px 6px;
+  padding: 6px 8px;
   border-radius: 4px;
+  white-space: nowrap;
 }
 
 .submenu-item:hover {
   background: #555;
 }
 
-/* COUNTDOWN BOXES */
+/* -------------------------
+   COUNTDOWN BOXES
+------------------------- */
+
 .count-box {
   background: white;
   padding: 20px;
@@ -70,6 +86,9 @@ body {
 .count-title {
   font-size: 1.4rem;
   margin-bottom: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .count-number {
@@ -78,7 +97,10 @@ body {
   color: #c0392b;
 }
 
-/* EDITOR TILES */
+/* -------------------------
+   EDITOR TILES
+------------------------- */
+
 .editor-item,
 .add-item,
 .category-item,
@@ -92,13 +114,24 @@ body {
   text-align: left;
 }
 
+.editor-name {
+  font-size: 1.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+}
+
 .editor-buttons {
   display: flex;
   gap: 10px;
   margin-top: 8px;
 }
 
-/* BUTTONS */
+/* -------------------------
+   BUTTONS
+------------------------- */
+
 .btn {
   padding: 6px 10px;
   border: none;
@@ -119,7 +152,10 @@ body {
   cursor: default !important;
 }
 
-/* FORM FIELDS */
+/* -------------------------
+   FORM FIELDS
+------------------------- */
+
 .field-row {
   display: flex;
   align-items: center;
@@ -137,7 +173,10 @@ body {
   padding: 6px;
 }
 
-/* IMAGE MANAGER */
+/* -------------------------
+   IMAGE MANAGER
+------------------------- */
+
 .image-row {
   display: flex;
   align-items: center;
@@ -147,7 +186,7 @@ body {
 .image-thumb {
   width: 80px;
   height: 80px;
-  object-fit: cover;
+  object-fit: cover; /* cover cropping */
   border-radius: 6px;
   background: #ddd;
 }
