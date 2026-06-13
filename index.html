@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Count My Days</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -10,6 +11,7 @@
       background: #f4f4f4;
     }
 
+    /* Top Menu */
     .menu {
       background: #333;
       color: white;
@@ -28,6 +30,7 @@
       text-decoration: underline;
     }
 
+    /* Countdown Boxes */
     .container {
       text-align: center;
       padding: 40px;
@@ -52,8 +55,35 @@
       font-weight: bold;
       color: #c0392b;
     }
+
+    /* Editor */
+    .editor-item {
+      background: white;
+      padding: 10px;
+      margin: 10px auto;
+      border-radius: 8px;
+      width: 320px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .editor-name {
+      font-size: 1.1rem;
+    }
+
+    .delete-btn {
+      background: #c0392b;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
   </style>
 </head>
+
 <body>
 
   <!-- Top Menu -->
@@ -64,9 +94,22 @@
     <div class="menu-item" onclick="menuAction('settings')">Settings</div>
   </div>
 
-  <!-- Main Content -->
-  <div class="container" id="countdownContainer">
-    <!-- JS will fill this -->
+  <!-- Countdown View -->
+  <div class="container" id="countdownContainer"></div>
+
+  <!-- Editor View -->
+  <div class="container" id="editorContainer" style="display:none;">
+    <h2>Edit Dates</h2>
+
+    <div id="editorList"></div>
+
+    <h3>Add New Date</h3>
+    <input id="newName" type="text" placeholder="Name">
+    <input id="newDate" type="date">
+    <button onclick="addDate()">Add</button>
+
+    <br><br>
+    <button onclick="closeEditor()">Done</button>
   </div>
 
   <script>
@@ -76,24 +119,24 @@
       { name: "Birthday", date: "2026-08-14" }
     ];
 
-    // Ensure countdownDates exists
     function initStorage() {
       if (!localStorage.getItem("countdownDates")) {
         localStorage.setItem("countdownDates", JSON.stringify(defaultDates));
       }
     }
 
-    // Load stored dates
     function loadDates() {
       return JSON.parse(localStorage.getItem("countdownDates")) || [];
     }
 
-    // Calculate days until a date
+    function saveDates(dates) {
+      localStorage.setItem("countdownDates", JSON.stringify(dates));
+    }
+
     function daysUntil(dateString) {
       const today = new Date();
       const target = new Date(dateString);
 
-      // If the date is in the past, move it to next year
       if (target < today) {
         target.setFullYear(today.getFullYear() + 1);
       }
@@ -102,10 +145,17 @@
       return Math.ceil(diff / (1000 * 60 * 60 * 24));
     }
 
-    // Render countdowns
+    // -------------------------
+    // COUNTDOWN VIEW
+    // -------------------------
     function renderCountdowns() {
       const container = document.getElementById("countdownContainer");
-      container.innerHTML = ""; // Clear existing
+      const editor = document.getElementById("editorContainer");
+
+      container.style.display = "block";
+      editor.style.display = "none";
+
+      container.innerHTML = "";
 
       const dates = loadDates();
 
@@ -122,12 +172,80 @@
       });
     }
 
-    // Placeholder menu actions
+    // -------------------------
+    // EDITOR VIEW
+    // -------------------------
+    function openEditor() {
+      const container = document.getElementById("countdownContainer");
+      const editor = document.getElementById("editorContainer");
+      const list = document.getElementById("editorList");
+
+      container.style.display = "none";
+      editor.style.display = "block";
+
+      list.innerHTML = "";
+
+      const dates = loadDates();
+
+      dates.forEach((item, index) => {
+        const row = document.createElement("div");
+        row.className = "editor-item";
+
+        row.innerHTML = `
+          <div class="editor-name">${item.name} — ${item.date}</div>
+          <button class="delete-btn" onclick="deleteDate(${index})">Delete</button>
+        `;
+
+        list.appendChild(row);
+      });
+    }
+
+    function closeEditor() {
+      renderCountdowns();
+    }
+
+    // -------------------------
+    // ADD / DELETE
+    // -------------------------
+    function addDate() {
+      const name = document.getElementById("newName").value.trim();
+      const date = document.getElementById("newDate").value;
+
+      if (!name || !date) {
+        alert("Please enter both a name and a date");
+        return;
+      }
+
+      const dates = loadDates();
+      dates.push({ name, date });
+      saveDates(dates);
+
+      document.getElementById("newName").value = "";
+      document.getElementById("newDate").value = "";
+
+      openEditor();
+    }
+
+    function deleteDate(index) {
+      const dates = loadDates();
+      dates.splice(index, 1);
+      saveDates(dates);
+      openEditor();
+    }
+
+    // -------------------------
+    // MENU ACTIONS
+    // -------------------------
     function menuAction(action) {
+      if (action === "edit") {
+        openEditor();
+        return;
+      }
+
       alert("You clicked: " + action);
     }
 
-    // Initialise app
+    // Init
     initStorage();
     renderCountdowns();
   </script>
