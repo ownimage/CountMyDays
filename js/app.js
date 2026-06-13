@@ -13,8 +13,25 @@ function initStorage() {
   if (!localStorage.getItem("countdownDates")) {
     localStorage.setItem("countdownDates", JSON.stringify(defaultDates));
   }
+
   if (!localStorage.getItem("countdownImages")) {
-    localStorage.setItem("countdownImages", JSON.stringify([]));
+    // Load cartoon theme by default
+    if (typeof sampleImages !== "undefined") {
+      const cartoonSet = sampleImages.cartoon;
+      const avatarSet = sampleImages.avatars;
+
+      const initialImages = [
+        { name: "Birthday", category: "Birthday", data: cartoonSet.birthday },
+        { name: "Holiday", category: "Holiday", data: cartoonSet.holiday },
+        { name: "Anniversary", category: "Anniversary", data: cartoonSet.anniversary },
+        { name: "Event", category: "Event", data: cartoonSet.event },
+        { name: "Person", category: "Avatar", data: avatarSet.cartoonMale }
+      ];
+
+      localStorage.setItem("countdownImages", JSON.stringify(initialImages));
+    } else {
+      localStorage.setItem("countdownImages", JSON.stringify([]));
+    }
   }
 }
 
@@ -46,30 +63,6 @@ function getAllCategories() {
 
   return Array.from(categories);
 }
-
-/* -------------------------
-   SUBMENU HANDLING
-------------------------- */
-
-function toggleSubmenu(id) {
-  // Close all submenus first
-  document.querySelectorAll(".submenu").forEach(menu => {
-    if (menu.id !== id) menu.style.display = "none";
-  });
-
-  const menu = document.getElementById(id);
-  menu.style.display = (menu.style.display === "flex") ? "none" : "flex";
-}
-
-// Close submenus when clicking anywhere else
-document.addEventListener("click", function (e) {
-  if (!e.target.classList.contains("menu-item") &&
-      !e.target.classList.contains("submenu-item")) {
-    document.querySelectorAll(".submenu").forEach(menu => {
-      menu.style.display = "none";
-    });
-  }
-});
 
 /* -------------------------
    VIEW SWITCHING

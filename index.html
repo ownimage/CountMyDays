@@ -11,26 +11,26 @@
   <!-- Top Menu -->
   <div class="menu">
 
-    <div class="menu-item" onclick="toggleSubmenu('editMenu')">
+    <div class="menu-item">
       Edit
-      <div id="editMenu" class="submenu">
+      <div class="submenu">
         <div class="submenu-item" onclick="openDatesEditor()">Dates</div>
         <div class="submenu-item" onclick="openCategoriesEditor()">Categories</div>
         <div class="submenu-item" onclick="openImagesEditor()">Images</div>
       </div>
     </div>
 
-    <div class="menu-item" onclick="toggleSubmenu('exportMenu')">
+    <div class="menu-item">
       Export
-      <div id="exportMenu" class="submenu">
+      <div class="submenu">
         <div class="submenu-item">Export JSON</div>
         <div class="submenu-item">Export QR</div>
       </div>
     </div>
 
-    <div class="menu-item" onclick="toggleSubmenu('importMenu')">
+    <div class="menu-item">
       Import
-      <div id="importMenu" class="submenu">
+      <div class="submenu">
         <div class="submenu-item">Import JSON</div>
         <div class="submenu-item">Import QR</div>
       </div>
@@ -67,6 +67,7 @@
   </div>
 
   <!-- JS Files -->
+  <script src="js/sampleImages.js"></script>
   <script src="js/app.js"></script>
   <script src="js/dates.js"></script>
   <script src="js/categories.js"></script>
