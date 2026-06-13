@@ -146,7 +146,7 @@
     }
 
     // -------------------------
-    // COUNTDOWN VIEW
+    // COUNTDOWN VIEW (SORTED)
     // -------------------------
     function renderCountdowns() {
       const container = document.getElementById("countdownContainer");
@@ -157,15 +157,25 @@
 
       container.innerHTML = "";
 
-      const dates = loadDates();
+      let dates = loadDates();
 
+      // Add daysRemaining to each item
+      dates = dates.map(item => ({
+        ...item,
+        daysRemaining: daysUntil(item.date)
+      }));
+
+      // Sort by fewest days remaining
+      dates.sort((a, b) => a.daysRemaining - b.daysRemaining);
+
+      // Render sorted list
       dates.forEach(item => {
         const box = document.createElement("div");
         box.className = "count-box";
 
         box.innerHTML = `
           <div class="count-title">${item.name}</div>
-          <div class="count-number">${daysUntil(item.date)}</div>
+          <div class="count-number">${item.daysRemaining}</div>
         `;
 
         container.appendChild(box);
