@@ -1,3 +1,18 @@
+function safeImages() {
+  const raw = loadImages();
+  let arr = [];
+
+  if (Array.isArray(raw)) arr = raw;
+  else if (raw && typeof raw === "object") arr = Object.values(raw);
+
+  arr = arr.filter(i => i && typeof i === "object");
+
+  return arr.map(i => ({
+    category: i.category || "Holiday",
+    data: i.data || ""
+  }));
+}
+
 function renderDatesEditor() {
   const list = document.getElementById("editorList");
   const addTile = document.getElementById("addDateTile");
@@ -6,15 +21,8 @@ function renderDatesEditor() {
   addTile.innerHTML = "";
 
   const dates = loadDates();
-  const rawImages = loadImages();
-
-  // Normalise images so we always have an array
-  let images = [];
-  if (Array.isArray(rawImages)) {
-    images = rawImages;
-  } else if (rawImages && typeof rawImages === "object") {
-    images = Object.values(rawImages);
-  }
+  const images = safeImages();
+  const categories = loadCategories();
 
   dates.forEach((d, index) => {
     const img = images.find(i => i.category === d.category);
@@ -26,61 +34,77 @@ function renderDatesEditor() {
 
     card.innerHTML = `
       <div class="row align-items-center">
+
         <div class="col-auto">
-          <img src="${imgSrc}" class="date-img">
+          ${imgSrc ? `<img src="${imgSrc}" class="date-img">`
+                   : `<div class="text-secondary">No image</div>`}
         </div>
-        <!-- rest of your existing innerHTML stays the same -->
+
+        <div class="col-4">
+          <label class="form-label">Title</label>
+          <input class="form-control"
+                 value="${d.name || ""}"
+                 onchange="updateDateField(${index}, 'name', this.value)">
+
+          <label class="form-label mt-2">Category</label>
+          <select class="form-select"
+                  onchange="updateDateField(${index}, 'category', this.value)">
+            ${categories.map(c => `
+              <option value="${c}" ${c === d.category ? "selected" : ""}>${c}</option>
+            `).join("")}
+          </select>
+
+          <label class="form-label mt-2">Type</label>
+          <select class="form-select"
+                  onchange="updateDateField(${index}, 'type', this.value)">
+            <option value="annual" ${d.type === "annual" ? "selected" : ""}>Annual</option>
+            <option value="once" ${d.type === "once" ? "selected" : ""}>Once</option>
+          </select>
+        </div>
+
+        <div class="col-4">
+          <label class="form-label">Day</label>
+          <input type="number" min="1" max="31"
+                 class="form-control"
+                 value="${d.day || ""}"
+                 onchange="updateDateField(${index}, 'day', Number(this.value))">
+
+          <label class="form-label mt-2">Month</label>
+          <input type="number" min="1" max="12"
+                 class="form-control"
+                 value="${d.month || ""}"
+                 onchange="updateDateField(${index}, 'month', Number(this.value))">
+
+          ${showYear ? `
+            <label class="form-label mt-2">Year</label>
+            <input type="number"
+                   class="form-control"
+                   value="${d.year || ""}"
+                   onchange="updateDateField(${index}, 'year', Number(this.value))">
+          ` : ""}
+        </div>
+
+        <div class="col-auto">
+          <button class="btn btn-danger" onclick="deleteDate(${index})">Delete</button>
+        </div>
+
+      </div>
     `;
 
     list.appendChild(card);
   });
 
   addTile.innerHTML = `
-    <button class="btn btn-success btn-add" onclick="addNewDate()">Add Date</button>
-    <button class="btn btn-primary" onclick="closeDatesEditor()">Done</button>
+    <div class="d-flex justify-content-end gap-2 mt-4">
+      <button class="btn btn-success" onclick="addNewDate()">Add Date</button>
+      <button class="btn btn-primary" onclick="closeDatesEditor()">Done</button>
+    </div>
   `;
 }
 
-
-/* ---------------------------------------------------------
-   UPDATE FUNCTIONS
---------------------------------------------------------- */
-
-function updateDateName(index, value) {
+function updateDateField(index, field, value) {
   const dates = loadDates();
-  dates[index].name = value;
-  saveDates(dates);
-}
-
-function updateDateCategory(index, value) {
-  const dates = loadDates();
-  dates[index].category = value;
-  saveDates(dates);
-  renderDatesEditor(); // refresh to update image + layout
-}
-
-function updateDateType(index, value) {
-  const dates = loadDates();
-  dates[index].type = value;
-  saveDates(dates);
-  renderDatesEditor(); // refresh to show/hide year
-}
-
-function updateDateYear(index, value) {
-  const dates = loadDates();
-  dates[index].year = Number(value);
-  saveDates(dates);
-}
-
-function updateDateMonth(index, value) {
-  const dates = loadDates();
-  dates[index].month = Number(value);
-  saveDates(dates);
-}
-
-function updateDateDay(index, value) {
-  const dates = loadDates();
-  dates[index].day = Number(value);
+  dates[index][field] = value;
   saveDates(dates);
 }
 
@@ -95,7 +119,7 @@ function addNewDate() {
   const dates = loadDates();
   dates.push({
     name: "New Event",
-    category: "Event",
+    category: "Holiday",
     type: "annual",
     month: 1,
     day: 1
