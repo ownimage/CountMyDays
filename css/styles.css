@@ -1,225 +1,109 @@
-/* -----------------------------------------
-   GLOBAL PAGE LAYOUT
------------------------------------------ */
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>Countdowns</title>
 
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #f3f4f6;
-}
+  <!-- Bootstrap 5.3 Dark Mode -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-/* -----------------------------------------
-   TOP MENU BAR
------------------------------------------ */
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
 
-.menu {
-  display: flex;
-  gap: 16px;
-  padding: 10px 16px;
-  background: #222;
-  color: #fff;
-  font-size: 14px;
-}
+<body class="bg-dark">
 
-.menu-item {
-  position: relative;
-  cursor: pointer;
-  user-select: none;
-}
+  <!-- FIXED NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-black px-3">
+    <div class="container-fluid">
 
-/* -----------------------------------------
-   SUBMENU — BLACK BACKGROUND
------------------------------------------ */
+      <div class="navbar-nav gap-3">
 
-.submenu {
-  display: none;
-  position: absolute;
-  top: 24px;
-  left: 0;
-  background: #000;
-  color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-  min-width: 140px;
-  z-index: 10;
-}
+        <!-- EDIT MENU -->
+        <div class="dropdown">
+          <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">
+            Edit
+          </button>
+          <ul class="dropdown-menu dropdown-menu-dark">
+            <li><a class="dropdown-item" onclick="openDatesEditor()">Dates</a></li>
+            <li><a class="dropdown-item" onclick="openCategoriesEditor()">Categories</a></li>
+            <li><a class="dropdown-item" onclick="openImagesEditor()">Images</a></li>
+          </ul>
+        </div>
 
-.submenu-item {
-  padding: 8px 12px;
-  font-size: 14px;
-  cursor: pointer;
-  white-space: nowrap;
-}
+        <!-- EXPORT MENU -->
+        <div class="dropdown">
+          <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">
+            Export
+          </button>
+          <ul class="dropdown-menu dropdown-menu-dark">
+            <li><a class="dropdown-item" onclick="exportData()">Export JSON</a></li>
+          </ul>
+        </div>
 
-.submenu-item:hover {
-  background: #333;
-}
+        <!-- IMPORT MENU -->
+        <div class="dropdown">
+          <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">
+            Import
+          </button>
+          <ul class="dropdown-menu dropdown-menu-dark">
+            <li><a class="dropdown-item" onclick="importData()">Import JSON</a></li>
+          </ul>
+        </div>
 
-.menu-item.active .submenu {
-  display: block;
-}
+        <!-- SETTINGS MENU -->
+        <div class="dropdown">
+          <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">
+            Settings
+          </button>
+          <ul class="dropdown-menu dropdown-menu-dark">
+            <li><a class="dropdown-item" onclick="resetAll()">Reset All</a></li>
+          </ul>
+        </div>
 
-/* -----------------------------------------
-   MAIN CONTENT CONTAINER
------------------------------------------ */
+      </div>
 
-.container {
-  max-width: 900px;
-  margin: 16px auto;
-  padding: 0 12px 24px;
-}
+    </div>
+  </nav>
 
-/* -----------------------------------------
-   COUNTDOWN TILES (main screen)
------------------------------------------ */
+  <!-- MAIN CONTENT -->
+  <div class="container my-4">
 
-.count-tile {
-  width: 100%;
-  background: #ffffff;
-  border-radius: 10px;
-  padding: 12px 16px;
-  margin-bottom: 12px;
+    <!-- COUNTDOWN SCREEN -->
+    <div id="countdownContainer"></div>
 
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+    <!-- EDIT DATES -->
+    <div id="datesEditor" class="d-none">
+      <h2 class="mb-3">Edit Dates</h2>
+      <div id="editorList"></div>
+      <div id="addDateTile" class="mt-4"></div>
+    </div>
 
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-}
+    <!-- EDIT CATEGORIES -->
+    <div id="categoriesEditor" class="d-none">
+      <h2 class="mb-3">Edit Categories</h2>
+      <div id="categoriesList"></div>
+      <div id="addCategoryTile" class="mt-4"></div>
+    </div>
 
-.tile-left {
-  flex: 0 0 auto;
-}
+    <!-- EDIT IMAGES -->
+    <div id="imagesEditor" class="d-none">
+      <h2 class="mb-3">Edit Images</h2>
+      <div id="imagesList"></div>
+      <div id="addImageTile" class="mt-4"></div>
+    </div>
 
-.tile-icon {
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
-  display: block;
-}
+  </div>
 
-.tile-middle {
-  flex: 1 1 auto;
-  min-width: 0;
-}
+  <!-- Bootstrap JS Bundle (REQUIRED FOR DROPDOWNS) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-.tile-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #222;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+  <!-- App Scripts -->
+  <script src="js/sampleImages.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/dates.js"></script>
+  <script src="js/categories.js"></script>
+  <script src="js/images.js"></script>
 
-.tile-right {
-  flex: 0 0 auto;
-  text-align: right;
-}
-
-.tile-days {
-  font-size: 36px;
-  font-weight: 700;
-  color: #0078d4;
-  min-width: 80px;
-}
-
-/* -----------------------------------------
-   EDIT DATES — FULL TILE WITH 3 COLUMNS
------------------------------------------ */
-
-.date-tile {
-  width: 100%;
-  background: #ffffff;
-  border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 12px;
-
-  display: grid;
-  grid-template-columns: 100px 1fr 1fr 100px;
-  gap: 16px;
-
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-  align-items: center;
-}
-
-/* LEFT — FULL SIZE IMAGE */
-
-.date-tile-left img {
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
-}
-
-/* COLUMN 1 — TITLE / CATEGORY / TYPE */
-
-.date-col-1 label,
-.date-col-2 label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #444;
-  display: block;
-  margin-bottom: 4px;
-}
-
-.date-col-1 input,
-.date-col-1 select,
-.date-col-2 input {
-  width: 100%;
-  padding: 6px;
-  font-size: 14px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-/* COLUMN 2 — DAY / MONTH / YEAR */
-
-.date-col-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
-}
-
-/* COLUMN 3 — DELETE BUTTON */
-
-.date-col-3 {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.btn-delete {
-  background: #e03131;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 14px;
-  font-size: 14px;
-  cursor: pointer;
-  width: 100%;
-}
-
-/* -----------------------------------------
-   BUTTONS (uniform size)
------------------------------------------ */
-
-.btn {
-  padding: 10px 14px;
-  font-size: 14px;
-  cursor: pointer;
-  border-radius: 4px;
-  border: none;
-  width: 160px;
-  text-align: center;
-}
-
-.btn-add {
-  background: #2ecc71; /* GREEN */
-  color: #fff;
-  margin-bottom: 12px; /* vertical spacing above Done */
-}
-
-.btn-done {
-  background: #0078d4;
-  color: #fff;
-}
+</body>
+</html>

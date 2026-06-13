@@ -1,153 +1,68 @@
-/* -------------------------
-   CATEGORIES EDITOR
-------------------------- */
-
 function renderCategoriesEditor() {
-  const container = document.getElementById("categoryListContainer");
+  const list = document.getElementById("categoriesList");
   const addTile = document.getElementById("addCategoryTile");
 
-  container.innerHTML = "";
+  list.innerHTML = "";
   addTile.innerHTML = "";
 
-  const categories = getAllCategories();
+  const categories = loadCategories();
 
-  /* -------------------------
-     RENDER CATEGORY LIST
-  ------------------------- */
+  categories.forEach((c, index) => {
+    const card = document.createElement("div");
+    card.className = "card p-3 mb-3";
 
-  categories.forEach((cat, index) => {
-    const row = document.createElement("div");
-    row.className = "category-item";
+    card.innerHTML = `
+      <div class="row align-items-center">
 
-    const safeId = `cat_${index}`;
+        <!-- CATEGORY NAME -->
+        <div class="col">
+          <label class="form-label">Category</label>
+          <input class="form-control"
+                 value="${c}"
+                 onchange="updateCategory(${index}, this.value)">
+        </div>
 
-    row.innerHTML = `
-      <div class="field-row">
-        <label>Name:</label>
-        <input id="${safeId}" type="text" value="${cat}">
-      </div>
+        <!-- DELETE BUTTON -->
+        <div class="col-auto">
+          <button class="btn btn-danger"
+                  onclick="deleteCategory(${index})">
+            Delete
+          </button>
+        </div>
 
-      <div class="editor-buttons">
-        <button class="btn btn-save btn-disabled" id="${safeId}_save" onclick="saveCategory('${safeId}', '${cat}')" disabled>Save</button>
-        <button class="btn btn-delete" onclick="deleteCategory('${cat}')">Delete</button>
       </div>
     `;
 
-    container.appendChild(row);
-
-    /* Enable save button only when changed */
-    const input = document.getElementById(safeId);
-    const saveBtn = document.getElementById(`${safeId}_save`);
-
-    input.addEventListener("input", () => {
-      if (input.value.trim() !== cat) {
-        saveBtn.classList.remove("btn-disabled");
-        saveBtn.disabled = false;
-      } else {
-        saveBtn.classList.add("btn-disabled");
-        saveBtn.disabled = true;
-      }
-    });
+    list.appendChild(card);
   });
 
-  /* -------------------------
-     ADD CATEGORY TILE
-  ------------------------- */
-
-  const add = document.createElement("div");
-  add.className = "add-item";
-
-  add.innerHTML = `
-    <h3>Add Category</h3>
-
-    <div class="field-row">
-      <label>Name:</label>
-      <input id="newCategoryName" type="text">
-    </div>
-
-    <button class="btn btn-add" onclick="addCategory()">Add Category</button>
+  // ADD CATEGORY + DONE BUTTON
+  addTile.innerHTML = `
+    <button class="btn btn-success btn-add" onclick="addNewCategory()">Add Category</button>
+    <button class="btn btn-primary" onclick="closeCategoriesEditor()">Done</button>
   `;
-
-  addTile.appendChild(add);
 }
 
-/* -------------------------
-   ADD CATEGORY
-------------------------- */
+/* ---------------------------------------------------------
+   UPDATE FUNCTIONS
+--------------------------------------------------------- */
 
-function addCategory() {
-  const name = document.getElementById("newCategoryName").value.trim();
-  if (!name) {
-    alert("Please enter a category name");
-    return;
-  }
+function updateCategory(index, value) {
+  const categories = loadCategories();
+  categories[index] = value;
+  saveCategories(categories);
+}
 
-  const categories = getAllCategories();
-  if (categories.includes(name)) {
-    alert("Category already exists");
-    return;
-  }
-
-  // No need to store categories separately — they are derived from events
-  // But we add a dummy event to force category existence? No.
-  // Instead: categories come from defaultCategories + event categories.
-  // So we simply add it to defaultCategories.
-  defaultCategories.push(name);
-
+function deleteCategory(index) {
+  const categories = loadCategories();
+  categories.splice(index, 1);
+  saveCategories(categories);
   renderCategoriesEditor();
 }
 
-/* -------------------------
-   SAVE (RENAME) CATEGORY
-------------------------- */
-
-function saveCategory(inputId, oldName) {
-  const newName = document.getElementById(inputId).value.trim();
-  if (!newName) {
-    alert("Category name cannot be empty");
-    return;
-  }
-
-  const dates = loadDates();
-
-  // Update all events using this category
-  dates.forEach(event => {
-    if (event.category === oldName) {
-      event.category = newName;
-    }
-  });
-
-  saveDates(dates);
-
-  // Update default categories
-  const idx = defaultCategories.indexOf(oldName);
-  if (idx !== -1) defaultCategories[idx] = newName;
-
-  renderCategoriesEditor();
-}
-
-/* -------------------------
-   DELETE CATEGORY
-------------------------- */
-
-function deleteCategory(name) {
-  if (!confirm(`Delete category "${name}"?\nEvents using this category will be set to "Event".`)) {
-    return;
-  }
-
-  const dates = loadDates();
-
-  dates.forEach(event => {
-    if (event.category === name) {
-      event.category = "Event"; // fallback category
-    }
-  });
-
-  saveDates(dates);
-
-  // Remove from default categories
-  const idx = defaultCategories.indexOf(name);
-  if (idx !== -1) defaultCategories.splice(idx, 1);
-
+function addNewCategory() {
+  const categories = loadCategories();
+  categories.push("New Category");
+  saveCategories(categories);
   renderCategoriesEditor();
 }
