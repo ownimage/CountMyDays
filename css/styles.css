@@ -1,0 +1,191 @@
+/* -------------------------
+   GLOBAL
+------------------------- */
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f4f4f4;
+}
+
+.container {
+  text-align: center;
+  padding: 40px;
+}
+
+/* -------------------------
+   TOP MENU
+------------------------- */
+
+.menu {
+  background: #333;
+  color: white;
+  padding: 12px 20px;
+  display: flex;
+  gap: 20px;
+  font-size: 1.1rem;
+  position: relative;
+}
+
+.menu-item {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+.menu-item:hover {
+  text-decoration: underline;
+}
+
+/* Submenu */
+.submenu {
+  position: absolute;
+  top: 40px;
+  background: #444;
+  padding: 10px;
+  border-radius: 6px;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 10;
+}
+
+.submenu-item {
+  color: white;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.submenu-item:hover {
+  text-decoration: underline;
+}
+
+/* -------------------------
+   COUNTDOWN BOXES
+------------------------- */
+
+.count-box {
+  background: white;
+  padding: 20px;
+  margin: 15px auto;
+  border-radius: 12px;
+  width: 340px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.count-title {
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.count-number {
+  font-size: 2.4rem;
+  font-weight: bold;
+  color: #c0392b;
+}
+
+/* -------------------------
+   EDITOR TILES
+------------------------- */
+
+.editor-item,
+.add-item,
+.category-item,
+.image-item {
+  background: white;
+  padding: 15px;
+  margin: 15px auto;
+  border-radius: 8px;
+  width: 360px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  text-align: left;
+}
+
+.editor-name {
+  font-size: 1.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+}
+
+.editor-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* -------------------------
+   BUTTONS
+------------------------- */
+
+.btn {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: white;
+}
+
+.btn-edit { background: #2980b9; }
+.btn-delete { background: #c0392b; }
+.btn-save { background: #27ae60; }
+.btn-cancel { background: #7f8c8d; }
+.btn-add { background: #27ae60; width: 100%; margin-top: 10px; }
+.btn-done { background: #2980b9; width: 200px; margin-top: 20px; }
+
+.btn-disabled {
+  background: #aaa !important;
+  cursor: default !important;
+}
+
+/* -------------------------
+   FORM FIELDS
+------------------------- */
+
+.field-row {
+  display: flex;
+  align-items: center;
+  margin: 6px 0;
+}
+
+.field-row label {
+  width: 80px;
+  font-weight: bold;
+}
+
+.field-row input,
+.field-row select {
+  flex: 1;
+  padding: 6px;
+}
+
+/* -------------------------
+   IMAGE MANAGER
+------------------------- */
+
+.image-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.image-thumb {
+  width: 80px;
+  height: 80px;
+  object-fit: cover; /* cover cropping */
+  border-radius: 6px;
+  background: #ddd;
+}
+
+.image-name {
+  flex: 1;
+}
+
+.image-buttons {
+  display: flex;
+  gap: 6px;
+}
