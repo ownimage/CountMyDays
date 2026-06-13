@@ -66,13 +66,16 @@
       padding: 20px;
       margin: 15px auto;
       border-radius: 12px;
-      width: 300px;
+      width: 340px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
 
     .count-title {
       font-size: 1.4rem;
       margin-bottom: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .count-number {
@@ -87,7 +90,7 @@
       padding: 10px;
       margin: 10px auto;
       border-radius: 8px;
-      width: 320px;
+      width: 360px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -96,6 +99,10 @@
 
     .editor-name {
       font-size: 1.1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 260px;
     }
 
     .delete-btn {
@@ -144,8 +151,21 @@
     <div id="editorList"></div>
 
     <h3>Add New Date</h3>
+
     <input id="newName" type="text" placeholder="Name">
-    <input id="newDate" type="date">
+
+    <select id="newType" onchange="updateTypeUI()">
+      <option value="annual">Annual Event</option>
+      <option value="once">One-off Event</option>
+    </select>
+
+    <div id="yearRow" style="display:none;">
+      <input id="newYear" type="number" placeholder="Year" min="1900" max="3000">
+    </div>
+
+    <input id="newMonth" type="number" placeholder="Month (1-12)" min="1" max="12">
+    <input id="newDay" type="number" placeholder="Day (1-31)" min="1" max="31">
+
     <button onclick="addDate()">Add</button>
 
     <br><br>
@@ -153,16 +173,14 @@
   </div>
 
   <script>
-    // Default dates if none exist
+    // Default dataset (wipe + recreate)
     const defaultDates = [
-      { name: "Christmas", date: "2026-12-25" },
-      { name: "Birthday", date: "2026-08-14" }
+      { name: "Christmas", month: 12, day: 25, type: "annual" },
+      { name: "Holiday", year: 2026, month: 8, day: 21, type: "once" }
     ];
 
     function initStorage() {
-      if (!localStorage.getItem("countdownDates")) {
-        localStorage.setItem("countdownDates", JSON.stringify(defaultDates));
-      }
+      localStorage.setItem("countdownDates", JSON.stringify(defaultDates));
     }
 
     function loadDates() {
@@ -173,36 +191,39 @@
       localStorage.setItem("countdownDates", JSON.stringify(dates));
     }
 
-    function daysUntil(dateString) {
+    // Calculate days until event
+    function daysUntil(item) {
       const today = new Date();
-      const target = new Date(dateString);
+      let target;
 
-      if (target < today) {
-        target.setFullYear(today.getFullYear() + 1);
+      if (item.type === "annual") {
+        target = new Date(today.getFullYear(), item.month - 1, item.day);
+        if (target < today) {
+          target = new Date(today.getFullYear() + 1, item.month - 1, item.day);
+        }
+      } else {
+        target = new Date(item.year, item.month - 1, item.day);
+        if (target < today) return null;
       }
 
       const diff = target - today;
       return Math.ceil(diff / (1000 * 60 * 60 * 24));
     }
 
-    // -------------------------
-    // COUNTDOWN VIEW (SORTED)
-    // -------------------------
+    // COUNTDOWN VIEW
     function renderCountdowns() {
       const container = document.getElementById("countdownContainer");
       const editor = document.getElementById("editorContainer");
 
       container.style.display = "block";
       editor.style.display = "none";
-
       container.innerHTML = "";
 
       let dates = loadDates();
 
-      dates = dates.map(item => ({
-        ...item,
-        daysRemaining: daysUntil(item.date)
-      }));
+      dates = dates
+        .map(item => ({ ...item, daysRemaining: daysUntil(item) }))
+        .filter(item => item.daysRemaining !== null);
 
       dates.sort((a, b) => a.daysRemaining - b.daysRemaining);
 
@@ -210,8 +231,12 @@
         const box = document.createElement("div");
         box.className = "count-box";
 
+        const label = item.type === "annual"
+          ? `${item.name} (annual)`
+          : `${item.name} (${item.year})`;
+
         box.innerHTML = `
-          <div class="count-title">${item.name}</div>
+          <div class="count-title">${label}</div>
           <div class="count-number">${item.daysRemaining}</div>
         `;
 
@@ -219,9 +244,7 @@
       });
     }
 
-    // -------------------------
     // EDITOR VIEW
-    // -------------------------
     function openEditor() {
       const container = document.getElementById("countdownContainer");
       const editor = document.getElementById("editorContainer");
@@ -229,7 +252,6 @@
 
       container.style.display = "none";
       editor.style.display = "block";
-
       list.innerHTML = "";
 
       const dates = loadDates();
@@ -238,8 +260,12 @@
         const row = document.createElement("div");
         row.className = "editor-item";
 
+        const label = item.type === "annual"
+          ? `${item.name} — ${item.month}/${item.day} — annual`
+          : `${item.name} — ${item.year}/${item.month}/${item.day} — once`;
+
         row.innerHTML = `
-          <div class="editor-name">${item.name} — ${item.date}</div>
+          <div class="editor-name">${label}</div>
           <button class="delete-btn" onclick="deleteDate(${index})">Delete</button>
         `;
 
@@ -251,24 +277,40 @@
       renderCountdowns();
     }
 
-    // -------------------------
     // ADD / DELETE
-    // -------------------------
+    function updateTypeUI() {
+      const type = document.getElementById("newType").value;
+      document.getElementById("yearRow").style.display =
+        type === "once" ? "block" : "none";
+    }
+
     function addDate() {
       const name = document.getElementById("newName").value.trim();
-      const date = document.getElementById("newDate").value;
+      const type = document.getElementById("newType").value;
+      const month = parseInt(document.getElementById("newMonth").value);
+      const day = parseInt(document.getElementById("newDay").value);
 
-      if (!name || !date) {
-        alert("Please enter both a name and a date");
+      if (!name || !month || !day) {
+        alert("Please enter name, month, and day");
         return;
       }
 
-      const dates = loadDates();
-      dates.push({ name, date });
-      saveDates(dates);
+      let newItem;
 
-      document.getElementById("newName").value = "";
-      document.getElementById("newDate").value = "";
+      if (type === "annual") {
+        newItem = { name, month, day, type };
+      } else {
+        const year = parseInt(document.getElementById("newYear").value);
+        if (!year) {
+          alert("Please enter a year for one-off events");
+          return;
+        }
+        newItem = { name, year, month, day, type };
+      }
+
+      const dates = loadDates();
+      dates.push(newItem);
+      saveDates(dates);
 
       openEditor();
     }
@@ -280,9 +322,7 @@
       openEditor();
     }
 
-    // -------------------------
     // SUBMENU LOGIC
-    // -------------------------
     function toggleSubmenu(id) {
       document.getElementById("exportMenu").style.display = "none";
       document.getElementById("importMenu").style.display = "none";
@@ -298,9 +338,7 @@
       }
     };
 
-    // -------------------------
     // MENU ACTIONS
-    // -------------------------
     function menuAction(action) {
       if (action === "edit") {
         openEditor();
