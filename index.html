@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Count My Days – Christmas</title>
+  <title>Count My Days</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -10,7 +10,6 @@
       background: #f4f4f4;
     }
 
-    /* Top Menu Bar */
     .menu {
       background: #333;
       color: white;
@@ -29,26 +28,27 @@
       text-decoration: underline;
     }
 
-    /* Main Content */
     .container {
       text-align: center;
       padding: 40px;
     }
 
-    .box {
+    .count-box {
       background: white;
-      padding: 30px;
+      padding: 20px;
+      margin: 15px auto;
       border-radius: 12px;
-      display: inline-block;
+      width: 300px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
 
-    h1 {
-      margin-top: 0;
+    .count-title {
+      font-size: 1.4rem;
+      margin-bottom: 10px;
     }
 
-    .count {
-      font-size: 3rem;
+    .count-number {
+      font-size: 2.4rem;
       font-weight: bold;
       color: #c0392b;
     }
@@ -65,33 +65,71 @@
   </div>
 
   <!-- Main Content -->
-  <div class="container">
-    <div class="box">
-      <h1>Days Until Christmas</h1>
-      <div id="count" class="count">...</div>
-    </div>
+  <div class="container" id="countdownContainer">
+    <!-- JS will fill this -->
   </div>
 
   <script>
-    function daysUntilChristmas() {
-      const today = new Date();
-      const year = today.getFullYear();
-      let christmas = new Date(year, 11, 25);
+    // Default dates if none exist
+    const defaultDates = [
+      { name: "Christmas", date: "2026-12-25" },
+      { name: "Birthday", date: "2026-08-14" }
+    ];
 
-      if (today > christmas) {
-        christmas = new Date(year + 1, 11, 25);
+    // Ensure countdownDates exists
+    function initStorage() {
+      if (!localStorage.getItem("countdownDates")) {
+        localStorage.setItem("countdownDates", JSON.stringify(defaultDates));
       }
-
-      const diffTime = christmas - today;
-      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     }
 
-    document.getElementById("count").textContent = daysUntilChristmas();
+    // Load stored dates
+    function loadDates() {
+      return JSON.parse(localStorage.getItem("countdownDates")) || [];
+    }
+
+    // Calculate days until a date
+    function daysUntil(dateString) {
+      const today = new Date();
+      const target = new Date(dateString);
+
+      // If the date is in the past, move it to next year
+      if (target < today) {
+        target.setFullYear(today.getFullYear() + 1);
+      }
+
+      const diff = target - today;
+      return Math.ceil(diff / (1000 * 60 * 60 * 24));
+    }
+
+    // Render countdowns
+    function renderCountdowns() {
+      const container = document.getElementById("countdownContainer");
+      container.innerHTML = ""; // Clear existing
+
+      const dates = loadDates();
+
+      dates.forEach(item => {
+        const box = document.createElement("div");
+        box.className = "count-box";
+
+        box.innerHTML = `
+          <div class="count-title">${item.name}</div>
+          <div class="count-number">${daysUntil(item.date)}</div>
+        `;
+
+        container.appendChild(box);
+      });
+    }
 
     // Placeholder menu actions
     function menuAction(action) {
       alert("You clicked: " + action);
     }
+
+    // Initialise app
+    initStorage();
+    renderCountdowns();
   </script>
 
 </body>
