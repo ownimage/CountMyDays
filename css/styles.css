@@ -1,7 +1,4 @@
-/* -------------------------
-   GLOBAL
-------------------------- */
-
+/* GLOBAL */
 body {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -13,10 +10,7 @@ body {
   padding: 40px;
 }
 
-/* -------------------------
-   TOP MENU
-------------------------- */
-
+/* MENU BAR */
 .menu {
   background: #333;
   color: white;
@@ -29,41 +23,41 @@ body {
 
 .menu-item {
   cursor: pointer;
-  user-select: none;
   position: relative;
+  user-select: none;
 }
 
 .menu-item:hover {
   text-decoration: underline;
 }
 
-/* Submenu */
+/* SUBMENUS */
 .submenu {
   position: absolute;
-  top: 40px;
+  top: 36px;
+  left: 0;
   background: #444;
   padding: 10px;
   border-radius: 6px;
   display: none;
   flex-direction: column;
   gap: 8px;
-  z-index: 10;
+  z-index: 20;
+  min-width: 140px;
 }
 
 .submenu-item {
   color: white;
   cursor: pointer;
-  white-space: nowrap;
+  padding: 4px 6px;
+  border-radius: 4px;
 }
 
 .submenu-item:hover {
-  text-decoration: underline;
+  background: #555;
 }
 
-/* -------------------------
-   COUNTDOWN BOXES
-------------------------- */
-
+/* COUNTDOWN BOXES */
 .count-box {
   background: white;
   padding: 20px;
@@ -76,9 +70,6 @@ body {
 .count-title {
   font-size: 1.4rem;
   margin-bottom: 10px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .count-number {
@@ -87,10 +78,7 @@ body {
   color: #c0392b;
 }
 
-/* -------------------------
-   EDITOR TILES
-------------------------- */
-
+/* EDITOR TILES */
 .editor-item,
 .add-item,
 .category-item,
@@ -104,24 +92,13 @@ body {
   text-align: left;
 }
 
-.editor-name {
-  font-size: 1.1rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 260px;
-}
-
 .editor-buttons {
   display: flex;
   gap: 10px;
   margin-top: 8px;
 }
 
-/* -------------------------
-   BUTTONS
-------------------------- */
-
+/* BUTTONS */
 .btn {
   padding: 6px 10px;
   border: none;
@@ -142,10 +119,7 @@ body {
   cursor: default !important;
 }
 
-/* -------------------------
-   FORM FIELDS
-------------------------- */
-
+/* FORM FIELDS */
 .field-row {
   display: flex;
   align-items: center;
@@ -163,10 +137,7 @@ body {
   padding: 6px;
 }
 
-/* -------------------------
-   IMAGE MANAGER
-------------------------- */
-
+/* IMAGE MANAGER */
 .image-row {
   display: flex;
   align-items: center;
@@ -176,7 +147,7 @@ body {
 .image-thumb {
   width: 80px;
   height: 80px;
-  object-fit: cover; /* cover cropping */
+  object-fit: cover;
   border-radius: 6px;
   background: #ddd;
 }

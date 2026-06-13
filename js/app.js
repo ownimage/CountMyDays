@@ -52,19 +52,24 @@ function getAllCategories() {
 ------------------------- */
 
 function toggleSubmenu(id) {
-  document.getElementById("exportMenu").style.display = "none";
-  document.getElementById("importMenu").style.display = "none";
+  // Close all submenus first
+  document.querySelectorAll(".submenu").forEach(menu => {
+    if (menu.id !== id) menu.style.display = "none";
+  });
 
   const menu = document.getElementById(id);
-  menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+  menu.style.display = (menu.style.display === "flex") ? "none" : "flex";
 }
 
-window.onclick = function (event) {
-  if (!event.target.classList.contains("menu-item")) {
-    document.getElementById("exportMenu").style.display = "none";
-    document.getElementById("importMenu").style.display = "none";
+// Close submenus when clicking anywhere else
+document.addEventListener("click", function (e) {
+  if (!e.target.classList.contains("menu-item") &&
+      !e.target.classList.contains("submenu-item")) {
+    document.querySelectorAll(".submenu").forEach(menu => {
+      menu.style.display = "none";
+    });
   }
-};
+});
 
 /* -------------------------
    VIEW SWITCHING
@@ -72,19 +77,9 @@ window.onclick = function (event) {
 
 function hideAll() {
   document.getElementById("countdownContainer").style.display = "none";
-  document.getElementById("editMenuContainer").style.display = "none";
   document.getElementById("datesEditor").style.display = "none";
   document.getElementById("categoriesEditor").style.display = "none";
   document.getElementById("imagesEditor").style.display = "none";
-}
-
-function openEditMenu() {
-  hideAll();
-  document.getElementById("editMenuContainer").style.display = "block";
-}
-
-function closeEditMenu() {
-  renderCountdowns();
 }
 
 function openDatesEditor() {
@@ -94,7 +89,7 @@ function openDatesEditor() {
 }
 
 function closeDatesEditor() {
-  openEditMenu();
+  renderCountdowns();
 }
 
 function openCategoriesEditor() {
@@ -104,7 +99,7 @@ function openCategoriesEditor() {
 }
 
 function closeCategoriesEditor() {
-  openEditMenu();
+  renderCountdowns();
 }
 
 function openImagesEditor() {
@@ -114,7 +109,7 @@ function openImagesEditor() {
 }
 
 function closeImagesEditor() {
-  openEditMenu();
+  renderCountdowns();
 }
 
 /* -------------------------

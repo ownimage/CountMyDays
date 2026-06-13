@@ -10,7 +10,15 @@
 
   <!-- Top Menu -->
   <div class="menu">
-    <div class="menu-item" onclick="openEditMenu()">Edit</div>
+
+    <div class="menu-item" onclick="toggleSubmenu('editMenu')">
+      Edit
+      <div id="editMenu" class="submenu">
+        <div class="submenu-item" onclick="openDatesEditor()">Dates</div>
+        <div class="submenu-item" onclick="openCategoriesEditor()">Categories</div>
+        <div class="submenu-item" onclick="openImagesEditor()">Images</div>
+      </div>
+    </div>
 
     <div class="menu-item" onclick="toggleSubmenu('exportMenu')">
       Export
@@ -34,46 +42,27 @@
   <!-- Countdown View -->
   <div class="container" id="countdownContainer"></div>
 
-  <!-- Edit Menu -->
-  <div class="container" id="editMenuContainer" style="display:none;">
-    <h2>Edit</h2>
-
-    <div class="editor-item" onclick="openDatesEditor()">Dates</div>
-    <div class="editor-item" onclick="openCategoriesEditor()">Categories</div>
-    <div class="editor-item" onclick="openImagesEditor()">Images</div>
-
-    <button class="btn btn-done" onclick="closeEditMenu()">Done</button>
-  </div>
-
   <!-- Dates Editor -->
   <div class="container" id="datesEditor" style="display:none;">
     <h2>Edit Dates</h2>
     <div id="editorList"></div>
-
     <div id="addDateTile"></div>
-
     <button class="btn btn-done" onclick="closeDatesEditor()">Done</button>
   </div>
 
   <!-- Categories Editor -->
   <div class="container" id="categoriesEditor" style="display:none;">
     <h2>Categories</h2>
-
     <div id="categoryListContainer"></div>
-
     <div id="addCategoryTile"></div>
-
     <button class="btn btn-done" onclick="closeCategoriesEditor()">Done</button>
   </div>
 
   <!-- Images Editor -->
   <div class="container" id="imagesEditor" style="display:none;">
     <h2>Images</h2>
-
     <div id="addImageTile"></div>
-
     <div id="imageList"></div>
-
     <button class="btn btn-done" onclick="closeImagesEditor()">Done</button>
   </div>
 
