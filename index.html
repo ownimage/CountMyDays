@@ -19,14 +19,39 @@
       display: flex;
       gap: 20px;
       font-size: 1.1rem;
+      position: relative;
     }
 
     .menu-item {
       cursor: pointer;
       user-select: none;
+      position: relative;
     }
 
     .menu-item:hover {
+      text-decoration: underline;
+    }
+
+    /* Submenu */
+    .submenu {
+      position: absolute;
+      top: 40px;
+      background: #444;
+      padding: 10px;
+      border-radius: 6px;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 10;
+    }
+
+    .submenu-item {
+      color: white;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .submenu-item:hover {
       text-decoration: underline;
     }
 
@@ -89,8 +114,23 @@
   <!-- Top Menu -->
   <div class="menu">
     <div class="menu-item" onclick="menuAction('edit')">Edit</div>
-    <div class="menu-item" onclick="menuAction('export')">Export</div>
-    <div class="menu-item" onclick="menuAction('import')">Import</div>
+
+    <div class="menu-item" onclick="toggleSubmenu('exportMenu')">
+      Export
+      <div id="exportMenu" class="submenu">
+        <div class="submenu-item" onclick="exportAction('json')">Export JSON</div>
+        <div class="submenu-item" onclick="exportAction('qr')">Export QR</div>
+      </div>
+    </div>
+
+    <div class="menu-item" onclick="toggleSubmenu('importMenu')">
+      Import
+      <div id="importMenu" class="submenu">
+        <div class="submenu-item" onclick="importAction('json')">Import JSON</div>
+        <div class="submenu-item" onclick="importAction('qr')">Import QR</div>
+      </div>
+    </div>
+
     <div class="menu-item" onclick="menuAction('settings')">Settings</div>
   </div>
 
@@ -159,16 +199,13 @@
 
       let dates = loadDates();
 
-      // Add daysRemaining to each item
       dates = dates.map(item => ({
         ...item,
         daysRemaining: daysUntil(item.date)
       }));
 
-      // Sort by fewest days remaining
       dates.sort((a, b) => a.daysRemaining - b.daysRemaining);
 
-      // Render sorted list
       dates.forEach(item => {
         const box = document.createElement("div");
         box.className = "count-box";
@@ -244,6 +281,24 @@
     }
 
     // -------------------------
+    // SUBMENU LOGIC
+    // -------------------------
+    function toggleSubmenu(id) {
+      document.getElementById("exportMenu").style.display = "none";
+      document.getElementById("importMenu").style.display = "none";
+
+      const menu = document.getElementById(id);
+      menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+    }
+
+    window.onclick = function (event) {
+      if (!event.target.classList.contains("menu-item")) {
+        document.getElementById("exportMenu").style.display = "none";
+        document.getElementById("importMenu").style.display = "none";
+      }
+    };
+
+    // -------------------------
     // MENU ACTIONS
     // -------------------------
     function menuAction(action) {
@@ -253,6 +308,14 @@
       }
 
       alert("You clicked: " + action);
+    }
+
+    function exportAction(type) {
+      alert("Export as " + type.toUpperCase());
+    }
+
+    function importAction(type) {
+      alert("Import from " + type.toUpperCase());
     }
 
     // Init
