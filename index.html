@@ -85,13 +85,14 @@
     }
 
     /* Editor */
-    .editor-item {
+    .editor-item, .add-item {
       background: white;
-      padding: 10px;
-      margin: 10px auto;
+      padding: 15px;
+      margin: 15px auto;
       border-radius: 8px;
       width: 360px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      text-align: left;
     }
 
     .editor-name {
@@ -120,11 +121,15 @@
     .btn-delete { background: #c0392b; }
     .btn-save { background: #27ae60; }
     .btn-cancel { background: #7f8c8d; }
+    .btn-add { background: #27ae60; width: 100%; margin-top: 10px; }
+    .btn-done { background: #2980b9; width: 200px; margin-top: 20px; }
 
     .edit-fields input,
-    .edit-fields select {
+    .edit-fields select,
+    .add-item input,
+    .add-item select {
       margin: 4px 0;
-      width: 90%;
+      width: 95%;
       padding: 6px;
     }
   </style>
@@ -164,37 +169,41 @@
 
     <div id="editorList"></div>
 
-    <h3>Add New Date</h3>
+    <!-- Add New Event Tile -->
+    <div class="add-item">
+      <h3>Add New Event</h3>
 
-    <input id="newName" type="text" placeholder="Name">
+      <input id="newName" type="text" placeholder="Name">
 
-    <select id="newType" onchange="updateTypeUI()">
-      <option value="annual">Annual Event</option>
-      <option value="once">One-off Event</option>
-    </select>
+      <select id="newType" onchange="updateTypeUI()">
+        <option value="annual">Annual Event</option>
+        <option value="once">One-off Event</option>
+      </select>
 
-    <div id="yearRow" style="display:none;">
-      <input id="newYear" type="number" placeholder="Year" min="1900" max="3000">
+      <div id="yearRow" style="display:none;">
+        <input id="newYear" type="number" placeholder="Year" min="1900" max="3000">
+      </div>
+
+      <input id="newMonth" type="number" placeholder="Month (1-12)" min="1" max="12">
+      <input id="newDay" type="number" placeholder="Day (1-31)" min="1" max="31">
+
+      <button class="btn btn-add" onclick="addDate()">Add Event</button>
     </div>
 
-    <input id="newMonth" type="number" placeholder="Month (1-12)" min="1" max="12">
-    <input id="newDay" type="number" placeholder="Day (1-31)" min="1" max="31">
-
-    <button onclick="addDate()">Add</button>
-
-    <br><br>
-    <button onclick="closeEditor()">Done</button>
+    <button class="btn btn-done" onclick="closeEditor()">Done</button>
   </div>
 
   <script>
-    // Default dataset (wipe + recreate)
+    // Default dataset (only set if empty)
     const defaultDates = [
       { name: "Christmas", month: 12, day: 25, type: "annual" },
       { name: "Holiday", year: 2026, month: 8, day: 21, type: "once" }
     ];
 
     function initStorage() {
-      localStorage.setItem("countdownDates", JSON.stringify(defaultDates));
+      if (!localStorage.getItem("countdownDates")) {
+        localStorage.setItem("countdownDates", JSON.stringify(defaultDates));
+      }
     }
 
     function loadDates() {
@@ -327,7 +336,6 @@
 
     function saveEdit(index) {
       const dates = loadDates();
-      const item = dates[index];
 
       const name = document.getElementById(`editName${index}`).value.trim();
       const type = document.getElementById(`editType${index}`).value;
