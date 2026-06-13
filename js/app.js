@@ -73,10 +73,13 @@ function renderCountdowns() {
   const dates = loadDates();
   const images = normaliseImages(loadImages());
 
-  dates.forEach(d => {
-    const days = daysUntil(d);
-    if (days === null) return;
+  // SORT BY DAYS REMAINING (ascending)
+  const sorted = dates
+    .map(d => ({ ...d, days: daysUntil(d) }))
+    .filter(d => d.days !== null)
+    .sort((a, b) => a.days - b.days);
 
+  sorted.forEach(d => {
     const img = images.find(i => i.category === d.category);
     const imgSrc = img ? img.data : "";
 
@@ -85,17 +88,21 @@ function renderCountdowns() {
 
     card.innerHTML = `
       <div class="row align-items-center">
+
         <div class="col-auto">
           <img src="${imgSrc}" class="countdown-img">
         </div>
+
         <div class="col">
           <h4 class="mb-0">${d.name}</h4>
           <small class="text-secondary">${d.category}</small>
         </div>
+
         <div class="col-auto text-end">
-          <div class="fs-1 fw-bold">${days}</div>
+          <div class="fs-1 fw-bold">${d.days}</div>
           <div class="text-secondary">days</div>
         </div>
+
       </div>
     `;
 
