@@ -48,7 +48,7 @@ function renderDatesEditor() {
 
           <label class="form-label mt-2">Category</label>
           <select class="form-select"
-                  onchange="updateDateField(${index}, 'category', this.value)">
+                  onchange="updateDateCategory(${index}, this.value)">
             ${categories.map(c => `
               <option value="${c}" ${c === d.category ? "selected" : ""}>${c}</option>
             `).join("")}
@@ -100,6 +100,13 @@ function renderDatesEditor() {
       <button class="btn btn-primary" onclick="closeDatesEditor()">Done</button>
     </div>
   `;
+}
+
+function updateDateCategory(index, newCategory) {
+  const dates = loadDates();
+  dates[index].category = newCategory;
+  saveDates(dates);
+  renderDatesEditor(); // refresh so the image updates
 }
 
 function updateDateField(index, field, value) {
