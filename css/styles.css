@@ -1,207 +1,117 @@
-/* -------------------------
-   GLOBAL
-------------------------- */
+/* BASIC PAGE LAYOUT */
 
 body {
-  font-family: Arial, sans-serif;
   margin: 0;
-  background: #f4f4f4;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f3f4f6;
 }
-
-.container {
-  text-align: center;
-  padding: 40px;
-}
-
-/* -------------------------
-   TOP MENU
-------------------------- */
 
 .menu {
-  background: #333;
-  color: white;
-  padding: 12px 20px;
   display: flex;
-  gap: 20px;
-  font-size: 1.1rem;
-  position: relative;
-  z-index: 50;
+  gap: 16px;
+  padding: 10px 16px;
+  background: #333;
+  color: #fff;
+  font-size: 14px;
 }
 
 .menu-item {
-  cursor: pointer;
-  user-select: none;
   position: relative;
-  padding: 4px 6px;
+  cursor: pointer;
 }
-
-.menu-item:hover {
-  text-decoration: underline;
-}
-
-/* -------------------------
-   SUBMENUS (hover‑open)
-------------------------- */
 
 .submenu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background: #444;
-  padding: 10px;
-  border-radius: 6px;
   display: none;
-  flex-direction: column;
-  gap: 8px;
-  z-index: 100;
-  min-width: 150px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  position: absolute;
+  top: 24px;
+  left: 0;
+  background: #fff;
+  color: #333;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  min-width: 120px;
+  z-index: 10;
 }
 
 .menu-item:hover .submenu {
-  display: flex;
+  display: block;
 }
 
 .submenu-item {
-  color: white;
-  cursor: pointer;
-  padding: 6px 8px;
-  border-radius: 4px;
-  white-space: nowrap;
+  padding: 6px 10px;
+  font-size: 13px;
 }
 
 .submenu-item:hover {
-  background: #555;
+  background: #eee;
 }
 
-/* -------------------------
-   COUNTDOWN BOXES
-------------------------- */
-
-.count-box {
-  background: white;
-  padding: 20px;
-  margin: 15px auto;
-  border-radius: 12px;
-  width: 340px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+.container {
+  max-width: 800px;
+  margin: 16px auto;
+  padding: 0 12px 24px;
 }
 
-.count-title {
-  font-size: 1.4rem;
+/* MAIN COUNTDOWN TILES */
+
+.count-tile {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 10px 14px;
   margin-bottom: 10px;
-}
 
-.count-number {
-  font-size: 2.4rem;
-  font-weight: bold;
-  color: #c0392b;
-}
-
-/* -------------------------
-   EDITOR TILES
-------------------------- */
-
-.editor-item,
-.add-item,
-.category-item,
-.image-item {
-  background: white;
-  padding: 15px;
-  margin: 15px auto;
-  border-radius: 8px;
-  width: 360px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  text-align: left;
-}
-
-.editor-buttons {
-  display: flex;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-/* -------------------------
-   BUTTONS
-------------------------- */
-
-.btn {
-  padding: 6px 10px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  color: white;
-}
-
-.btn-edit { background: #2980b9; }
-.btn-delete { background: #c0392b; }
-.btn-save { background: #27ae60; }
-.btn-cancel { background: #7f8c8d; }
-.btn-add { background: #27ae60; width: 100%; margin-top: 10px; }
-.btn-done { background: #2980b9; width: 200px; margin-top: 20px; }
-
-.btn-disabled {
-  background: #aaa !important;
-  cursor: default !important;
-}
-
-/* -------------------------
-   FORM FIELDS
-------------------------- */
-
-.field-row {
   display: flex;
   align-items: center;
-  margin: 6px 0;
+  justify-content: space-between;
+  gap: 12px;
+
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
-.field-row label {
-  width: 80px;
-  font-weight: bold;
+.tile-left {
+  flex: 0 0 auto;
 }
 
-.field-row input,
-.field-row select {
-  flex: 1;
-  padding: 6px;
-}
-
-/* -------------------------
-   IMAGE MANAGER
-------------------------- */
-
-.image-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.image-thumb {
+.tile-icon {
   width: 80px;
   height: 80px;
-  object-fit: cover;
-  border-radius: 6px;
-  background: #ddd;
-}
-
-.image-name {
-  flex: 1;
-}
-
-.image-buttons {
-  display: flex;
-  gap: 6px;
-}
-
-.count-image {
-  text-align: center;
-  margin-bottom: 6px;
-}
-
-.count-thumb {
-  width: 48px;
-  height: 48px;
   object-fit: contain;
+  display: block;
+}
+
+.tile-middle {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.tile-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tile-right {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.tile-days {
+  font-size: 32px;
+  font-weight: 700;
+  color: #0078d4;
+}
+
+/* EDITORS (minimal, keep your existing if you prefer) */
+
+.date-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
 }
 
 .date-image {
@@ -215,4 +125,39 @@ body {
   width: 40px;
   height: 40px;
   object-fit: contain;
+}
+
+.edit-name {
+  flex: 1 1 160px;
+}
+
+.edit-category,
+.edit-type,
+.edit-year,
+.edit-month,
+.edit-day {
+  width: 80px;
+}
+
+.btn {
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.btn-delete {
+  background: #e03131;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+}
+
+.btn-add,
+.btn-done {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: none;
+  background: #0078d4;
+  color: #fff;
 }

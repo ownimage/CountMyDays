@@ -4,7 +4,7 @@
 
 const defaultDates = [
   { name: "Christmas", category: "Holiday", month: 12, day: 25, type: "annual" },
-  { name: "Holiday", category: "Holiday", year: 2026, month: 8, day: 21, type: "once" }
+  { name: "Cruise", category: "Holiday", year: 2026, month: 8, day: 21, type: "once" }
 ];
 
 const defaultCategories = ["Holiday", "Birthday", "Anniversary", "Event"];
@@ -137,6 +137,7 @@ function renderCountdowns() {
   container.innerHTML = "";
 
   let dates = loadDates();
+  const images = loadImages();
 
   dates = dates
     .map(item => ({ ...item, daysRemaining: daysUntil(item) }))
@@ -144,11 +145,9 @@ function renderCountdowns() {
 
   dates.sort((a, b) => a.daysRemaining - b.daysRemaining);
 
-  const images = loadImages();
-
   dates.forEach(item => {
     const box = document.createElement("div");
-    box.className = "count-box";
+    box.className = "count-tile";
 
     const img = images.find(i => i.category === item.category);
     const imgSrc = img ? img.data : "";
@@ -158,11 +157,17 @@ function renderCountdowns() {
       : `${item.name} (${item.category}, ${item.year})`;
 
     box.innerHTML = `
-      <div class="count-image">
-        <img src="${imgSrc}" class="count-thumb">
+      <div class="tile-left">
+        <img src="${imgSrc}" class="tile-icon">
       </div>
-      <div class="count-title">${label}</div>
-      <div class="count-number">${item.daysRemaining}</div>
+
+      <div class="tile-middle">
+        <div class="tile-title">${label}</div>
+      </div>
+
+      <div class="tile-right">
+        <div class="tile-days">${item.daysRemaining}</div>
+      </div>
     `;
 
     container.appendChild(box);
