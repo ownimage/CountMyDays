@@ -7,10 +7,34 @@
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      padding: 40px;
       background: #f4f4f4;
-      text-align: center;
     }
+
+    /* Top Menu Bar */
+    .menu {
+      background: #333;
+      color: white;
+      padding: 12px 20px;
+      display: flex;
+      gap: 20px;
+      font-size: 1.1rem;
+    }
+
+    .menu-item {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .menu-item:hover {
+      text-decoration: underline;
+    }
+
+    /* Main Content */
+    .container {
+      text-align: center;
+      padding: 40px;
+    }
+
     .box {
       background: white;
       padding: 30px;
@@ -18,9 +42,11 @@
       display: inline-block;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
+
     h1 {
       margin-top: 0;
     }
+
     .count {
       font-size: 3rem;
       font-weight: bold;
@@ -30,31 +56,42 @@
 </head>
 <body>
 
-  <div class="box">
-    <h1>Days Until Christmas</h1>
-    <div id="count" class="count">...</div>
+  <!-- Top Menu -->
+  <div class="menu">
+    <div class="menu-item" onclick="menuAction('edit')">Edit</div>
+    <div class="menu-item" onclick="menuAction('export')">Export</div>
+    <div class="menu-item" onclick="menuAction('import')">Import</div>
+    <div class="menu-item" onclick="menuAction('settings')">Settings</div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="box">
+      <h1>Days Until Christmas</h1>
+      <div id="count" class="count">...</div>
+    </div>
   </div>
 
   <script>
     function daysUntilChristmas() {
       const today = new Date();
       const year = today.getFullYear();
+      let christmas = new Date(year, 11, 25);
 
-      // Christmas this year
-      let christmas = new Date(year, 11, 25); // Month is 0-indexed
-
-      // If Christmas has already passed, use next year
       if (today > christmas) {
         christmas = new Date(year + 1, 11, 25);
       }
 
       const diffTime = christmas - today;
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      return diffDays;
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     }
 
     document.getElementById("count").textContent = daysUntilChristmas();
+
+    // Placeholder menu actions
+    function menuAction(action) {
+      alert("You clicked: " + action);
+    }
   </script>
 
 </body>
