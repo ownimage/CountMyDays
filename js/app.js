@@ -353,7 +353,7 @@ function closeQRExportModal() {
 }
 
 // -------------------------------
-// QR IMPORT (QR-only, iPhone-safe)
+// QR IMPORT (cameraId approach, QR-only, iPhone-safe)
 // -------------------------------
 
 let qrImportState = {
@@ -372,10 +372,10 @@ function startQRImport() {
   qrImportState = { total: null, chunks: {}, reader: null };
 
   // small delay so the reader element is rendered before starting camera
-  setTimeout(() => {
+  setTimeout(async () => {
     // clear any previous reader instance
     if (qrImportState.reader) {
-      try { qrImportState.reader.stop(); } catch (e) {}
+      try { await qrImportState.reader.stop(); } catch (e) {}
       qrImportState.reader = null;
     }
 
@@ -387,29 +387,41 @@ function startQRImport() {
     const width = Math.max(300, Math.min(420, readerEl.clientWidth || 360));
     const qrbox = Math.floor(width * 0.9); // use most of the area
 
+    // Try to get camera list and pick a rear camera id if possible
+    let cameraIdToUse = null;
+    try {
+      const devices = await Html5Qrcode.getCameras();
+      if (devices && devices.length) {
+        // prefer a device whose label suggests 'back' or 'rear'
+        const rear = devices.find(d => /back|rear|environment|wide/i.test(d.label));
+        cameraIdToUse = (rear && rear.id) || devices[0].id;
+      }
+    } catch (e) {
+      // getCameras may fail in some contexts; we'll fallback to facingMode if needed
+      cameraIdToUse = null;
+    }
+
+    // Build scanner config (QR-only, disable native detector)
+    const config = {
+      fps: 10,
+      qrbox: qrbox,
+      formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ],
+      experimentalFeatures: { useBarCodeDetectorIfSupported: false }
+    };
+
+    // Start using cameraId if available, otherwise fall back to facingMode single-key
+    const cameraArg = cameraIdToUse || { facingMode: "environment" };
+
     reader.start(
-      // camera config: single key only (facingMode)
-      { facingMode: "environment" },
-
-      // scanner config
-      {
-        fps: 10,
-        qrbox: qrbox,
-        // force QR only and disable native BarcodeDetector
-        formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ],
-        experimentalFeatures: { useBarCodeDetectorIfSupported: false }
-      },
-
-      // success callback
+      cameraArg,
+      config,
       decoded => {
         // Only accept the JSON chunk objects we exported.
-        // If the decoded string is not our JSON chunk object, ignore it.
         let obj = null;
         try {
           obj = JSON.parse(decoded);
         } catch (e) {
           // not JSON — likely a 1D barcode or other QR content; ignore
-          // update status briefly so user knows we ignored something
           status.innerText = "Ignored non-matching code (not app data)";
           return;
         }
@@ -431,7 +443,6 @@ function startQRImport() {
         status.innerText = `Scanned ${Object.keys(qrImportState.chunks).length} of ${total}`;
 
         if (Object.keys(qrImportState.chunks).length === total) {
-          // stop camera and finish
           reader.stop().then(() => {
             finishQRImport();
           }).catch(() => {
@@ -439,15 +450,40 @@ function startQRImport() {
           });
         }
       },
-
-      // error callback (scan errors, not fatal)
       error => {
-        // keep the status informative but not noisy
+        // non-fatal scan errors; keep status simple
         status.innerText = "Scanning…";
       }
     ).catch(err => {
-      // start() failed — show a clear message
-      status.innerText = "Camera start failed: " + (err && err.message ? err.message : String(err));
+      // start() failed — show a clear message and fallback suggestion
+      const msg = err && err.message ? err.message : String(err);
+      status.innerText = "Camera start failed: " + msg;
+      // if we tried cameraId and failed, try fallback to facingMode (single-key)
+      if (cameraIdToUse) {
+        setTimeout(() => {
+          status.innerText = "Retrying with facingMode fallback…";
+          reader.start(
+            { facingMode: "environment" },
+            config,
+            decoded => {
+              // same decode handler as above (inline for brevity)
+              let obj = null;
+              try { obj = JSON.parse(decoded); } catch (e) { status.innerText = "Ignored non-matching code"; return; }
+              if (!obj || typeof obj.index !== "number" || typeof obj.total !== "number" || typeof obj.chunk !== "string") { status.innerText = "Ignored non-matching JSON"; return; }
+              const { index, total, chunk } = obj;
+              if (qrImportState.total === null) qrImportState.total = total;
+              qrImportState.chunks[index] = chunk;
+              status.innerText = `Scanned ${Object.keys(qrImportState.chunks).length} of ${total}`;
+              if (Object.keys(qrImportState.chunks).length === total) {
+                reader.stop().then(() => { finishQRImport(); }).catch(() => { finishQRImport(); });
+              }
+            },
+            err2 => { status.innerText = "Scanning…"; }
+          ).catch(err2 => {
+            status.innerText = "Camera start failed (fallback): " + (err2 && err2.message ? err2.message : String(err2));
+          });
+        }, 300);
+      }
     });
   }, 250);
 }
@@ -460,6 +496,32 @@ function finishQRImport() {
   for (let i = 0; i < qrImportState.total; i++) {
     ordered.push(qrImportState.chunks[i]);
   }
+
+  const compressed = ordered.join("");
+  const json = LZString.decompressFromEncodedURIComponent(compressed);
+
+  try {
+    const data = JSON.parse(json);
+
+    saveDates(data.dates);
+    saveCategories(data.categories);
+    saveImages(data.images);
+
+    alert("QR import complete!");
+    renderCountdowns();
+  } catch (err) {
+    alert("Failed to import QR data.");
+  }
+}
+
+function cancelQRImport() {
+  const modal = document.getElementById("qrImportModal");
+  modal.classList.add("d-none");
+
+  if (qrImportState.reader) {
+    qrImportState.reader.stop().catch(()=>{});
+  }
+}
 
   const compressed = ordered.join("");
   const json = LZString.decompressFromEncodedURIComponent(compressed);
