@@ -1,21 +1,9 @@
-function safeImages() {
-  const raw = loadImages();
-  let arr = [];
+function loadImages() {
+  return JSON.parse(localStorage.getItem("images") || "[]");
+}
 
-  if (Array.isArray(raw)) {
-    arr = raw;
-  } else if (raw && typeof raw === "object") {
-    arr = Object.values(raw);
-  }
-
-  arr = arr.filter(img => img && typeof img === "object");
-
-  arr = arr.map(img => ({
-    category: img.category || "Holiday",
-    data: img.data || ""
-  }));
-
-  return arr;
+function saveImages(images) {
+  localStorage.setItem("images", JSON.stringify(images));
 }
 
 function renderImagesEditor() {
@@ -25,40 +13,24 @@ function renderImagesEditor() {
   list.innerHTML = "";
   addTile.innerHTML = "";
 
-  const images = safeImages();
-  const categories = loadCategories();
+  const images = loadImages();
 
   images.forEach((img, index) => {
     const card = document.createElement("div");
     card.className = "card p-3 mb-3";
 
-    const preview = img.data
-      ? `<img src="${img.data}" class="date-img">`
-      : `<div class="text-secondary">No image</div>`;
-
     card.innerHTML = `
       <div class="row align-items-center">
 
         <div class="col-auto">
-          ${preview}
+          <img src="${img.data}" class="date-img">
         </div>
 
-        <div class="col-4">
-          <label class="form-label">Category</label>
-          <select class="form-select"
-                  onchange="updateImageCategory(${index}, this.value)">
-            ${categories.map(c => `
-              <option value="${c}" ${c === img.category ? "selected" : ""}>${c}</option>
-            `).join("")}
-          </select>
-        </div>
-
-        <div class="col-4">
-          <label class="form-label">Replace Image</label>
-          <input type="file"
-                 accept="image/*"
-                 class="form-control"
-                 onchange="replaceImage(${index}, this.files[0])">
+        <div class="col">
+          <label class="form-label">Image Name</label>
+          <input class="form-control"
+                 value="${img.name}"
+                 onchange="renameImage(${index}, this.value)">
         </div>
 
         <div class="col-auto">
@@ -76,57 +48,53 @@ function renderImagesEditor() {
       <button class="btn btn-success" onclick="addNewImage()">Add Image</button>
       <button class="btn btn-primary" onclick="closeImagesEditor()">Done</button>
     </div>
-`;
+  `;
 }
 
-function updateImageCategory(index, value) {
-  const images = safeImages();
-  images[index].category = value;
+function renameImage(index, newName) {
+  const images = loadImages();
+  const oldName = images[index].name;
+
+  images[index].name = newName;
   saveImages(images);
-}
 
-function replaceImage(index, file) {
-  if (!file) return;
+  // Update categories that reference this image
+  const categories = loadCategories();
+  categories.forEach(c => {
+    if (c.image === oldName) c.image = newName;
+  });
+  saveCategories(categories);
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    const images = safeImages();
-    images[index].data = reader.result;
-    saveImages(images);
-    renderImagesEditor();
-  };
-  reader.readAsDataURL(file);
+  renderImagesEditor();
 }
 
 function deleteImage(index) {
-  const images = safeImages();
+  const images = loadImages();
+  const removed = images[index].name;
+
   images.splice(index, 1);
   saveImages(images);
+
+  // Fix categories that referenced this image
+  const categories = loadCategories();
+  categories.forEach(c => {
+    if (c.image === removed) c.image = null;
+  });
+  saveCategories(categories);
+
   renderImagesEditor();
 }
 
 function addNewImage() {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = "image/*";
+  const images = loadImages();
 
-  input.onchange = e => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const name = "New Image " + (images.length + 1);
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const images = safeImages();
-      images.push({
-        category: "Holiday",
-        data: reader.result
-      });
-      saveImages(images);
-      renderImagesEditor();
-    };
+  images.push({
+    name,
+    data: "" // user will upload later
+  });
 
-    reader.readAsDataURL(file);
-  };
-
-  input.click();
+  saveImages(images);
+  renderImagesEditor();
 }

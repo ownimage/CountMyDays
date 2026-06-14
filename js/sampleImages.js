@@ -1,53 +1,64 @@
-// js/sampleImages.js
-// Converted to the new flat array format your app expects.
+// Colourful SVG icons using URL-encoded inline SVG (no Base64)
 
-const sampleImages = [
-  // FLAT THEME
+const defaultImages = [
   {
-    category: "Birthday",
-    data: "data:image/svg+xml;base64," + btoa(`
-      <svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'>
-        <rect width='80' height='80' fill='#f5f5f5'/>
-        <circle cx='40' cy='32' r='16' fill='#ff6b6b'/>
-        <rect x='24' y='40' width='32' height='18' fill='#ffa94d'/>
-      </svg>
-    `)
+    name: "Birthday",
+    data:
+      "data:image/svg+xml," +
+      "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' " +
+      "stroke='%23ff4081' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E" +
+      "%3Ccircle cx='12' cy='8' r='3'/%3E" +
+      "%3Cpath d='M5 21c1.5-3 3.5-4.5 7-4.5s5.5 1.5 7 4.5'/%3E" +
+      "%3C/svg%3E"
   },
   {
-    category: "Holiday",
-    data: "data:image/svg+xml;base64," + btoa(`
-      <svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'>
-        <rect width='80' height='80' fill='#f5f5f5'/>
-        <polygon points='40,12 50,32 30,32' fill='#4dabf7'/>
-        <rect x='34' y='32' width='12' height='24' fill='#228be6'/>
-      </svg>
-    `)
+    name: "Holiday",
+    data:
+      "data:image/svg+xml," +
+      "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' " +
+      "stroke='%230099ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E" +
+      "%3Cpath d='M3 20h18'/%3E" +
+      "%3Cpath d='M4 16l4-8 4 4 4-6 4 10'/%3E" +
+      "%3Ccircle cx='8' cy='8' r='1'/%3E" +
+      "%3C/svg%3E"
   },
   {
-    category: "Anniversary",
-    data: "data:image/svg+xml;base64," + btoa(`
-      <svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'>
-        <rect width='80' height='80' fill='#f5f5f5'/>
-        <path d='M28 30 C28 24 34 22 40 26 C46 22 52 24 52 30 C52 36 46 42 40 48 C34 42 28 36 28 30Z'
-              fill='#e64980'/>
-      </svg>
-    `)
+    name: "Event",
+    data:
+      "data:image/svg+xml," +
+      "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' " +
+      "stroke='%23ff9800' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E" +
+      "%3Crect x='3' y='5' width='18' height='16' rx='2' ry='2'/%3E" +
+      "%3Cpath d='M3 10h18'/%3E" +
+      "%3Ccircle cx='8' cy='14' r='1.5'/%3E" +
+      "%3Ccircle cx='12' cy='14' r='1.5'/%3E" +
+      "%3Ccircle cx='16' cy='14' r='1.5'/%3E" +
+      "%3C/svg%3E"
   },
   {
-    category: "Event",
-    data: "data:image/svg+xml;base64," + btoa(`
-      <svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'>
-        <rect width='80' height='80' fill='#f5f5f5'/>
-        <rect x='18' y='22' width='44' height='30' rx='4' fill='#51cf66'/>
-        <circle cx='30' cy='32' r='4' fill='#ffffff'/>
-        <circle cx='40' cy='32' r='4' fill='#ffffff'/>
-        <circle cx='50' cy='32' r='4' fill='#ffffff'/>
-      </svg>
-    `)
+    name: "Travel",
+    data:
+      "data:image/svg+xml," +
+      "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' " +
+      "stroke='%233ddc84' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E" +
+      "%3Cpath d='M10 3l2 4 4 2-4 2-2 4-2-4-4-2 4-2z'/%3E" +
+      "%3Cpath d='M19 21l-4-4'/%3E" +
+      "%3Ccircle cx='19' cy='21' r='2'/%3E" +
+      "%3C/svg%3E"
+  },
+  {
+    name: "Work",
+    data:
+      "data:image/svg+xml," +
+      "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' " +
+      "stroke='%236673ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E" +
+      "%3Crect x='3' y='7' width='18' height='13' rx='2' ry='2'/%3E" +
+      "%3Cpath d='M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2'/%3E" +
+      "%3Cpath d='M3 12h18'/%3E" +
+      "%3C/svg%3E"
   }
 ];
 
-// Default theme (not used anymore but kept for compatibility)
-function getDefaultTheme() {
-  return "cartoon";
+if (!localStorage.getItem("images")) {
+  localStorage.setItem("images", JSON.stringify(defaultImages));
 }

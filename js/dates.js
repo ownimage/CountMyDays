@@ -1,18 +1,3 @@
-function safeImages() {
-  const raw = loadImages();
-  let arr = [];
-
-  if (Array.isArray(raw)) arr = raw;
-  else if (raw && typeof raw === "object") arr = Object.values(raw);
-
-  arr = arr.filter(i => i && typeof i === "object");
-
-  return arr.map(i => ({
-    category: i.category || "Holiday",
-    data: i.data || ""
-  }));
-}
-
 function renderDatesEditor() {
   const list = document.getElementById("editorList");
   const addTile = document.getElementById("addDateTile");
@@ -21,12 +6,15 @@ function renderDatesEditor() {
   addTile.innerHTML = "";
 
   const dates = loadDates();
-  const images = safeImages();
   const categories = loadCategories();
+  const images = loadImages();
 
   dates.forEach((d, index) => {
-    const img = images.find(i => i.category === d.category);
-    const imgSrc = img ? img.data : "";
+    const category = categories.find(c => c.name === d.category);
+    const imageName = category ? category.image : null;
+    const image = images.find(i => i.name === imageName);
+    const imgSrc = image ? image.data : "";
+
     const showYear = d.type === "once";
 
     const card = document.createElement("div");
@@ -48,9 +36,11 @@ function renderDatesEditor() {
 
           <label class="form-label mt-2">Category</label>
           <select class="form-select"
-                  onchange="updateDateCategory(${index}, this.value)">
+                  onchange="updateDateField(${index}, 'category', this.value)">
             ${categories.map(c => `
-              <option value="${c}" ${c === d.category ? "selected" : ""}>${c}</option>
+              <option value="${c.name}" ${c.name === d.category ? "selected" : ""}>
+                ${c.name}
+              </option>
             `).join("")}
           </select>
 
@@ -102,17 +92,11 @@ function renderDatesEditor() {
   `;
 }
 
-function updateDateCategory(index, newCategory) {
-  const dates = loadDates();
-  dates[index].category = newCategory;
-  saveDates(dates);
-  renderDatesEditor(); // refresh so the image updates
-}
-
 function updateDateField(index, field, value) {
   const dates = loadDates();
   dates[index][field] = value;
   saveDates(dates);
+  renderDatesEditor(); // refresh image when category changes
 }
 
 function deleteDate(index) {
@@ -126,7 +110,7 @@ function addNewDate() {
   const dates = loadDates();
   dates.push({
     name: "New Event",
-    category: "Holiday",
+    category: "",   // user must choose
     type: "annual",
     month: 1,
     day: 1
