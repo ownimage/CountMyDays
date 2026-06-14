@@ -432,11 +432,25 @@ function closeQRExportModal() {
 // QR IMPORT (cameraId approach, QR-only, iPhone-safe)
 // -------------------------------
 
+// -------------------------------
+// QR IMPORT (iOS-safe manual fallback using jsQR)
+// -------------------------------
+
 let qrImportState = {
   total: null,
   chunks: {},
-  reader: null
+  reader: null,
+  manual: {
+    stream: null,
+    video: null,
+    canvas: null,
+    rafId: null
+  }
 };
+
+function isiOS() {
+  return /iP(hone|od|ad)/i.test(navigator.userAgent);
+}
 
 function startQRImport() {
   const modal = document.getElementById("qrImportModal");
@@ -448,125 +462,205 @@ function startQRImport() {
     return;
   }
 
-  // show modal first (important for iOS)
   modal.classList.remove("d-none");
   status.innerText = "Preparing camera…";
 
-  qrImportState = { total: null, chunks: {}, reader: null };
+  qrImportState = { total: null, chunks: {}, reader: null, manual: { stream: null, video: null, canvas: null, rafId: null } };
 
-  // small delay so the reader element is rendered before starting camera
-  setTimeout(async () => {
-    // clear any previous reader instance
-    if (qrImportState.reader) {
-      try { await qrImportState.reader.stop(); } catch (e) {}
-      qrImportState.reader = null;
+  // If iPhone, use manual jsQR fallback to avoid native barcode UI
+  if (isiOS()) {
+    startManualQRImport();
+  } else {
+    startHtml5QrcodeImport(); // non-iOS: use existing html5-qrcode flow
+  }
+}
+
+/* ---------- html5-qrcode path (non-iOS) ---------- */
+async function startHtml5QrcodeImport() {
+  const status = document.getElementById("qrImportStatus");
+  const readerEl = document.getElementById("qrReader");
+
+  // compute qrbox
+  const width = Math.max(300, Math.min(420, readerEl.clientWidth || 360));
+  const qrbox = Math.floor(width * 0.9);
+
+  const reader = new Html5Qrcode("qrReader");
+  qrImportState.reader = reader;
+
+  // try to pick cameraId first
+  let cameraIdToUse = null;
+  try {
+    const devices = await Html5Qrcode.getCameras();
+    if (devices && devices.length) {
+      const rear = devices.find(d => /back|rear|environment|wide/i.test(d.label));
+      cameraIdToUse = (rear && rear.id) || devices[0].id;
     }
+  } catch (e) {
+    cameraIdToUse = null;
+  }
 
-    const reader = new Html5Qrcode("qrReader");
-    qrImportState.reader = reader;
+  const config = {
+    fps: 10,
+    qrbox: qrbox,
+    formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ],
+    experimentalFeatures: { useBarCodeDetectorIfSupported: false }
+  };
 
-    // compute a larger qrbox (square) based on reader element width
-    const width = Math.max(300, Math.min(420, readerEl.clientWidth || 360));
-    const qrbox = Math.floor(width * 0.9); // use most of the area
+  const cameraArg = cameraIdToUse || { facingMode: "environment" };
+  status.innerText = "Starting camera…";
 
-    // Try to get camera list and pick a rear camera id if possible
-    let cameraIdToUse = null;
-    try {
-      const devices = await Html5Qrcode.getCameras();
-      if (devices && devices.length) {
-        const rear = devices.find(d => /back|rear|environment|wide/i.test(d.label));
-        cameraIdToUse = (rear && rear.id) || devices[0].id;
+  reader.start(
+    cameraArg,
+    config,
+    decoded => {
+      handleDecodedString(decoded);
+    },
+    error => {
+      // non-fatal scan errors
+      status.innerText = "Scanning…";
+    }
+  ).catch(err => {
+    status.innerText = "Camera start failed: " + (err && err.message ? err.message : String(err));
+    // fallback to facingMode if cameraId failed
+    if (cameraIdToUse) {
+      setTimeout(() => {
+        reader.start({ facingMode: "environment" }, config, decoded => handleDecodedString(decoded), () => { status.innerText = "Scanning…"; })
+          .catch(e => status.innerText = "Camera start failed (fallback): " + (e && e.message ? e.message : String(e)));
+      }, 300);
+    }
+  });
+}
+
+/* ---------- Manual jsQR path (iOS) ---------- */
+async function startManualQRImport() {
+  const status = document.getElementById("qrImportStatus");
+  const readerEl = document.getElementById("qrReader");
+
+  status.innerText = "Starting camera (manual mode)…";
+
+  // create video element
+  const video = document.createElement("video");
+  video.setAttribute("playsinline", "true"); // important for iOS
+  video.style.width = "100%";
+  video.style.height = "100%";
+  readerEl.innerHTML = "";
+  readerEl.appendChild(video);
+
+  // create canvas for frame capture (offscreen)
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
+    qrImportState.manual.stream = stream;
+    video.srcObject = stream;
+
+    await video.play();
+
+    // set canvas size to video size
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+
+    qrImportState.manual.video = video;
+    qrImportState.manual.canvas = canvas;
+
+    status.innerText = "Scanning… (align QR inside the white box)";
+
+    // scanning loop
+    const scanLoop = () => {
+      try {
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          // draw current frame
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+          // get image data
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+          // decode with jsQR
+          const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
+
+          if (code && code.data) {
+            handleDecodedString(code.data);
+          }
+        }
+      } catch (e) {
+        // ignore per-frame errors
+        console.warn("scan frame error", e);
       }
-    } catch (e) {
-      cameraIdToUse = null;
-    }
-
-    // Build scanner config (QR-only, disable native detector)
-    const config = {
-      fps: 10,
-      qrbox: qrbox,
-      formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ],
-      experimentalFeatures: { useBarCodeDetectorIfSupported: false }
+      qrImportState.manual.rafId = requestAnimationFrame(scanLoop);
     };
 
-    // Start using cameraId if available, otherwise fall back to facingMode single-key
-    const cameraArg = cameraIdToUse || { facingMode: "environment" };
+    qrImportState.manual.rafId = requestAnimationFrame(scanLoop);
+  } catch (err) {
+    status.innerText = "Camera access failed: " + (err && err.message ? err.message : String(err));
+  }
+}
 
-    status.innerText = "Starting camera…";
+function stopManualScanner() {
+  const m = qrImportState.manual;
+  if (m.rafId) {
+    cancelAnimationFrame(m.rafId);
+    m.rafId = null;
+  }
+  if (m.video) {
+    try { m.video.pause(); } catch (e) {}
+    if (m.video.srcObject) {
+      const tracks = m.video.srcObject.getTracks();
+      tracks.forEach(t => t.stop());
+    }
+    m.video.remove();
+    m.video = null;
+  }
+  if (m.stream) {
+    try {
+      m.stream.getTracks().forEach(t => t.stop());
+    } catch (e) {}
+    m.stream = null;
+  }
+  if (m.canvas) {
+    m.canvas = null;
+  }
+}
 
-    reader.start(
-      cameraArg,
-      config,
-      decoded => {
-        // Only accept the JSON chunk objects we exported.
-        let obj = null;
-        try {
-          obj = JSON.parse(decoded);
-        } catch (e) {
-          // not JSON — likely a 1D barcode or other QR content; ignore
-          status.innerText = "Ignored non-matching code";
-          return;
-        }
+/* ---------- Shared decode handler ---------- */
+function handleDecodedString(decoded) {
+  const status = document.getElementById("qrImportStatus");
 
-        // Validate expected chunk object shape
-        if (!obj || typeof obj.index !== "number" || typeof obj.total !== "number" || typeof obj.chunk !== "string") {
-          status.innerText = "Ignored non-matching JSON";
-          return;
-        }
+  // Only accept the JSON chunk objects we exported.
+  let obj = null;
+  try {
+    obj = JSON.parse(decoded);
+  } catch (e) {
+    // not JSON — likely a 1D barcode or other QR content; ignore
+    status.innerText = "Ignored non-matching code";
+    return;
+  }
 
-        const { index, total, chunk } = obj;
+  // Validate expected chunk object shape
+  if (!obj || typeof obj.index !== "number" || typeof obj.total !== "number" || typeof obj.chunk !== "string") {
+    status.innerText = "Ignored non-matching JSON";
+    return;
+  }
 
-        if (qrImportState.total === null) {
-          qrImportState.total = total;
-        }
+  const { index, total, chunk } = obj;
 
-        qrImportState.chunks[index] = chunk;
+  if (qrImportState.total === null) {
+    qrImportState.total = total;
+  }
 
-        status.innerText = `Scanned ${Object.keys(qrImportState.chunks).length} of ${total}`;
+  qrImportState.chunks[index] = chunk;
 
-        if (Object.keys(qrImportState.chunks).length === total) {
-          reader.stop().then(() => {
-            finishQRImport();
-          }).catch(() => {
-            finishQRImport();
-          });
-        }
-      },
-      error => {
-        // non-fatal scan errors; keep status simple
-        status.innerText = "Scanning…";
-      }
-    ).catch(err => {
-      const msg = err && err.message ? err.message : String(err);
-      status.innerText = "Camera start failed: " + msg;
+  status.innerText = `Scanned ${Object.keys(qrImportState.chunks).length} of ${total}`;
 
-      // if we tried cameraId and failed, try fallback to facingMode (single-key)
-      if (cameraIdToUse) {
-        setTimeout(() => {
-          status.innerText = "Retrying with facingMode fallback…";
-          reader.start(
-            { facingMode: "environment" },
-            config,
-            decoded => {
-              let obj = null;
-              try { obj = JSON.parse(decoded); } catch (e) { status.innerText = "Ignored non-matching code"; return; }
-              if (!obj || typeof obj.index !== "number" || typeof obj.total !== "number" || typeof obj.chunk !== "string") { status.innerText = "Ignored non-matching JSON"; return; }
-              const { index, total, chunk } = obj;
-              if (qrImportState.total === null) qrImportState.total = total;
-              qrImportState.chunks[index] = chunk;
-              status.innerText = `Scanned ${Object.keys(qrImportState.chunks).length} of ${total}`;
-              if (Object.keys(qrImportState.chunks).length === total) {
-                reader.stop().then(() => { finishQRImport(); }).catch(() => { finishQRImport(); });
-              }
-            },
-            err2 => { status.innerText = "Scanning…"; }
-          ).catch(err2 => {
-            status.innerText = "Camera start failed (fallback): " + (err2 && err2.message ? err2.message : String(err2));
-          });
-        }, 300);
-      }
-    });
-  }, 250);
+  if (Object.keys(qrImportState.chunks).length === total) {
+    // stop both possible scanners
+    if (qrImportState.reader) {
+      qrImportState.reader.stop().catch(()=>{});
+      qrImportState.reader = null;
+    }
+    stopManualScanner();
+    finishQRImport();
+  }
 }
 
 function finishQRImport() {
@@ -601,7 +695,9 @@ function cancelQRImport() {
 
   if (qrImportState.reader) {
     qrImportState.reader.stop().catch(()=>{});
+    qrImportState.reader = null;
   }
+  stopManualScanner();
 }
 
 // -------------------------------
