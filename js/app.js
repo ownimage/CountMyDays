@@ -353,7 +353,7 @@ function closeQRExportModal() {
 }
 
 // -------------------------------
-// QR IMPORT
+// QR IMPORT (iPhone-safe)
 // -------------------------------
 
 let qrImportState = {
@@ -370,18 +370,24 @@ function startQRImport() {
 
   qrImportState = { total: null, chunks: {}, reader: null };
 
+  // iPhone requires the element to be visible before starting the camera
   setTimeout(() => {
     const reader = new Html5Qrcode("qrReader");
     qrImportState.reader = reader;
 
     reader.start(
-      { facingMode: "environment", width: { min: 640 }, height: { min: 480 } },
+      // IMPORTANT: iPhone only accepts ONE key here
+      { facingMode: "environment" },
+
+      // Scanner config
       {
         fps: 10,
         qrbox: 250,
         formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ],
         experimentalFeatures: { useBarCodeDetectorIfSupported: false }
       },
+
+      // Success callback
       decoded => {
         try {
           const obj = JSON.parse(decoded);
@@ -393,7 +399,8 @@ function startQRImport() {
 
           qrImportState.chunks[index] = chunk;
 
-          status.innerText = `Scanned ${Object.keys(qrImportState.chunks).length} of ${total}`;
+          status.innerText =
+            `Scanned ${Object.keys(qrImportState.chunks).length} of ${total}`;
 
           if (Object.keys(qrImportState.chunks).length === total) {
             reader.stop();
@@ -403,6 +410,8 @@ function startQRImport() {
           console.warn("Invalid QR scan");
         }
       },
+
+      // Error callback
       error => {
         status.innerText = "Camera error: " + error;
       }
