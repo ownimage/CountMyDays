@@ -1,4 +1,10 @@
 // -------------------------------
+// app.js - Full replacement
+// Includes: storage, rendering, editors, export/import JSON, QR export/import (iPhone-safe)
+// Requires: lz-string, html5-qrcode, qrcodejs loaded in index.html before this file
+// -------------------------------
+
+// -------------------------------
 // STORAGE HELPERS
 // -------------------------------
 
@@ -80,14 +86,7 @@ function importData() {
         saveImages(json.images);
 
         alert("Import complete!");
-
-        document.getElementById("datesEditor").classList.add("d-none");
-        document.getElementById("categoriesEditor").classList.add("d-none");
-        document.getElementById("imagesEditor").classList.add("d-none");
-        document.getElementById("settingsPage").classList.add("d-none");
-
-        document.getElementById("countdownContainer").classList.remove("d-none");
-
+        hideAllEditors();
         renderCountdowns();
 
       } catch (err) {
@@ -102,7 +101,7 @@ function importData() {
 }
 
 // -------------------------------
-// THEMES
+// THEME HELPERS
 // -------------------------------
 
 const themes = {
@@ -149,25 +148,15 @@ function changeTheme(name) {
 }
 
 // -------------------------------
-// SETTINGS PAGE
+// UI UTILITIES
 // -------------------------------
 
-function openSettings() {
-  document.getElementById("countdownContainer").classList.add("d-none");
+function hideAllEditors() {
+  document.getElementById("countdownContainer").classList.remove("d-none");
   document.getElementById("datesEditor").classList.add("d-none");
   document.getElementById("categoriesEditor").classList.add("d-none");
   document.getElementById("imagesEditor").classList.add("d-none");
-
-  document.getElementById("settingsPage").classList.remove("d-none");
-
-  const saved = localStorage.getItem("theme") || "dark";
-  document.getElementById("themeSelector").value = saved;
-}
-
-function closeSettings() {
   document.getElementById("settingsPage").classList.add("d-none");
-  document.getElementById("countdownContainer").classList.remove("d-none");
-  renderCountdowns();
 }
 
 // -------------------------------
@@ -176,7 +165,11 @@ function closeSettings() {
 
 function daysUntil(d) {
   const now = new Date();
-  const year = d.type === "once" ? d.year : now.getFullYear();
+  let year = now.getFullYear();
+
+  if (d.type === "once") {
+    year = d.year;
+  }
 
   const target = new Date(year, d.month - 1, d.day);
 
@@ -189,11 +182,12 @@ function daysUntil(d) {
 }
 
 // -------------------------------
-// MAIN COUNTDOWN RENDERING
+// RENDER COUNTDOWNS
 // -------------------------------
 
 function renderCountdowns() {
   const container = document.getElementById("countdownContainer");
+  if (!container) return;
   container.innerHTML = "";
 
   const dates = loadDates();
@@ -216,22 +210,17 @@ function renderCountdowns() {
 
     card.innerHTML = `
       <div class="row align-items-center">
-
         <div class="col-auto">
-          ${imgSrc ? `<img src="${imgSrc}" class="countdown-img">`
-                   : `<div class="text-secondary">No image</div>`}
+          ${imgSrc ? `<img src="${imgSrc}" class="countdown-img">` : `<div class="text-secondary">No image</div>`}
         </div>
-
         <div class="col">
-          <h4 class="mb-0">${d.name}</h4>
-          <small class="text-secondary">${d.category}</small>
+          <h4 class="mb-0">${escapeHtml(d.name)}</h4>
+          <small class="text-secondary">${escapeHtml(d.category)}</small>
         </div>
-
         <div class="col-auto text-end">
           <div class="fs-1 fw-bold">${d.days}</div>
           <div class="text-secondary">days</div>
         </div>
-
       </div>
     `;
 
@@ -239,8 +228,17 @@ function renderCountdowns() {
   });
 }
 
+// small helper to avoid accidental HTML injection
+function escapeHtml(str) {
+  if (!str && str !== 0) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 // -------------------------------
-// EDITOR SWITCHING
+// EDITOR NAVIGATION
 // -------------------------------
 
 function openDatesEditor() {
@@ -249,7 +247,6 @@ function openDatesEditor() {
   document.getElementById("categoriesEditor").classList.add("d-none");
   document.getElementById("imagesEditor").classList.add("d-none");
   document.getElementById("settingsPage").classList.add("d-none");
-
   renderDatesEditor();
 }
 
@@ -259,7 +256,6 @@ function openCategoriesEditor() {
   document.getElementById("categoriesEditor").classList.remove("d-none");
   document.getElementById("imagesEditor").classList.add("d-none");
   document.getElementById("settingsPage").classList.add("d-none");
-
   renderCategoriesEditor();
 }
 
@@ -269,8 +265,56 @@ function openImagesEditor() {
   document.getElementById("categoriesEditor").classList.add("d-none");
   document.getElementById("imagesEditor").classList.remove("d-none");
   document.getElementById("settingsPage").classList.add("d-none");
-
   renderImagesEditor();
+}
+
+function openSettings() {
+  document.getElementById("countdownContainer").classList.add("d-none");
+  document.getElementById("datesEditor").classList.add("d-none");
+  document.getElementById("categoriesEditor").classList.add("d-none");
+  document.getElementById("imagesEditor").classList.add("d-none");
+  document.getElementById("settingsPage").classList.remove("d-none");
+
+  const saved = localStorage.getItem("theme") || "dark";
+  const sel = document.getElementById("themeSelector");
+  if (sel) sel.value = saved;
+}
+
+function closeSettings() {
+  document.getElementById("settingsPage").classList.add("d-none");
+  document.getElementById("countdownContainer").classList.remove("d-none");
+  renderCountdowns();
+}
+
+// -------------------------------
+// SIMPLE EDITOR RENDERS (placeholders)
+// -------------------------------
+
+function renderDatesEditor() {
+  const el = document.getElementById("datesEditor");
+  if (!el) return;
+  const dates = loadDates();
+  el.innerHTML = `<h2 class="mb-3">Edit Dates</h2><div id="editorList"></div><div class="mt-3"><button class="btn btn-primary" onclick="addSampleDate()">Add Sample Date</button> <button class="btn btn-secondary" onclick="closeDatesEditor()">Done</button></div>`;
+  const list = document.getElementById("editorList");
+  list.innerHTML = dates.map((d, i) => `<div class="mb-2"><strong>${escapeHtml(d.name)}</strong> — ${escapeHtml(d.category)} — ${d.type}</div>`).join("");
+}
+
+function renderCategoriesEditor() {
+  const el = document.getElementById("categoriesEditor");
+  if (!el) return;
+  const categories = loadCategories();
+  el.innerHTML = `<h2 class="mb-3">Edit Categories</h2><div id="categoriesList"></div><div class="mt-3"><button class="btn btn-primary" onclick="addSampleCategory()">Add Sample Category</button> <button class="btn btn-secondary" onclick="closeCategoriesEditor()">Done</button></div>`;
+  const list = document.getElementById("categoriesList");
+  list.innerHTML = categories.map((c, i) => `<div class="mb-2"><strong>${escapeHtml(c.name)}</strong></div>`).join("");
+}
+
+function renderImagesEditor() {
+  const el = document.getElementById("imagesEditor");
+  if (!el) return;
+  const images = loadImages();
+  el.innerHTML = `<h2 class="mb-3">Edit Images</h2><div id="imagesList"></div><div class="mt-3"><button class="btn btn-primary" onclick="addSampleImage()">Add Sample Image</button> <button class="btn btn-secondary" onclick="closeImagesEditor()">Done</button></div>`;
+  const list = document.getElementById("imagesList");
+  list.innerHTML = images.map((i, idx) => `<div class="mb-2">${escapeHtml(i.name)}</div>`).join("");
 }
 
 function closeDatesEditor() {
@@ -292,12 +336,41 @@ function closeImagesEditor() {
 }
 
 // -------------------------------
+// SAMPLE DATA HELPERS (for quick testing)
+// -------------------------------
+
+function addSampleDate() {
+  const dates = loadDates();
+  dates.push({ name: "Sample Event", category: "General", type: "annual", month: 12, day: 25 });
+  saveDates(dates);
+  renderDatesEditor();
+}
+
+function addSampleCategory() {
+  const categories = loadCategories();
+  categories.push({ name: "General", image: "" });
+  saveCategories(categories);
+  renderCategoriesEditor();
+}
+
+function addSampleImage() {
+  const images = loadImages();
+  images.push({ name: "Sample", data: "" });
+  saveImages(images);
+  renderImagesEditor();
+}
+
+// -------------------------------
 // QR EXPORT
 // -------------------------------
 
 function exportToQR() {
   const modal = document.getElementById("qrExportModal");
   const list = document.getElementById("qrList");
+  if (!modal || !list) {
+    alert("QR export UI not found.");
+    return;
+  }
   list.innerHTML = "";
 
   const data = {
@@ -309,6 +382,7 @@ function exportToQR() {
   const json = JSON.stringify(data);
   const compressed = LZString.compressToEncodedURIComponent(json);
 
+  // chunk size tuned for reliability
   const chunkSize = 400;
   const chunks = [];
   for (let i = 0; i < compressed.length; i += chunkSize) {
@@ -319,17 +393,18 @@ function exportToQR() {
     const wrapper = document.createElement("div");
     wrapper.className = "mb-4 text-center";
 
+    // white quiet zone container
     const qrBox = document.createElement("div");
     qrBox.style.background = "white";
     qrBox.style.padding = "20px";
     qrBox.style.display = "inline-block";
-    qrBox.style.borderRadius = "10px";
+    qrBox.style.borderRadius = "8px";
 
     const qrDiv = document.createElement("div");
     qrBox.appendChild(qrDiv);
-
     wrapper.appendChild(qrBox);
 
+    // generate QR
     new QRCode(qrDiv, {
       text: JSON.stringify({ index, total: chunks.length, chunk }),
       width: 220,
@@ -349,7 +424,8 @@ function exportToQR() {
 }
 
 function closeQRExportModal() {
-  document.getElementById("qrExportModal").classList.add("d-none");
+  const modal = document.getElementById("qrExportModal");
+  if (modal) modal.classList.add("d-none");
 }
 
 // -------------------------------
@@ -365,9 +441,16 @@ let qrImportState = {
 function startQRImport() {
   const modal = document.getElementById("qrImportModal");
   const status = document.getElementById("qrImportStatus");
+  const readerEl = document.getElementById("qrReader");
+
+  if (!modal || !status || !readerEl) {
+    alert("QR import UI not found.");
+    return;
+  }
 
   // show modal first (important for iOS)
   modal.classList.remove("d-none");
+  status.innerText = "Preparing camera…";
 
   qrImportState = { total: null, chunks: {}, reader: null };
 
@@ -383,7 +466,6 @@ function startQRImport() {
     qrImportState.reader = reader;
 
     // compute a larger qrbox (square) based on reader element width
-    const readerEl = document.getElementById("qrReader");
     const width = Math.max(300, Math.min(420, readerEl.clientWidth || 360));
     const qrbox = Math.floor(width * 0.9); // use most of the area
 
@@ -392,12 +474,10 @@ function startQRImport() {
     try {
       const devices = await Html5Qrcode.getCameras();
       if (devices && devices.length) {
-        // prefer a device whose label suggests 'back' or 'rear'
         const rear = devices.find(d => /back|rear|environment|wide/i.test(d.label));
         cameraIdToUse = (rear && rear.id) || devices[0].id;
       }
     } catch (e) {
-      // getCameras may fail in some contexts; we'll fallback to facingMode if needed
       cameraIdToUse = null;
     }
 
@@ -412,6 +492,8 @@ function startQRImport() {
     // Start using cameraId if available, otherwise fall back to facingMode single-key
     const cameraArg = cameraIdToUse || { facingMode: "environment" };
 
+    status.innerText = "Starting camera…";
+
     reader.start(
       cameraArg,
       config,
@@ -422,7 +504,7 @@ function startQRImport() {
           obj = JSON.parse(decoded);
         } catch (e) {
           // not JSON — likely a 1D barcode or other QR content; ignore
-          status.innerText = "Ignored non-matching code (not app data)";
+          status.innerText = "Ignored non-matching code";
           return;
         }
 
@@ -455,9 +537,9 @@ function startQRImport() {
         status.innerText = "Scanning…";
       }
     ).catch(err => {
-      // start() failed — show a clear message and fallback suggestion
       const msg = err && err.message ? err.message : String(err);
       status.innerText = "Camera start failed: " + msg;
+
       // if we tried cameraId and failed, try fallback to facingMode (single-key)
       if (cameraIdToUse) {
         setTimeout(() => {
@@ -466,7 +548,6 @@ function startQRImport() {
             { facingMode: "environment" },
             config,
             decoded => {
-              // same decode handler as above (inline for brevity)
               let obj = null;
               try { obj = JSON.parse(decoded); } catch (e) { status.innerText = "Ignored non-matching code"; return; }
               if (!obj || typeof obj.index !== "number" || typeof obj.total !== "number" || typeof obj.chunk !== "string") { status.innerText = "Ignored non-matching JSON"; return; }
@@ -490,7 +571,7 @@ function startQRImport() {
 
 function finishQRImport() {
   const modal = document.getElementById("qrImportModal");
-  modal.classList.add("d-none");
+  if (modal) modal.classList.add("d-none");
 
   const ordered = [];
   for (let i = 0; i < qrImportState.total; i++) {
@@ -516,33 +597,7 @@ function finishQRImport() {
 
 function cancelQRImport() {
   const modal = document.getElementById("qrImportModal");
-  modal.classList.add("d-none");
-
-  if (qrImportState.reader) {
-    qrImportState.reader.stop().catch(()=>{});
-  }
-}
-
-  const compressed = ordered.join("");
-  const json = LZString.decompressFromEncodedURIComponent(compressed);
-
-  try {
-    const data = JSON.parse(json);
-
-    saveDates(data.dates);
-    saveCategories(data.categories);
-    saveImages(data.images);
-
-    alert("QR import complete!");
-    renderCountdowns();
-  } catch (err) {
-    alert("Failed to import QR data.");
-  }
-}
-
-function cancelQRImport() {
-  const modal = document.getElementById("qrImportModal");
-  modal.classList.add("d-none");
+  if (modal) modal.classList.add("d-none");
 
   if (qrImportState.reader) {
     qrImportState.reader.stop().catch(()=>{});
