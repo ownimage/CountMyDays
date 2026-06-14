@@ -60,3 +60,27 @@ body {
   border-color: var(--form-focus-border) !important;
   box-shadow: none !important;
 }
+
+.qr-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.qr-modal-content {
+  background: var(--tile-bg);
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 420px;
+  text-align: center;
+}
+
+.qr-scroll {
+  max-height: 60vh;
+  overflow-y: auto;
+}
