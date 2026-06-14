@@ -27,6 +27,84 @@ function saveImages(images) {
 }
 
 // -------------------------------
+// JSON EXPORT
+// -------------------------------
+
+function exportData() {
+  const data = {
+    dates: loadDates(),
+    categories: loadCategories(),
+    images: loadImages()
+  };
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json"
+  });
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "countmydays-export.json";
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+// -------------------------------
+// JSON IMPORT (with proper refresh)
+// -------------------------------
+
+function importData() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "application/json";
+
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = evt => {
+      try {
+        const json = JSON.parse(evt.target.result);
+
+        if (!json.dates || !json.categories || !json.images) {
+          alert("Invalid JSON file — missing required fields.");
+          return;
+        }
+
+        saveDates(json.dates);
+        saveCategories(json.categories);
+        saveImages(json.images);
+
+        alert("Import complete!");
+
+        // Close all editors
+        document.getElementById("datesEditor").classList.add("d-none");
+        document.getElementById("categoriesEditor").classList.add("d-none");
+        document.getElementById("imagesEditor").classList.add("d-none");
+        document.getElementById("settingsPage").classList.add("d-none");
+
+        // Show main view
+        document.getElementById("countdownContainer").classList.remove("d-none");
+
+        // Refresh UI
+        renderCountdowns();
+
+      } catch (err) {
+        alert("Invalid JSON file.");
+      }
+    };
+
+    reader.readAsText(file);
+  };
+
+  input.click();
+}
+
+// -------------------------------
 // THEMES
 // -------------------------------
 
