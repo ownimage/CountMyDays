@@ -10,44 +10,42 @@
 
 <body class="bg-dark">
 
-  <nav class="navbar navbar-expand-lg navbar-dark bg-black px-3">
-    <div class="container-fluid">
-      <div class="navbar-nav d-flex flex-row gap-3">
+  <!-- FIXED TOOLBAR (not a navbar) -->
+  <div class="bg-black px-3 py-2 d-flex gap-3 align-items-center">
 
-        <div class="dropdown">
-          <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">Edit</button>
-          <ul class="dropdown-menu dropdown-menu-dark">
-            <li><a class="dropdown-item" onclick="openDatesEditor()">Dates</a></li>
-            <li><a class="dropdown-item" onclick="openCategoriesEditor()">Categories</a></li>
-            <li><a class="dropdown-item" onclick="openImagesEditor()">Images</a></li>
-          </ul>
-        </div>
-
-        <div class="dropdown">
-          <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">Export</button>
-          <ul class="dropdown-menu dropdown-menu-dark">
-            <li><a class="dropdown-item" onclick="exportData()">Export JSON</a></li>
-          </ul>
-        </div>
-
-        <div class="dropdown">
-          <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">Import</button>
-          <ul class="dropdown-menu dropdown-menu-dark">
-            <li><a class="dropdown-item" onclick="importData()">Import JSON</a></li>
-          </ul>
-        </div>
-
-        <div class="dropdown">
-          <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">Settings</button>
-          <ul class="dropdown-menu dropdown-menu-dark">
-            <li><a class="dropdown-item" onclick="resetAll()">Reset All</a></li>
-          </ul>
-        </div>
-
-      </div>
+    <div class="dropdown">
+      <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">Edit</button>
+      <ul class="dropdown-menu dropdown-menu-dark">
+        <li><a class="dropdown-item" onclick="openDatesEditor()">Dates</a></li>
+        <li><a class="dropdown-item" onclick="openCategoriesEditor()">Categories</a></li>
+        <li><a class="dropdown-item" onclick="openImagesEditor()">Images</a></li>
+      </ul>
     </div>
-  </nav>
 
+    <div class="dropdown">
+      <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">Export</button>
+      <ul class="dropdown-menu dropdown-menu-dark">
+        <li><a class="dropdown-item" onclick="exportData()">Export JSON</a></li>
+      </ul>
+    </div>
+
+    <div class="dropdown">
+      <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">Import</button>
+      <ul class="dropdown-menu dropdown-menu-dark">
+        <li><a class="dropdown-item" onclick="importData()">Import JSON</a></li>
+      </ul>
+    </div>
+
+    <div class="dropdown">
+      <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">Settings</button>
+      <ul class="dropdown-menu dropdown-menu-dark">
+        <li><a class="dropdown-item" onclick="resetAll()">Reset All</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- MAIN CONTENT -->
   <div class="container my-4">
 
     <div id="countdownContainer"></div>
@@ -72,17 +70,19 @@
 
   </div>
 
+  <!-- BOOTSTRAP JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+  <!-- SAMPLE DATA LOADERS -->
   <script src="js/sampleImages.js"></script>
   <script src="js/sampleCategories.js"></script>
   <script src="js/sampleDates.js"></script>
 
+  <!-- APP LOGIC -->
   <script src="js/app.js"></script>
   <script src="js/dates.js"></script>
   <script src="js/categories.js"></script>
   <script src="js/images.js"></script>
-
 
 </body>
 </html>
