@@ -323,24 +323,37 @@ function exportToQR() {
   const compressed = LZString.compressToEncodedURIComponent(json);
 
   // Split into chunks of ~800 chars (safe for QR)
-  const chunkSize = 800;
+  const chunkSize = 400;
   const chunks = [];
   for (let i = 0; i < compressed.length; i += chunkSize) {
     chunks.push(compressed.substring(i, i + chunkSize));
   }
 
   chunks.forEach((chunk, index) => {
-    const wrapper = document.createElement("div");
+ const wrapper = document.createElement("div");
     wrapper.className = "mb-4 text-center";
 
-    const qrDiv = document.createElement("div");
-    wrapper.appendChild(qrDiv);
+    /* White border container */
+    const qrBox = document.createElement("div");
+    qrBox.style.background = "white";
+    qrBox.style.padding = "20px";        // Quiet zone
+    qrBox.style.display = "inline-block";
+    qrBox.style.borderRadius = "10px";   // Optional, looks nice
 
+    /* Actual QR target */
+    const qrDiv = document.createElement("div");
+    qrBox.appendChild(qrDiv);
+
+    wrapper.appendChild(qrBox);
+
+    /* Generate QR */
     new QRCode(qrDiv, {
       text: JSON.stringify({ index, total: chunks.length, chunk }),
       width: 220,
-      height: 220
+      height: 220,
+      margin: 16   // Internal quiet zone
     });
+
 
     const label = document.createElement("div");
     label.className = "mt-2 text-secondary";
