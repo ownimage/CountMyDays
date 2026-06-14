@@ -353,7 +353,7 @@ function closeQRExportModal() {
 }
 
 // -------------------------------
-// QR IMPORT (iPhone-safe)
+// QR IMPORT (QR-only, iPhone-safe)
 // -------------------------------
 
 let qrImportState = {
@@ -366,56 +366,89 @@ function startQRImport() {
   const modal = document.getElementById("qrImportModal");
   const status = document.getElementById("qrImportStatus");
 
+  // show modal first (important for iOS)
   modal.classList.remove("d-none");
 
   qrImportState = { total: null, chunks: {}, reader: null };
 
-  // iPhone requires the element to be visible before starting the camera
+  // small delay so the reader element is rendered before starting camera
   setTimeout(() => {
+    // clear any previous reader instance
+    if (qrImportState.reader) {
+      try { qrImportState.reader.stop(); } catch (e) {}
+      qrImportState.reader = null;
+    }
+
     const reader = new Html5Qrcode("qrReader");
     qrImportState.reader = reader;
 
+    // compute a larger qrbox (square) based on reader element width
+    const readerEl = document.getElementById("qrReader");
+    const width = Math.max(300, Math.min(420, readerEl.clientWidth || 360));
+    const qrbox = Math.floor(width * 0.9); // use most of the area
+
     reader.start(
-      // IMPORTANT: iPhone only accepts ONE key here
+      // camera config: single key only (facingMode)
       { facingMode: "environment" },
 
-      // Scanner config
+      // scanner config
       {
         fps: 10,
-        qrbox: 250,
+        qrbox: qrbox,
+        // force QR only and disable native BarcodeDetector
         formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ],
         experimentalFeatures: { useBarCodeDetectorIfSupported: false }
       },
 
-      // Success callback
+      // success callback
       decoded => {
+        // Only accept the JSON chunk objects we exported.
+        // If the decoded string is not our JSON chunk object, ignore it.
+        let obj = null;
         try {
-          const obj = JSON.parse(decoded);
-          const { index, total, chunk } = obj;
-
-          if (qrImportState.total === null) {
-            qrImportState.total = total;
-          }
-
-          qrImportState.chunks[index] = chunk;
-
-          status.innerText =
-            `Scanned ${Object.keys(qrImportState.chunks).length} of ${total}`;
-
-          if (Object.keys(qrImportState.chunks).length === total) {
-            reader.stop();
-            finishQRImport();
-          }
+          obj = JSON.parse(decoded);
         } catch (e) {
-          console.warn("Invalid QR scan");
+          // not JSON — likely a 1D barcode or other QR content; ignore
+          // update status briefly so user knows we ignored something
+          status.innerText = "Ignored non-matching code (not app data)";
+          return;
+        }
+
+        // Validate expected chunk object shape
+        if (!obj || typeof obj.index !== "number" || typeof obj.total !== "number" || typeof obj.chunk !== "string") {
+          status.innerText = "Ignored non-matching JSON";
+          return;
+        }
+
+        const { index, total, chunk } = obj;
+
+        if (qrImportState.total === null) {
+          qrImportState.total = total;
+        }
+
+        qrImportState.chunks[index] = chunk;
+
+        status.innerText = `Scanned ${Object.keys(qrImportState.chunks).length} of ${total}`;
+
+        if (Object.keys(qrImportState.chunks).length === total) {
+          // stop camera and finish
+          reader.stop().then(() => {
+            finishQRImport();
+          }).catch(() => {
+            finishQRImport();
+          });
         }
       },
 
-      // Error callback
+      // error callback (scan errors, not fatal)
       error => {
-        status.innerText = "Camera error: " + error;
+        // keep the status informative but not noisy
+        status.innerText = "Scanning…";
       }
-    );
+    ).catch(err => {
+      // start() failed — show a clear message
+      status.innerText = "Camera start failed: " + (err && err.message ? err.message : String(err));
+    });
   }, 250);
 }
 
@@ -450,7 +483,7 @@ function cancelQRImport() {
   modal.classList.add("d-none");
 
   if (qrImportState.reader) {
-    qrImportState.reader.stop();
+    qrImportState.reader.stop().catch(()=>{});
   }
 }
 
