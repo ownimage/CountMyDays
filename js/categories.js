@@ -38,8 +38,10 @@ function renderCategoriesEditor() {
 
   // ADD CATEGORY + DONE BUTTON
   addTile.innerHTML = `
-    <button class="btn btn-success btn-add" onclick="addNewCategory()">Add Category</button>
-    <button class="btn btn-primary" onclick="closeCategoriesEditor()">Done</button>
+    <div class="d-flex justify-content-end gap-2 mt-4">
+      <button class="btn btn-success" onclick="addNewImage()">Add Image</button>
+      <button class="btn btn-primary" onclick="closeImagesEditor()">Done</button>
+    </div>
   `;
 }
 

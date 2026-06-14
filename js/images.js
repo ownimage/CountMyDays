@@ -72,9 +72,11 @@ function renderImagesEditor() {
   });
 
   addTile.innerHTML = `
-    <button class="btn btn-success btn-add" onclick="addNewImage()">Add Image</button>
-    <button class="btn btn-primary" onclick="closeImagesEditor()">Done</button>
-  `;
+    <div class="d-flex justify-content-end gap-2 mt-4">
+      <button class="btn btn-success" onclick="addNewImage()">Add Image</button>
+      <button class="btn btn-primary" onclick="closeImagesEditor()">Done</button>
+    </div>
+`;
 }
 
 function updateImageCategory(index, value) {
