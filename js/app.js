@@ -27,6 +27,75 @@ function saveImages(images) {
 }
 
 // -------------------------------
+// THEMES
+// -------------------------------
+
+const themes = {
+  dark: {
+    menuBg: "#000000",
+    menuText: "#ffffff",
+    pageBg: "#181a1b",
+    tileBg: "#242628"
+  },
+  light: {
+    menuBg: "#ffffff",
+    menuText: "#000000",
+    pageBg: "#f3f4f6",
+    tileBg: "#ffffff"
+  },
+  midnight: {
+    menuBg: "#001f3f",
+    menuText: "#ffffff",
+    pageBg: "#001529",
+    tileBg: "#003366"
+  },
+  highContrast: {
+    menuBg: "#000000",
+    menuText: "#ffff00",
+    pageBg: "#000000",
+    tileBg: "#ffffff"
+  }
+};
+
+function applyTheme(name) {
+  const t = themes[name];
+  if (!t) return;
+
+  document.documentElement.style.setProperty("--menu-bg", t.menuBg);
+  document.documentElement.style.setProperty("--menu-text", t.menuText);
+  document.documentElement.style.setProperty("--page-bg", t.pageBg);
+  document.documentElement.style.setProperty("--tile-bg", t.tileBg);
+
+  localStorage.setItem("theme", name);
+}
+
+function changeTheme(name) {
+  applyTheme(name);
+}
+
+// -------------------------------
+// SETTINGS PAGE
+// -------------------------------
+
+function openSettings() {
+  document.getElementById("countdownContainer").classList.add("d-none");
+  document.getElementById("datesEditor").classList.add("d-none");
+  document.getElementById("categoriesEditor").classList.add("d-none");
+  document.getElementById("imagesEditor").classList.add("d-none");
+
+  document.getElementById("settingsPage").classList.remove("d-none");
+
+  const saved = localStorage.getItem("theme") || "dark";
+  document.getElementById("themeSelector").value = saved;
+}
+
+function closeSettings() {
+  document.getElementById("settingsPage").classList.add("d-none");
+  document.getElementById("countdownContainer").classList.remove("d-none");
+  renderCountdowns();
+}
+
+// -------------------------------
 // DATE CALCULATION
 // -------------------------------
 
@@ -104,6 +173,7 @@ function openDatesEditor() {
   document.getElementById("datesEditor").classList.remove("d-none");
   document.getElementById("categoriesEditor").classList.add("d-none");
   document.getElementById("imagesEditor").classList.add("d-none");
+  document.getElementById("settingsPage").classList.add("d-none");
 
   renderDatesEditor();
 }
@@ -113,6 +183,7 @@ function openCategoriesEditor() {
   document.getElementById("datesEditor").classList.add("d-none");
   document.getElementById("categoriesEditor").classList.remove("d-none");
   document.getElementById("imagesEditor").classList.add("d-none");
+  document.getElementById("settingsPage").classList.add("d-none");
 
   renderCategoriesEditor();
 }
@@ -122,6 +193,7 @@ function openImagesEditor() {
   document.getElementById("datesEditor").classList.add("d-none");
   document.getElementById("categoriesEditor").classList.add("d-none");
   document.getElementById("imagesEditor").classList.remove("d-none");
+  document.getElementById("settingsPage").classList.add("d-none");
 
   renderImagesEditor();
 }
@@ -149,5 +221,7 @@ function closeImagesEditor() {
 // -------------------------------
 
 document.addEventListener("DOMContentLoaded", () => {
+  const savedTheme = localStorage.getItem("theme") || "dark";
+  applyTheme(savedTheme);
   renderCountdowns();
 });

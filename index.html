@@ -8,10 +8,10 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
-<body class="bg-dark">
+<body>
 
-  <!-- FIXED TOOLBAR (not a navbar) -->
-  <div class="bg-black px-3 py-2 d-flex gap-3 align-items-center">
+  <!-- FIXED TOOLBAR -->
+  <div class="menu-bar px-3 py-2 d-flex gap-3 align-items-center">
 
     <div class="dropdown">
       <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">Edit</button>
@@ -36,12 +36,7 @@
       </ul>
     </div>
 
-    <div class="dropdown">
-      <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">Settings</button>
-      <ul class="dropdown-menu dropdown-menu-dark">
-        <li><a class="dropdown-item" onclick="resetAll()">Reset All</a></li>
-      </ul>
-    </div>
+    <button class="btn btn-outline-light" onclick="openSettings()">Settings</button>
 
   </div>
 
@@ -50,22 +45,40 @@
 
     <div id="countdownContainer"></div>
 
+    <!-- DATES EDITOR -->
     <div id="datesEditor" class="d-none">
       <h2 class="mb-3">Edit Dates</h2>
       <div id="editorList"></div>
       <div id="addDateTile" class="mt-4"></div>
     </div>
 
+    <!-- CATEGORIES EDITOR -->
     <div id="categoriesEditor" class="d-none">
       <h2 class="mb-3">Edit Categories</h2>
       <div id="categoriesList"></div>
       <div id="addCategoryTile" class="mt-4"></div>
     </div>
 
+    <!-- IMAGES EDITOR -->
     <div id="imagesEditor" class="d-none">
       <h2 class="mb-3">Edit Images</h2>
       <div id="imagesList"></div>
       <div id="addImageTile" class="mt-4"></div>
+    </div>
+
+    <!-- SETTINGS PAGE -->
+    <div id="settingsPage" class="d-none">
+      <h2 class="mb-3">Settings</h2>
+
+      <label class="form-label">Theme</label>
+      <select id="themeSelector" class="form-select mb-4" onchange="changeTheme(this.value)">
+        <option value="dark">Dark</option>
+        <option value="light">Light</option>
+        <option value="midnight">Midnight</option>
+        <option value="highContrast">High Contrast</option>
+      </select>
+
+      <button class="btn btn-primary" onclick="closeSettings()">Done</button>
     </div>
 
   </div>
