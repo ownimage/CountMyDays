@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Count My Days</title>
@@ -11,10 +11,10 @@
 <body>
 
   <!-- FIXED TOOLBAR -->
-  <nav class="navbar navbar-expand px-3 py-2 gap-3 bg-body-tertiary border-bottom">
+  <nav class="navbar navbar-expand px-3 py-2 gap-3">
 
     <div class="dropdown">
-      <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">Edit 28</button>
+      <button class="btn dropdown-toggle" data-bs-toggle="dropdown">Edit 28</button>
       <ul class="dropdown-menu">
         <li><a class="dropdown-item" onclick="openDatesEditor()">Dates</a></li>
         <li><a class="dropdown-item" onclick="openCategoriesEditor()">Categories</a></li>
@@ -23,7 +23,7 @@
     </div>
 
     <div class="dropdown">
-      <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">Export</button>
+      <button class="btn dropdown-toggle" data-bs-toggle="dropdown">Export</button>
       <ul class="dropdown-menu">
         <li><a class="dropdown-item" onclick="exportData()">Export JSON</a></li>
         <li><a class="dropdown-item" onclick="exportToQR()">Export QR</a></li>
@@ -31,14 +31,14 @@
     </div>
 
     <div class="dropdown">
-      <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">Import</button>
+      <button class="btn dropdown-toggle" data-bs-toggle="dropdown">Import</button>
       <ul class="dropdown-menu">
         <li><a class="dropdown-item" onclick="importData()">Import JSON</a></li>
         <li><a class="dropdown-item" onclick="startQRImport()">Import QR</a></li>
       </ul>
     </div>
 
-    <button class="btn btn-outline-primary" onclick="openSettings()">Settings</button>
+    <button class="btn" onclick="openSettings()">Settings</button>
 
   </nav>
 
@@ -75,7 +75,7 @@
       <label class="form-label">Theme</label>
       <select id="themeSelector" class="form-select mb-4" onchange="changeTheme(this.value)">
         <option value="darkly">Darkly (dark)</option>
-        <option value="quartz">Quartz (light)</option>
+        <option value="quartz">Light (default)</option>
         <option value="cyborg">Cyborg (midnight)</option>
       </select>
 
