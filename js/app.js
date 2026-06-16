@@ -104,42 +104,18 @@ function importData() {
 // THEME HELPERS
 // -------------------------------
 
-const themes = {
-  dark: {
-    menuBg: "#000000",
-    menuText: "#ffffff",
-    pageBg: "#181a1b",
-    tileBg: "#242628"
-  },
-  light: {
-    menuBg: "#ffffff",
-    menuText: "#000000",
-    pageBg: "#f3f4f6",
-    tileBg: "#ffffff"
-  },
-  midnight: {
-    menuBg: "#001f3f",
-    menuText: "#ffffff",
-    pageBg: "#001529",
-    tileBg: "#003366"
-  },
-  highContrast: {
-    menuBg: "#000000",
-    menuText: "#ffff00",
-    pageBg: "#000000",
-    tileBg: "#ffffff"
-  }
+const themeConfig = {
+  darkly: { css: "https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/darkly/bootstrap.min.css", bsTheme: "dark" },
+  quartz: { css: "https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/quartz/bootstrap.min.css", bsTheme: "light" },
+  cyborg: { css: "https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/cyborg/bootstrap.min.css", bsTheme: "dark" }
 };
 
 function applyTheme(name) {
-  const t = themes[name];
-  if (!t) return;
-
-  document.documentElement.style.setProperty("--menu-bg", t.menuBg);
-  document.documentElement.style.setProperty("--menu-text", t.menuText);
-  document.documentElement.style.setProperty("--page-bg", t.pageBg);
-  document.documentElement.style.setProperty("--tile-bg", t.tileBg);
-
+  const config = themeConfig[name];
+  if (!config) return;
+  const link = document.getElementById("bootstrap-theme-css");
+  if (link) link.href = config.css;
+  document.documentElement.setAttribute("data-bs-theme", config.bsTheme);
   localStorage.setItem("theme", name);
 }
 
@@ -275,7 +251,7 @@ function openSettings() {
   document.getElementById("imagesEditor").classList.add("d-none");
   document.getElementById("settingsPage").classList.remove("d-none");
 
-  const saved = localStorage.getItem("theme") || "dark";
+  const saved = localStorage.getItem("theme") || "darkly";
   const sel = document.getElementById("themeSelector");
   if (sel) sel.value = saved;
 }
@@ -705,7 +681,7 @@ function cancelQRImport() {
 // -------------------------------
 
 document.addEventListener("DOMContentLoaded", () => {
-  const savedTheme = localStorage.getItem("theme") || "dark";
+  const savedTheme = localStorage.getItem("theme") || "darkly";
   applyTheme(savedTheme);
   renderCountdowns();
 });
