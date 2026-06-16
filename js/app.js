@@ -138,7 +138,7 @@ function hideAllEditors() {
 // DATE CALCULATION
 // -------------------------------
 
-function daysUntil(d) {
+function targetDate(d) {
   const now = new Date();
   let year = now.getFullYear();
 
@@ -152,8 +152,19 @@ function daysUntil(d) {
     target.setFullYear(target.getFullYear() + 1);
   }
 
-  const diff = target - now;
+  return target;
+}
+
+function daysUntil(d) {
+  const target = targetDate(d);
+  const diff = target - new Date();
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
+}
+
+function formatDate(date) {
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${days[date.getDay()]} ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
 }
 
 // -------------------------------
@@ -183,18 +194,31 @@ function renderCountdowns() {
     const card = document.createElement("div");
     card.className = "card p-3 mb-3";
 
+    const eventDate = targetDate(d);
+    const format = localStorage.getItem("countdownFormat") || "days";
+    const weeks = Math.floor(d.days / 7);
+    const remainDays = d.days % 7;
+
+    let displayText;
+    if (format === "weeksAndDays") {
+      displayText = `${weeks} week${weeks !== 1 ? "s" : ""}`;
+      if (remainDays > 0) displayText += ` ${remainDays} day${remainDays !== 1 ? "s" : ""}`;
+    } else {
+      displayText = `${d.days} day${d.days !== 1 ? "s" : ""}`;
+    }
+
     card.innerHTML = `
       <div class="row align-items-center">
-        <div class="col-auto">
-          ${imgSrc ? `<img src="${imgSrc}" class="countdown-img">` : `<div class="text-secondary">No image</div>`}
+        <div class="col-auto text-center">
+          ${imgSrc ? `<img src="${imgSrc}" class="countdown-img d-block mx-auto">` : `<div class="text-secondary">No image</div>`}
+          <div class="mt-1">${escapeHtml(d.category)}</div>
         </div>
         <div class="col">
-          <h4 class="mb-0">${escapeHtml(d.name)}</h4>
-          <small class="text-secondary">${escapeHtml(d.category)}</small>
+          <h4 class="mb-1">${escapeHtml(d.name)}</h4>
+          <div>${formatDate(eventDate)}</div>
         </div>
         <div class="col-auto text-end">
-          <div class="fs-1 fw-bold">${d.days}</div>
-          <div class="text-secondary">days</div>
+          <div class="h4 mb-0">${displayText}</div>
         </div>
       </div>
     `;
@@ -250,9 +274,17 @@ function openSettings() {
   document.getElementById("imagesEditor").classList.add("d-none");
   document.getElementById("settingsPage").classList.remove("d-none");
 
-  const saved = localStorage.getItem("theme") || "darkly";
-  const sel = document.getElementById("themeSelector");
-  if (sel) sel.value = saved;
+  const savedTheme = localStorage.getItem("theme") || "darkly";
+  const themeSel = document.getElementById("themeSelector");
+  if (themeSel) themeSel.value = savedTheme;
+
+  const savedFormat = localStorage.getItem("countdownFormat") || "days";
+  const formatSel = document.getElementById("formatSelector");
+  if (formatSel) formatSel.value = savedFormat;
+}
+
+function changeFormat(value) {
+  localStorage.setItem("countdownFormat", value);
 }
 
 function closeSettings() {
