@@ -19,8 +19,11 @@ function renderDatesEditor() {
   const images = loadImages();
 
   dates.forEach((d, index) => {
-    const category = categories.find(c => c.name === d.category);
-    const imageName = category ? category.image : null;
+    const category = categories.find(c => c.name === d.category) || categories[0];
+    let imageName = category ? category.image : null;
+    if (category && !imageName) {
+      imageName = category.name;
+    }
     const image = images.find(i => i.name === imageName);
     const imgSrc = image ? image.data : "";
 
@@ -54,7 +57,7 @@ function renderDatesEditor() {
           </div>
           <div class="row">
             <div class="col-3 text-end"><label class="form-label mb-0">Category</label></div>
-            <div class="col"><select class="form-select" onchange="updateDateField(${index}, 'category', this.value)">${categories.map(c => `<option value="${c.name}" ${c.name === d.category ? "selected" : ""}>${c.name}</option>`).join("")}</select></div>
+            <div class="col"><select class="form-select" onchange="updateDateField(${index}, 'category', this.value)">${categories.map(c => `<option value="${c.name}" ${c.name === (d.category || (categories[0] ? categories[0].name : "")) ? "selected" : ""}>${c.name}</option>`).join("")}</select></div>
           </div>
         </div>
 
@@ -154,9 +157,10 @@ function deleteDate(index) {
 
 function addNewDate() {
   const dates = loadDates();
+  const categories = loadCategories();
   dates.push({
     name: "New Event",
-    category: "",   // user must choose
+    category: categories.length > 0 ? categories[0].name : "",
     type: "annual",
     month: 1,
     day: 1
