@@ -192,7 +192,7 @@ function renderCountdowns() {
     const imgSrc = image ? image.data : "";
 
     const card = document.createElement("div");
-    card.className = "card p-3 mb-3";
+    card.className = "card countdown-card mb-2";
 
     const eventDate = targetDate(d);
     const format = localStorage.getItem("countdownFormat") || "days";
