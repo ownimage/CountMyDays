@@ -7,7 +7,7 @@
   <link id="bootstrap-theme-css" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/darkly/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
   <link rel="stylesheet" href="css/styles.css">
-  <script>const BUILD_NUMBER = "202606161930";</script>
+  <script>const BUILD_NUMBER = "202606161945";</script>
 </head>
 
 <body>
@@ -77,18 +77,26 @@
     <div id="settingsPage" class="d-none">
       <h2 class="mb-3">Settings</h2>
 
-      <label class="form-label">Theme</label>
-      <select id="themeSelector" class="form-select mb-4" onchange="changeTheme(this.value)">
-        <option value="darkly">Darkly (dark)</option>
-        <option value="quartz">Light (default)</option>
-        <option value="cyborg">Cyborg (midnight)</option>
-      </select>
+      <div class="row mb-3 align-items-center col-md-8">
+        <div class="col-4 text-end"><label class="form-label mb-0">Theme</label></div>
+        <div class="col-8">
+          <select id="themeSelector" class="form-select" onchange="changeTheme(this.value)">
+            <option value="darkly">Darkly (dark)</option>
+            <option value="quartz">Light (default)</option>
+            <option value="cyborg">Cyborg (midnight)</option>
+          </select>
+        </div>
+      </div>
 
-      <label class="form-label">Countdown display</label>
-      <select id="formatSelector" class="form-select mb-4" onchange="changeFormat(this.value)">
-        <option value="days">Days</option>
-        <option value="weeksAndDays">Weeks and days</option>
-      </select>
+      <div class="row mb-4 align-items-center col-md-8">
+        <div class="col-4 text-end"><label class="form-label mb-0">Countdown display</label></div>
+        <div class="col-8">
+          <select id="formatSelector" class="form-select" onchange="changeFormat(this.value)">
+            <option value="days">Days</option>
+            <option value="weeksAndDays">Weeks and days</option>
+          </select>
+        </div>
+      </div>
 
       <button class="btn btn-primary" onclick="closeSettings()">Done</button>
 
