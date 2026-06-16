@@ -1,64 +1,9 @@
-/* THEME VARIABLES */
-:root {
-  --menu-bg: #000000;
-  --menu-text: #ffffff;
-
-  --page-bg: #181a1b;
-  --page-text: #e6e6e6;
-
-  --tile-bg: #242628;
-  --tile-border: #2f3234;
-
-  --form-bg: #2c2f31;
-  --form-border: #3a3d3f;
-  --form-focus-bg: #323436;
-  --form-focus-border: #4a4d50;
-}
-
-/* PAGE BACKGROUND */
-body {
-  background-color: var(--page-bg) !important;
-  color: var(--page-text);
-}
-
-/* MENU BAR */
-.menu-bar {
-  background-color: var(--menu-bg);
-  color: var(--menu-text);
-}
-
-/* CARDS / TILES */
-.card {
-  background-color: var(--tile-bg) !important;
-  border: 1px solid var(--tile-border) !important;
-  border-radius: 10px;
-}
-
 /* IMAGES */
 .countdown-img,
 .date-img {
   width: 80px;
   height: 80px;
   object-fit: contain;
-}
-
-/* FORMS */
-.form-label {
-  color: var(--page-text);
-}
-
-.form-control,
-.form-select {
-  background-color: var(--form-bg) !important;
-  border-color: var(--form-border) !important;
-  color: var(--page-text) !important;
-}
-
-.form-control:focus,
-.form-select:focus {
-  background-color: var(--form-focus-bg) !important;
-  border-color: var(--form-focus-border) !important;
-  box-shadow: none !important;
 }
 
 .qr-modal {
@@ -72,7 +17,7 @@ body {
 }
 
 .qr-modal-content {
-  background: var(--tile-bg);
+  background: var(--bs-body-bg);
   padding: 20px;
   border-radius: 10px;
   width: 90%;
