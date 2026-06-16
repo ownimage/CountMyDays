@@ -20,28 +20,44 @@ function renderCategoriesEditor() {
     const card = document.createElement("div");
     card.className = "card p-3 mb-3";
 
+    // Find the selected image data for preview
+    let imageData = "";
+    if (c.image) {
+      const found = images.find(img => img.name === c.image);
+      if (found) imageData = found.data;
+    }
+
     card.innerHTML = `
       <div class="row align-items-center">
 
-        <div class="col">
-          <label class="form-label">Category Name</label>
-          <input class="form-control"
-                 value="${c.name}"
-                 onchange="updateCategoryName(${index}, this.value)">
+        ${imageData ? `<div class="col-auto">
+          <img src="${imageData}" class="countdown-img" alt="${c.image}">
+        </div>` : ""}
 
-          <label class="form-label mt-2">Image</label>
-          <select class="form-select"
-                  onchange="updateCategoryImage(${index}, this.value)">
-            <option value="">-- No Image Selected --</option>
-            ${images.map(img => `
-              <option value="${img.name}" ${img.name === c.image ? "selected" : ""}>
-                ${img.name}
-              </option>
-            `).join("")}
-          </select>
+        <div class="col">
+          <div class="d-flex flex-column gap-2">
+            <div class="d-flex align-items-center">
+              <span class="form-label mb-0 me-2" style="min-width:90px;">Category Name</span>
+              <input class="form-control"
+                     value="${c.name}"
+                     onchange="updateCategoryName(${index}, this.value)">
+            </div>
+            <div class="d-flex align-items-center">
+              <span class="form-label mb-0 me-2" style="min-width:90px;">Image</span>
+              <select class="form-select"
+                      onchange="updateCategoryImage(${index}, this.value)">
+                <option value="">-- No Image Selected --</option>
+                ${images.map(img => `
+                  <option value="${img.name}" ${img.name === c.image ? "selected" : ""}>
+                    ${img.name}
+                  </option>
+                `).join("")}
+              </select>
+            </div>
+          </div>
         </div>
 
-        <div class="col-auto">
+        <div class="col-auto d-flex align-items-center">
           <button class="btn btn-danger" onclick="deleteCategory(${index})">Delete</button>
         </div>
 
@@ -69,6 +85,7 @@ function updateCategoryImage(index, value) {
   const categories = loadCategories();
   categories[index].image = value || null;
   saveCategories(categories);
+  renderCategoriesEditor();
 }
 
 function deleteCategory(index) {
