@@ -111,8 +111,7 @@ const themeConfig = {
 };
 
 function applyTheme(name) {
-  const config = themeConfig[name];
-  if (!config) return;
+  const config = themeConfig[name] || themeConfig.darkly;
   const link = document.getElementById("bootstrap-theme-css");
   if (link) link.href = config.css;
   document.documentElement.setAttribute("data-bs-theme", config.bsTheme);
