@@ -6,7 +6,7 @@
 
   <link id="bootstrap-theme-css" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/darkly/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
-  <script>const BUILD_NUMBER = "202606161803";</script>
+  <script>const BUILD_NUMBER = "202606161837";</script>
 </head>
 
 <body>
@@ -44,7 +44,7 @@
   </nav>
 
   <!-- MAIN CONTENT -->
-  <div class="container my-4">
+  <div class="container-fluid px-3">
 
     <div id="countdownContainer"></div>
 
@@ -78,6 +78,12 @@
         <option value="darkly">Darkly (dark)</option>
         <option value="quartz">Light (default)</option>
         <option value="cyborg">Cyborg (midnight)</option>
+      </select>
+
+      <label class="form-label">Countdown display</label>
+      <select id="formatSelector" class="form-select mb-4" onchange="changeFormat(this.value)">
+        <option value="days">Days</option>
+        <option value="weeksAndDays">Weeks and days</option>
       </select>
 
       <button class="btn btn-primary" onclick="closeSettings()">Done</button>

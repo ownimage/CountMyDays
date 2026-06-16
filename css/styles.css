@@ -6,6 +6,15 @@
   object-fit: contain;
 }
 
+.countdown-card {
+  border-width: 1px;
+  padding: 0.5rem 0.75rem;
+}
+
+.countdown-card .row {
+  flex-wrap: nowrap;
+}
+
 .qr-modal {
   position: fixed;
   inset: 0;
