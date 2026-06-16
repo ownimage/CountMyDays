@@ -48,22 +48,13 @@ function renderDatesEditor() {
         </div>
 
         <div class="col">
-          <div class="d-flex align-items-center gap-2 mb-2">
-            <label class="form-label mb-0 text-nowrap">Title</label>
-            <input class="form-control"
-                   value="${d.name || ""}"
-                   onchange="updateDateField(${index}, 'name', this.value)">
+          <div class="row mb-2">
+            <div class="col-3 text-end"><label class="form-label mb-0">Title</label></div>
+            <div class="col"><input class="form-control" value="${d.name || ""}" onchange="updateDateField(${index}, 'name', this.value)"></div>
           </div>
-          <div class="d-flex align-items-center gap-2">
-            <label class="form-label mb-0 text-nowrap">Category</label>
-            <select class="form-select"
-                    onchange="updateDateField(${index}, 'category', this.value)">
-              ${categories.map(c => `
-                <option value="${c.name}" ${c.name === d.category ? "selected" : ""}>
-                  ${c.name}
-                </option>
-              `).join("")}
-            </select>
+          <div class="row">
+            <div class="col-3 text-end"><label class="form-label mb-0">Category</label></div>
+            <div class="col"><select class="form-select" onchange="updateDateField(${index}, 'category', this.value)">${categories.map(c => `<option value="${c.name}" ${c.name === d.category ? "selected" : ""}>${c.name}</option>`).join("")}</select></div>
           </div>
         </div>
 
@@ -91,6 +82,12 @@ function renderDatesEditor() {
   });
 
   initFlatpickrDates();
+
+  const topTile = document.getElementById("addDateTileTop");
+  topTile.innerHTML = `
+    <button class="btn btn-success" onclick="addNewDate()">Add Date</button>
+    <button class="btn btn-primary" onclick="closeDatesEditor()">Done</button>
+  `;
 
   addTile.innerHTML = `
     <div class="d-flex justify-content-end gap-2 mt-4">
