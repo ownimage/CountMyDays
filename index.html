@@ -5,8 +5,9 @@
   <title>Count My Days</title>
 
   <link id="bootstrap-theme-css" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/darkly/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
   <link rel="stylesheet" href="css/styles.css">
-  <script>const BUILD_NUMBER = "202606161837";</script>
+  <script>const BUILD_NUMBER = "202606161930";</script>
 </head>
 
 <body>
@@ -50,7 +51,10 @@
 
     <!-- DATES EDITOR -->
     <div id="datesEditor" class="d-none">
-      <h2 class="mb-3">Edit Dates</h2>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Edit Dates</h2>
+        <div id="addDateTileTop" class="d-flex gap-2"></div>
+      </div>
       <div id="editorList"></div>
       <div id="addDateTile" class="mt-4"></div>
     </div>
@@ -120,6 +124,9 @@
 
   <!-- BOOTSTRAP JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- FLATPICKR -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
 
   <!-- REQUIRED LIBRARIES FOR QR -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
