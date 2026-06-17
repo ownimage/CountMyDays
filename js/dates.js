@@ -99,7 +99,7 @@ function renderDatesEditor() {
     }
 
     card.innerHTML = `
-      <div class="d-flex gap-2">
+      <div class="d-flex gap-1">
 
         <div class="flex-shrink-0 d-flex align-items-center">
           ${imgSrc ? `<img src="${imgSrc}" class="date-img">`
@@ -107,25 +107,23 @@ function renderDatesEditor() {
         </div>
 
         <div class="flex-fill" style="min-width:0">
-          <div class="row mb-2 align-items-center">
-            <div class="col-3 text-end"><label class="form-label mb-0">Title</label></div>
-            <div class="col"><input class="form-control" value="${d.name || ""}" onchange="updateDateField(${index}, 'name', this.value)"></div>
+          <div class="d-flex align-items-center mb-2">
+            <label class="form-label mb-0 text-end flex-shrink-0" style="width:120px">Title</label>
+            <input class="form-control ms-2 flex-fill" value="${d.name || ""}" onchange="updateDateField(${index}, 'name', this.value)">
           </div>
-          <div class="row mb-2 align-items-center">
-            <div class="col-3 text-end"><label class="form-label mb-0">Category</label></div>
-            <div class="col"><select class="form-select" onchange="updateDateField(${index}, 'category', this.value)">${categories.map(c => `<option value="${c.name}" ${c.name === (d.category || (categories[0] ? categories[0].name : "")) ? "selected" : ""}>${c.name}</option>`).join("")}</select></div>
+          <div class="d-flex align-items-center mb-2">
+            <label class="form-label mb-0 text-end flex-shrink-0" style="width:120px">Category</label>
+            <select class="form-select ms-2 flex-fill" onchange="updateDateField(${index}, 'category', this.value)">${categories.map(c => `<option value="${c.name}" ${c.name === (d.category || (categories[0] ? categories[0].name : "")) ? "selected" : ""}>${c.name}</option>`).join("")}</select>
           </div>
-          <div class="row align-items-center">
-            <div class="col-3 text-end"><label class="form-label mb-0 text-nowrap">Type</label></div>
-            <div class="col-2"><select class="form-select" onchange="updateDateField(${index}, 'type', this.value)">
+          <div class="d-flex align-items-center">
+            <label class="form-label mb-0 text-end flex-shrink-0 text-nowrap" style="width:120px">Type</label>
+            <select class="form-select ms-2" style="width:120px;flex-shrink:0" onchange="updateDateField(${index}, 'type', this.value)">
               <option value="annual" ${d.type === "annual" ? "selected" : ""}>Annual</option>
               <option value="once" ${d.type === "once" ? "selected" : ""}>Once</option>
-            </select></div>
-            <div class="col-1 text-end"><label class="form-label mb-0 text-nowrap">Date</label></div>
-            <div class="col d-flex flex-nowrap gap-1">${dateHtml}</div>
-            <div class="col-auto">
-              <button class="btn btn-danger editor-btn" onclick="deleteDate(${index})">Delete</button>
-            </div>
+            </select>
+            <label class="form-label mb-0 text-end flex-shrink-0 text-nowrap ms-2" style="width:50px">Date</label>
+            <div class="d-flex flex-nowrap gap-1 ms-2 flex-fill">${dateHtml}</div>
+            <button class="btn btn-danger editor-btn ms-2" onclick="deleteDate(${index})">Delete</button>
           </div>
         </div>
 
