@@ -87,6 +87,7 @@ function closeSettings() {
 // -------------------------------
 
 let autoHideTimer = null;
+let autoHideCooldown = false;
 
 function showNav() {
   const nav = document.getElementById("mainNav");
@@ -101,10 +102,13 @@ function hideNav() {
       document.getElementById("categoriesEditor").classList.contains("d-none") &&
       document.getElementById("imagesEditor").classList.contains("d-none")) {
     nav.classList.add("nav-hidden");
+    autoHideCooldown = true;
+    setTimeout(() => { autoHideCooldown = false; }, 600);
   }
 }
 
 function resetAutoHideTimer() {
+  if (autoHideCooldown) return;
   const enabled = localStorage.getItem("autoHideMenu") === "true";
   if (!enabled) return;
   showNav();
