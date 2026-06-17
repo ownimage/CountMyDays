@@ -49,14 +49,17 @@
   flex: 0 0 auto;
 }
 .date-day-select {
-  width: 70px;
+  width: 100px;
+  flex-shrink: 0;
 }
 .date-month-select {
   width: 100px;
+  flex-shrink: 0;
 }
 
 .flatpickr-date {
   min-width: 120px;
+  width: 100%;
 }
 
 /* Light theme: clearer borders on form controls */

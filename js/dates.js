@@ -99,42 +99,34 @@ function renderDatesEditor() {
     }
 
     card.innerHTML = `
-      <div class="row align-items-center g-1">
+      <div class="d-flex gap-2">
 
-        <div class="col-auto text-end">
-          ${imgSrc ? `<img src="${imgSrc}" class="date-img" style="max-width:60px">`
-                   : `<div class="text-secondary" style="width:60px">No image</div>`}
+        <div class="flex-shrink-0 d-flex align-items-center">
+          ${imgSrc ? `<img src="${imgSrc}" class="date-img">`
+                   : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
         </div>
 
-        <div class="col">
+        <div class="flex-fill" style="min-width:0">
           <div class="row mb-2 align-items-center">
             <div class="col-3 text-end"><label class="form-label mb-0">Title</label></div>
             <div class="col"><input class="form-control" value="${d.name || ""}" onchange="updateDateField(${index}, 'name', this.value)"></div>
           </div>
-          <div class="row align-items-center">
+          <div class="row mb-2 align-items-center">
             <div class="col-3 text-end"><label class="form-label mb-0">Category</label></div>
             <div class="col"><select class="form-select" onchange="updateDateField(${index}, 'category', this.value)">${categories.map(c => `<option value="${c.name}" ${c.name === (d.category || (categories[0] ? categories[0].name : "")) ? "selected" : ""}>${c.name}</option>`).join("")}</select></div>
           </div>
-        </div>
-
-        <div class="col-auto" style="min-width:210px">
-          <div class="d-flex flex-column gap-2">
-            <div class="d-flex align-items-center gap-1">
-              <label class="form-label mb-0 text-nowrap">Type</label>
-              <select class="form-select w-100" onchange="updateDateField(${index}, 'type', this.value)">
-                <option value="annual" ${d.type === "annual" ? "selected" : ""}>Annual</option>
-                <option value="once" ${d.type === "once" ? "selected" : ""}>Once</option>
-              </select>
-            </div>
-            <div class="d-flex align-items-center gap-1">
-              <label class="form-label mb-0 text-nowrap">Date</label>
-              <div class="d-flex gap-1 w-100">${dateHtml}</div>
+          <div class="row align-items-center">
+            <div class="col-3 text-end"><label class="form-label mb-0 text-nowrap">Type</label></div>
+            <div class="col-2"><select class="form-select" onchange="updateDateField(${index}, 'type', this.value)">
+              <option value="annual" ${d.type === "annual" ? "selected" : ""}>Annual</option>
+              <option value="once" ${d.type === "once" ? "selected" : ""}>Once</option>
+            </select></div>
+            <div class="col-1 text-end"><label class="form-label mb-0 text-nowrap">Date</label></div>
+            <div class="col d-flex flex-nowrap gap-1">${dateHtml}</div>
+            <div class="col-auto">
+              <button class="btn btn-danger editor-btn" onclick="deleteDate(${index})">Delete</button>
             </div>
           </div>
-        </div>
-
-        <div class="col-auto">
-          <button class="btn btn-danger editor-btn" onclick="deleteDate(${index})">Delete</button>
         </div>
 
       </div>
