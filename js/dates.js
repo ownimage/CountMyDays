@@ -1,5 +1,6 @@
 let flatpickrInstances = [];
 let currentDatesTab = "current";
+let lastEditedIndex = -1;
 
 function switchDatesTab(tab) {
   currentDatesTab = tab;
@@ -7,6 +8,20 @@ function switchDatesTab(tab) {
     el.classList.toggle("active", el.dataset.tab === tab);
   });
   renderDatesEditor();
+}
+
+function switchToTabForIndex(index) {
+  const dates = loadDates();
+  const d = dates[index];
+  if (!d) return;
+  if (d.type === "annual") {
+    switchDatesTab("annual");
+  } else {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const date = new Date(d.year || today.getFullYear(), (d.month || 1) - 1, d.day || 1);
+    switchDatesTab(date < today ? "past" : "current");
+  }
 }
 
 function destroyDatePickers() {
@@ -38,6 +53,13 @@ function renderDatesEditor() {
       const date = new Date(d.year || today.getFullYear(), (d.month || 1) - 1, d.day || 1);
       if (currentDatesTab === "past") return date < today;
       return date >= today;
+    })
+    .sort((a, b) => {
+      const da = a.d, db = b.d;
+      if (currentDatesTab === "annual") {
+        return (da.month || 1) - (db.month || 1) || (da.day || 1) - (db.day || 1);
+      }
+      return (da.year || 0) - (db.year || 0) || (da.month || 1) - (db.month || 1) || (da.day || 1) - (db.day || 1);
     });
 
   filtered.forEach(({ d, i: index }) => {
@@ -52,17 +74,29 @@ function renderDatesEditor() {
     const showYear = d.type === "once";
 
     const card = document.createElement("div");
-    card.className = "card p-3 mb-3";
+    card.className = "card p-3 mb-3" + (index === lastEditedIndex ? " card-edited" : "");
 
     const day = d.day || 1;
     const month = d.month || 1;
     const year = d.year || new Date().getFullYear();
 
-    let dateHtml = `
-      <input type="text" class="form-control flatpickr-date"
-             data-index="${index}"
-             data-showyear="${showYear}"
-             placeholder="${showYear ? 'dd/mm/yyyy' : 'dd/mm'}">`;
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    let dateHtml;
+    if (showYear) {
+      dateHtml = `
+        <input type="text" class="form-control flatpickr-date"
+               data-index="${index}"
+               data-showyear="true"
+               placeholder="dd/mm/yyyy">`;
+    } else {
+      dateHtml = `
+        <select class="form-select date-day-select" onchange="updateDateField(${index}, 'day', parseInt(this.value))">
+          ${Array.from({length: 31}, (_, i) => `<option value="${i+1}" ${i+1 === day ? "selected" : ""}>${i+1}</option>`).join("")}
+        </select>
+        <select class="form-select date-month-select" onchange="updateDateField(${index}, 'month', parseInt(this.value))">
+          ${months.map((m, i) => `<option value="${i+1}" ${i+1 === month ? "selected" : ""}>${m}</option>`).join("")}
+        </select>`;
+    }
 
     card.innerHTML = `
       <div class="row align-items-center g-2">
@@ -97,7 +131,7 @@ function renderDatesEditor() {
         </div>
 
         <div class="col-auto">
-          <button class="btn btn-danger" onclick="deleteDate(${index})">Delete</button>
+          <button class="btn btn-danger editor-btn" onclick="deleteDate(${index})">Delete</button>
         </div>
 
       </div>
@@ -110,14 +144,14 @@ function renderDatesEditor() {
 
   const topTile = document.getElementById("addDateTileTop");
   topTile.innerHTML = `
-    <button class="btn btn-success" onclick="addNewDate()">Add Date</button>
-    <button class="btn btn-primary" onclick="closeDatesEditor()">Done</button>
+    <button class="btn btn-success editor-btn" onclick="addNewDate()">Add Date</button>
+    <button class="btn btn-primary editor-btn" onclick="closeDatesEditor()">Done</button>
   `;
 
   addTile.innerHTML = `
     <div class="d-flex justify-content-end gap-2 mt-4">
-      <button class="btn btn-success" onclick="addNewDate()">Add Date</button>
-      <button class="btn btn-primary" onclick="closeDatesEditor()">Done</button>
+      <button class="btn btn-success editor-btn" onclick="addNewDate()">Add Date</button>
+      <button class="btn btn-primary editor-btn" onclick="closeDatesEditor()">Done</button>
     </div>
   `;
 }
@@ -161,7 +195,12 @@ function updateDateField(index, field, value) {
   const dates = loadDates();
   dates[index][field] = value;
   saveDates(dates);
-  renderDatesEditor();
+  lastEditedIndex = index;
+  if (field === "type") {
+    switchToTabForIndex(index);
+  } else {
+    renderDatesEditor();
+  }
 }
 
 function updateDateFieldSilent(index, field, value) {

@@ -28,37 +28,29 @@ function renderCategoriesEditor() {
     }
 
     card.innerHTML = `
-      <div class="row align-items-center">
+      <div class="row align-items-center g-2">
 
-        ${imageData ? `<div class="col-auto">
-          <img src="${imageData}" class="countdown-img" alt="${c.image}">
-        </div>` : ""}
+        <div class="col-auto">
+          ${imageData ? `<img src="${imageData}" class="date-img">`
+                     : `<div class="text-secondary">No image</div>`}
+        </div>
 
         <div class="col">
-          <div class="d-flex flex-column gap-2">
-            <div class="d-flex align-items-center">
-              <span class="form-label mb-0 me-2" style="min-width:90px;">Category Name</span>
-              <input class="form-control"
-                     value="${c.name}"
-                     onchange="updateCategoryName(${index}, this.value)">
-            </div>
-            <div class="d-flex align-items-center">
-              <span class="form-label mb-0 me-2" style="min-width:90px;">Image</span>
-              <select class="form-select"
-                      onchange="updateCategoryImage(${index}, this.value)">
-                <option value="">-- No Image Selected --</option>
-                ${images.map(img => `
-                  <option value="${img.name}" ${img.name === c.image ? "selected" : ""}>
-                    ${img.name}
-                  </option>
-                `).join("")}
-              </select>
-            </div>
+          <div class="row mb-2">
+            <div class="col-3 text-end"><label class="form-label mb-0">Name</label></div>
+            <div class="col"><input class="form-control" value="${c.name}" onchange="updateCategoryName(${index}, this.value)"></div>
+          </div>
+          <div class="row">
+            <div class="col-3 text-end"><label class="form-label mb-0">Image</label></div>
+            <div class="col"><select class="form-select" onchange="updateCategoryImage(${index}, this.value)">
+              <option value="">-- None --</option>
+              ${images.map(img => `<option value="${img.name}" ${img.name === c.image ? "selected" : ""}>${img.name}</option>`).join("")}
+            </select></div>
           </div>
         </div>
 
-        <div class="col-auto d-flex align-items-center">
-          <button class="btn btn-danger" onclick="deleteCategory(${index})">Delete</button>
+        <div class="col-auto">
+          <button class="btn btn-danger editor-btn" onclick="deleteCategory(${index})">Delete</button>
         </div>
 
       </div>
@@ -69,8 +61,8 @@ function renderCategoriesEditor() {
 
   addTile.innerHTML = `
     <div class="d-flex justify-content-end gap-2 mt-4">
-      <button class="btn btn-success" onclick="addNewCategory()">Add Category</button>
-      <button class="btn btn-primary" onclick="closeCategoriesEditor()">Done</button>
+      <button class="btn btn-success editor-btn" onclick="addNewCategory()">Add Category</button>
+      <button class="btn btn-primary editor-btn" onclick="closeCategoriesEditor()">Done</button>
     </div>
   `;
 }

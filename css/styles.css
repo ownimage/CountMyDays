@@ -43,6 +43,12 @@
   width: auto;
   flex: 0 0 auto;
 }
+.date-day-select {
+  width: 70px;
+}
+.date-month-select {
+  width: 100px;
+}
 
 .flatpickr-date {
   min-width: 120px;
@@ -207,6 +213,17 @@ body.auto-hide-menu .container-fluid {
 }
 body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
   padding-top: 0.5rem;
+}
+
+/* EDIT HIGHLIGHT */
+.card-edited {
+  box-shadow: inset 0 0 0 3px var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.08);
+}
+
+/* BUTTON SIZING */
+.editor-btn {
+  min-width: 100px;
 }
 
 /* BUILD NUMBER */
