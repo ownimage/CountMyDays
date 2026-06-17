@@ -99,34 +99,37 @@ function renderDatesEditor() {
     }
 
     card.innerHTML = `
-      <div class="row align-items-center g-2">
+      <div class="row align-items-center g-1">
 
-        <div class="col-auto">
-          ${imgSrc ? `<img src="${imgSrc}" class="date-img">`
-                   : `<div class="text-secondary">No image</div>`}
+        <div class="col-auto text-end">
+          ${imgSrc ? `<img src="${imgSrc}" class="date-img" style="max-width:60px">`
+                   : `<div class="text-secondary" style="width:60px">No image</div>`}
         </div>
 
         <div class="col">
-          <div class="row mb-2">
+          <div class="row mb-2 align-items-center">
             <div class="col-3 text-end"><label class="form-label mb-0">Title</label></div>
             <div class="col"><input class="form-control" value="${d.name || ""}" onchange="updateDateField(${index}, 'name', this.value)"></div>
           </div>
-          <div class="row">
+          <div class="row align-items-center">
             <div class="col-3 text-end"><label class="form-label mb-0">Category</label></div>
             <div class="col"><select class="form-select" onchange="updateDateField(${index}, 'category', this.value)">${categories.map(c => `<option value="${c.name}" ${c.name === (d.category || (categories[0] ? categories[0].name : "")) ? "selected" : ""}>${c.name}</option>`).join("")}</select></div>
           </div>
         </div>
 
-        <div class="col-auto">
-          <div class="d-flex align-items-center gap-2">
-            <label class="form-label mb-0 text-nowrap">Type</label>
-            <select class="form-select type-select"
-                    onchange="updateDateField(${index}, 'type', this.value)">
-              <option value="annual" ${d.type === "annual" ? "selected" : ""}>Annual</option>
-              <option value="once" ${d.type === "once" ? "selected" : ""}>Once</option>
-            </select>
-            <label class="form-label mb-0 text-nowrap ms-2">Date</label>
-            ${dateHtml}
+        <div class="col-auto" style="min-width:210px">
+          <div class="d-flex flex-column gap-2">
+            <div class="d-flex align-items-center gap-1">
+              <label class="form-label mb-0 text-nowrap">Type</label>
+              <select class="form-select w-100" onchange="updateDateField(${index}, 'type', this.value)">
+                <option value="annual" ${d.type === "annual" ? "selected" : ""}>Annual</option>
+                <option value="once" ${d.type === "once" ? "selected" : ""}>Once</option>
+              </select>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label class="form-label mb-0 text-nowrap">Date</label>
+              <div class="d-flex gap-1 w-100">${dateHtml}</div>
+            </div>
           </div>
         </div>
 
@@ -194,6 +197,13 @@ function initFlatpickrDates() {
 function updateDateField(index, field, value) {
   const dates = loadDates();
   dates[index][field] = value;
+  if (field === "type") {
+    if (value === "annual") {
+      delete dates[index].year;
+    } else {
+      dates[index].year = new Date().getFullYear();
+    }
+  }
   saveDates(dates);
   lastEditedIndex = index;
   if (field === "type") {
