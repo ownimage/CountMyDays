@@ -5,6 +5,11 @@
   height: 80px;
   object-fit: contain;
 }
+.date-img {
+  max-width: 60px;
+  width: 60px;
+  height: 60px;
+}
 
 .countdown-card {
   border-width: 1px;
@@ -43,9 +48,18 @@
   width: auto;
   flex: 0 0 auto;
 }
+.date-day-select {
+  width: 100px;
+  flex-shrink: 0;
+}
+.date-month-select {
+  width: 100px;
+  flex-shrink: 0;
+}
 
 .flatpickr-date {
   min-width: 120px;
+  width: 100%;
 }
 
 /* Light theme: clearer borders on form controls */
@@ -67,6 +81,14 @@
 [data-bs-theme="dark"] .flatpickr-months .flatpickr-month,
 [data-bs-theme="dark"] .flatpickr-current-month .flatpickr-monthDropdown-months {
   background: transparent;
+  color: #e0e0e0;
+}
+[data-bs-theme="dark"] .flatpickr-current-month .flatpickr-monthDropdown-months {
+  background: #1e1e1e;
+  color: #e0e0e0;
+}
+[data-bs-theme="dark"] .flatpickr-current-month .flatpickr-monthDropdown-months option {
+  background: #1e1e1e;
   color: #e0e0e0;
 }
 [data-bs-theme="dark"] .flatpickr-current-month input.cur-year {
@@ -134,27 +156,75 @@ body.font-size-large,
 body.font-size-large .navbar .btn,
 body.font-size-large .navbar .dropdown-item,
 body.font-size-large #settingsPage,
+body.font-size-large #settingsPage .btn,
+body.font-size-large #settingsPage .form-label,
+body.font-size-large #settingsPage .form-control,
+body.font-size-large #settingsPage .form-select,
 body.font-size-large #datesEditor,
+body.font-size-large #datesEditor .btn,
+body.font-size-large #datesEditor .form-label,
+body.font-size-large #datesEditor .form-control,
+body.font-size-large #datesEditor .form-select,
 body.font-size-large #categoriesEditor,
-body.font-size-large #imagesEditor {
+body.font-size-large #categoriesEditor .btn,
+body.font-size-large #categoriesEditor .form-label,
+body.font-size-large #categoriesEditor .form-control,
+body.font-size-large #categoriesEditor .form-select,
+body.font-size-large #imagesEditor,
+body.font-size-large #imagesEditor .btn,
+body.font-size-large #imagesEditor .form-label,
+body.font-size-large #imagesEditor .form-control,
+body.font-size-large #imagesEditor .form-select {
   font-size: 1.125rem;
 }
 body.font-size-xlarge,
 body.font-size-xlarge .navbar .btn,
 body.font-size-xlarge .navbar .dropdown-item,
 body.font-size-xlarge #settingsPage,
+body.font-size-xlarge #settingsPage .btn,
+body.font-size-xlarge #settingsPage .form-label,
+body.font-size-xlarge #settingsPage .form-control,
+body.font-size-xlarge #settingsPage .form-select,
 body.font-size-xlarge #datesEditor,
+body.font-size-xlarge #datesEditor .btn,
+body.font-size-xlarge #datesEditor .form-label,
+body.font-size-xlarge #datesEditor .form-control,
+body.font-size-xlarge #datesEditor .form-select,
 body.font-size-xlarge #categoriesEditor,
-body.font-size-xlarge #imagesEditor {
+body.font-size-xlarge #categoriesEditor .btn,
+body.font-size-xlarge #categoriesEditor .form-label,
+body.font-size-xlarge #categoriesEditor .form-control,
+body.font-size-xlarge #categoriesEditor .form-select,
+body.font-size-xlarge #imagesEditor,
+body.font-size-xlarge #imagesEditor .btn,
+body.font-size-xlarge #imagesEditor .form-label,
+body.font-size-xlarge #imagesEditor .form-control,
+body.font-size-xlarge #imagesEditor .form-select {
   font-size: 1.3rem;
 }
 body.font-size-jumbo,
 body.font-size-jumbo .navbar .btn,
 body.font-size-jumbo .navbar .dropdown-item,
 body.font-size-jumbo #settingsPage,
+body.font-size-jumbo #settingsPage .btn,
+body.font-size-jumbo #settingsPage .form-label,
+body.font-size-jumbo #settingsPage .form-control,
+body.font-size-jumbo #settingsPage .form-select,
 body.font-size-jumbo #datesEditor,
+body.font-size-jumbo #datesEditor .btn,
+body.font-size-jumbo #datesEditor .form-label,
+body.font-size-jumbo #datesEditor .form-control,
+body.font-size-jumbo #datesEditor .form-select,
 body.font-size-jumbo #categoriesEditor,
-body.font-size-jumbo #imagesEditor {
+body.font-size-jumbo #categoriesEditor .btn,
+body.font-size-jumbo #categoriesEditor .form-label,
+body.font-size-jumbo #categoriesEditor .form-control,
+body.font-size-jumbo #categoriesEditor .form-select,
+body.font-size-jumbo #imagesEditor,
+body.font-size-jumbo #imagesEditor .btn,
+body.font-size-jumbo #imagesEditor .form-label,
+body.font-size-jumbo #imagesEditor .form-control,
+body.font-size-jumbo #imagesEditor .form-select {
   font-size: 1.6rem;
 }
 
@@ -199,6 +269,30 @@ body.auto-hide-menu .container-fluid {
 }
 body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
   padding-top: 0.5rem;
+}
+
+/* EDITOR TOP SPACING */
+#datesEditor, #categoriesEditor, #imagesEditor, #settingsPage {
+  padding-top: 60px;
+}
+
+/* ACTIVE TAB HIGHLIGHT */
+#datesTab .nav-link.active {
+  font-weight: 700;
+  border-bottom: 2px solid var(--bs-primary) !important;
+  background-color: rgba(var(--bs-primary-rgb), 0.08);
+  border-bottom-color: var(--bs-primary) !important;
+}
+
+/* EDIT HIGHLIGHT */
+.card-edited {
+  box-shadow: inset 0 0 0 3px var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.08);
+}
+
+/* BUTTON SIZING */
+.editor-btn {
+  min-width: 100px;
 }
 
 /* BUILD NUMBER */

@@ -161,17 +161,17 @@ function renderCountdowns() {
   const maxCountdowns = parseInt(localStorage.getItem("maxCountdowns") || "10", 10);
   const showAll = container.dataset.showAll === "true" || maxCountdowns === 0;
 
-  const sorted = dates
+  const withDays = dates
     .map(d => ({ ...d, days: daysUntil(d) }))
     .sort((a, b) => a.days - b.days);
 
-  const visible = showAll ? sorted : sorted.slice(0, maxCountdowns);
+  const todayEvents = withDays.filter(d => d.days === 0);
+  const futureEvents = withDays.filter(d => d.days > 0);
 
-  visible.forEach(d => {
+  function renderCard(d) {
     const category = categories.find(c => c.name === d.category);
     const imageName = category ? category.image : null;
     const image = images.find(i => i.name === imageName);
-
     const imgSrc = image ? image.data : "";
 
     const card = document.createElement("div");
@@ -207,22 +207,40 @@ function renderCountdowns() {
     `;
 
     container.appendChild(card);
-  });
+  }
 
-  if (!showAll && sorted.length > maxCountdowns) {
-    const more = document.createElement("div");
-    more.className = "text-center mt-2";
-    const moreBtn = document.createElement("a");
-    moreBtn.href = "#";
-    moreBtn.className = "btn btn-outline-primary btn-sm";
-    moreBtn.textContent = `+ ${sorted.length - maxCountdowns} more`;
-    moreBtn.onclick = e => {
-      e.preventDefault();
-      container.dataset.showAll = "true";
-      renderCountdowns();
-    };
-    more.appendChild(moreBtn);
-    container.appendChild(more);
+  if (todayEvents.length > 0) {
+    const heading = document.createElement("h2");
+    heading.className = "mb-3";
+    heading.textContent = "Today!";
+    container.appendChild(heading);
+    todayEvents.forEach(renderCard);
+  }
+
+  if (futureEvents.length > 0) {
+    const visible = showAll ? futureEvents : futureEvents.slice(0, maxCountdowns);
+
+    const heading = document.createElement("h2");
+    heading.className = "mb-3";
+    heading.textContent = "Counting the days to:";
+    container.appendChild(heading);
+    visible.forEach(renderCard);
+
+    if (!showAll && futureEvents.length > maxCountdowns) {
+      const more = document.createElement("div");
+      more.className = "text-center mt-2";
+      const moreBtn = document.createElement("a");
+      moreBtn.href = "#";
+      moreBtn.className = "btn btn-outline-primary btn-sm";
+      moreBtn.textContent = `+ ${futureEvents.length - maxCountdowns} more`;
+      moreBtn.onclick = e => {
+        e.preventDefault();
+        container.dataset.showAll = "true";
+        renderCountdowns();
+      };
+      more.appendChild(moreBtn);
+      container.appendChild(more);
+    }
   }
 }
 
@@ -300,6 +318,7 @@ function renderImagesEditor() {
 function closeDatesEditor() {
   document.getElementById("datesEditor").classList.add("d-none");
   document.getElementById("countdownContainer").classList.remove("d-none");
+  lastEditedIndex = -1;
   renderCountdowns();
 }
 

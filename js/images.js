@@ -34,7 +34,7 @@ function renderImagesEditor() {
         </div>
 
         <div class="col-auto">
-          <button class="btn btn-danger" onclick="deleteImage(${index})">Delete</button>
+          <button class="btn btn-danger editor-btn" onclick="deleteImage(${index})">Delete</button>
         </div>
 
       </div>
@@ -45,8 +45,8 @@ function renderImagesEditor() {
 
   addTile.innerHTML = `
     <div class="d-flex justify-content-end gap-2 mt-4">
-      <button class="btn btn-success" onclick="addNewImage()">Add Image</button>
-      <button class="btn btn-primary" onclick="closeImagesEditor()">Done</button>
+      <button class="btn btn-success editor-btn" onclick="addNewImage()">Add Image</button>
+      <button class="btn btn-primary editor-btn" onclick="closeImagesEditor()">Done</button>
     </div>
   `;
 }
