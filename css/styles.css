@@ -128,3 +128,24 @@
 [data-bs-theme="dark"] .flatpickr-calendar.arrowBottom:after {
   border-top-color: #1e1e1e;
 }
+
+/* FONT SIZE */
+body.font-size-large .navbar,
+body.font-size-large #settingsPage,
+body.font-size-large #datesEditor,
+body.font-size-large #categoriesEditor,
+body.font-size-large #imagesEditor {
+  font-size: 1.125rem;
+}
+body.font-size-xlarge .navbar,
+body.font-size-xlarge #settingsPage,
+body.font-size-xlarge #datesEditor,
+body.font-size-xlarge #categoriesEditor,
+body.font-size-xlarge #imagesEditor {
+  font-size: 1.3rem;
+}
+
+/* BUILD NUMBER */
+.build-number {
+  color: #fff;
+}

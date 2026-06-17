@@ -245,32 +245,6 @@ function openImagesEditor() {
   renderImagesEditor();
 }
 
-function openSettings() {
-  document.getElementById("countdownContainer").classList.add("d-none");
-  document.getElementById("datesEditor").classList.add("d-none");
-  document.getElementById("categoriesEditor").classList.add("d-none");
-  document.getElementById("imagesEditor").classList.add("d-none");
-  document.getElementById("settingsPage").classList.remove("d-none");
-
-  const savedTheme = localStorage.getItem("theme") || "darkly";
-  const themeSel = document.getElementById("themeSelector");
-  if (themeSel) themeSel.value = savedTheme;
-
-  const savedFormat = localStorage.getItem("countdownFormat") || "days";
-  const formatSel = document.getElementById("formatSelector");
-  if (formatSel) formatSel.value = savedFormat;
-}
-
-function changeFormat(value) {
-  localStorage.setItem("countdownFormat", value);
-}
-
-function closeSettings() {
-  document.getElementById("settingsPage").classList.add("d-none");
-  document.getElementById("countdownContainer").classList.remove("d-none");
-  renderCountdowns();
-}
-
 // -------------------------------
 // SIMPLE EDITOR RENDERS (placeholders)
 // -------------------------------
