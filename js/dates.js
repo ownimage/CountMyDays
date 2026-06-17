@@ -1,5 +1,5 @@
 let flatpickrInstances = [];
-let currentDatesTab = "future";
+let currentDatesTab = "current";
 
 function switchDatesTab(tab) {
   currentDatesTab = tab;
