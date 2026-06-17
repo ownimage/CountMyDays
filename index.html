@@ -7,13 +7,13 @@
   <link id="bootstrap-theme-css" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/darkly/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
   <link rel="stylesheet" href="css/styles.css">
-  <script>const BUILD_NUMBER = "202606161945";</script>
+  <script>const BUILD_NUMBER = "202606171225";</script>
 </head>
 
 <body>
 
   <!-- FIXED TOOLBAR -->
-  <nav class="navbar navbar-expand px-3 py-2 gap-3">
+  <nav id="mainNav" class="navbar navbar-expand px-3 py-2 gap-3">
 
     <div class="dropdown">
       <button class="btn dropdown-toggle" data-bs-toggle="dropdown">Edit</button>
@@ -109,6 +109,15 @@
             <option value="large">Large</option>
             <option value="xlarge">Extra large</option>
           </select>
+        </div>
+      </div>
+
+      <div class="row mb-4 align-items-center col-md-8">
+        <div class="col-4 text-end"><label class="form-label mb-0">Auto-hide menu</label></div>
+        <div class="col-8">
+          <div class="form-check form-switch mt-1">
+            <input id="autoHideMenu" class="form-check-input" type="checkbox" onchange="changeAutoHideMenu(this.checked)">
+          </div>
         </div>
       </div>
 

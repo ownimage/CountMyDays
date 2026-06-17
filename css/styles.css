@@ -149,6 +149,27 @@ body.font-size-xlarge #imagesEditor {
   font-size: 1.3rem;
 }
 
+/* AUTO-HIDE MENU */
+body.auto-hide-menu #mainNav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030;
+  background: var(--bs-body-bg);
+  transition: transform 0.3s ease;
+}
+body.auto-hide-menu #mainNav.nav-hidden {
+  transform: translateY(-100%);
+}
+body.auto-hide-menu .container-fluid {
+  padding-top: 60px;
+  transition: padding-top 0.3s ease;
+}
+body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
+  padding-top: 0.5rem;
+}
+
 /* BUILD NUMBER */
 .build-number {
   color: #fff;

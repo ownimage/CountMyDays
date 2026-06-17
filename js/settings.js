@@ -61,6 +61,10 @@ function openSettings() {
   const savedFontSize = localStorage.getItem("fontSize") || "xlarge";
   const fontSizeSel = document.getElementById("fontSizeSelector");
   if (fontSizeSel) fontSizeSel.value = savedFontSize;
+
+  const autoHide = localStorage.getItem("autoHideMenu") === "true";
+  const autoHideCb = document.getElementById("autoHideMenu");
+  if (autoHideCb) autoHideCb.checked = autoHide;
 }
 
 function changeFormat(value) {
@@ -73,9 +77,59 @@ function closeSettings() {
   renderCountdowns();
 }
 
+// -------------------------------
+// AUTO-HIDE MENU
+// -------------------------------
+
+let autoHideTimer = null;
+
+function showNav() {
+  const nav = document.getElementById("mainNav");
+  if (nav) nav.classList.remove("nav-hidden");
+}
+
+function hideNav() {
+  const nav = document.getElementById("mainNav");
+  if (!nav) return;
+  if (document.getElementById("settingsPage").classList.contains("d-none") &&
+      document.getElementById("datesEditor").classList.contains("d-none") &&
+      document.getElementById("categoriesEditor").classList.contains("d-none") &&
+      document.getElementById("imagesEditor").classList.contains("d-none")) {
+    nav.classList.add("nav-hidden");
+  }
+}
+
+function resetAutoHideTimer() {
+  const enabled = localStorage.getItem("autoHideMenu") === "true";
+  if (!enabled) return;
+  showNav();
+  clearTimeout(autoHideTimer);
+  autoHideTimer = setTimeout(hideNav, 4000);
+}
+
+function changeAutoHideMenu(enabled) {
+  localStorage.setItem("autoHideMenu", enabled);
+  document.body.classList.toggle("auto-hide-menu", enabled);
+  if (enabled) {
+    resetAutoHideTimer();
+  } else {
+    clearTimeout(autoHideTimer);
+    document.getElementById("mainNav").classList.remove("nav-hidden");
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const savedFontSize = localStorage.getItem("fontSize") || "xlarge";
   if (savedFontSize !== "normal") {
     document.body.classList.add("font-size-" + savedFontSize);
+  }
+
+  const autoHide = localStorage.getItem("autoHideMenu") === "true";
+  if (autoHide) {
+    document.body.classList.add("auto-hide-menu");
+    resetAutoHideTimer();
+    ["pointerdown", "touchstart"].forEach(evt => {
+      document.addEventListener(evt, resetAutoHideTimer, { passive: true });
+    });
   }
 });
