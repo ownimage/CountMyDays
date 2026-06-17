@@ -158,11 +158,16 @@ function renderCountdowns() {
   const categories = loadCategories();
   const images = loadImages();
 
+  const maxCountdowns = parseInt(localStorage.getItem("maxCountdowns") || "10", 10);
+  const showAll = container.dataset.showAll === "true" || maxCountdowns === 0;
+
   const sorted = dates
     .map(d => ({ ...d, days: daysUntil(d) }))
     .sort((a, b) => a.days - b.days);
 
-  sorted.forEach(d => {
+  const visible = showAll ? sorted : sorted.slice(0, maxCountdowns);
+
+  visible.forEach(d => {
     const category = categories.find(c => c.name === d.category);
     const imageName = category ? category.image : null;
     const image = images.find(i => i.name === imageName);
@@ -203,6 +208,22 @@ function renderCountdowns() {
 
     container.appendChild(card);
   });
+
+  if (!showAll && sorted.length > maxCountdowns) {
+    const more = document.createElement("div");
+    more.className = "text-center mt-2";
+    const moreBtn = document.createElement("a");
+    moreBtn.href = "#";
+    moreBtn.className = "btn btn-outline-primary btn-sm";
+    moreBtn.textContent = `+ ${sorted.length - maxCountdowns} more`;
+    moreBtn.onclick = e => {
+      e.preventDefault();
+      container.dataset.showAll = "true";
+      renderCountdowns();
+    };
+    more.appendChild(moreBtn);
+    container.appendChild(more);
+  }
 }
 
 // small helper to avoid accidental HTML injection

@@ -65,6 +65,10 @@ function openSettings() {
   const autoHide = localStorage.getItem("autoHideMenu") === "true";
   const autoHideCb = document.getElementById("autoHideMenu");
   if (autoHideCb) autoHideCb.checked = autoHide;
+
+  const savedMax = localStorage.getItem("maxCountdowns") || "10";
+  const maxSel = document.getElementById("maxCountdownsSelector");
+  if (maxSel) maxSel.value = savedMax;
 }
 
 function changeFormat(value) {
@@ -74,6 +78,7 @@ function changeFormat(value) {
 function closeSettings() {
   document.getElementById("settingsPage").classList.add("d-none");
   document.getElementById("countdownContainer").classList.remove("d-none");
+  delete document.getElementById("countdownContainer").dataset.showAll;
   renderCountdowns();
 }
 
@@ -105,6 +110,10 @@ function resetAutoHideTimer() {
   showNav();
   clearTimeout(autoHideTimer);
   autoHideTimer = setTimeout(hideNav, 4000);
+}
+
+function changeMaxCountdowns(value) {
+  localStorage.setItem("maxCountdowns", value);
 }
 
 function changeAutoHideMenu(enabled) {

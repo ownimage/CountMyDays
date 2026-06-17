@@ -172,5 +172,6 @@ body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
 
 /* BUILD NUMBER */
 .build-number {
-  color: #fff;
+  color: var(--bs-body-color);
+  opacity: 0.6;
 }
