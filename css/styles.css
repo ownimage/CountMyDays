@@ -159,17 +159,21 @@ body.font-size-jumbo #imagesEditor {
 }
 
 /* COUNTDOWN TILE HEADINGS */
-.countdown-card h4 {
+.countdown-card h4,
+.countdown-card .h4 {
   font-size: 1.5rem;
   font-weight: 800;
 }
-body.font-size-large .countdown-card h4 {
+body.font-size-large .countdown-card h4,
+body.font-size-large .countdown-card .h4 {
   font-size: 1.6rem;
 }
-body.font-size-xlarge .countdown-card h4 {
+body.font-size-xlarge .countdown-card h4,
+body.font-size-xlarge .countdown-card .h4 {
   font-size: 1.75rem;
 }
-body.font-size-jumbo .countdown-card h4 {
+body.font-size-jumbo .countdown-card h4,
+body.font-size-jumbo .countdown-card .h4 {
   font-size: 2rem;
 }
 
