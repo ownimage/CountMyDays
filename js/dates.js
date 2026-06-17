@@ -1,4 +1,13 @@
 let flatpickrInstances = [];
+let currentDatesTab = "future";
+
+function switchDatesTab(tab) {
+  currentDatesTab = tab;
+  document.querySelectorAll("#datesTab .nav-link").forEach(el => {
+    el.classList.toggle("active", el.dataset.tab === tab);
+  });
+  renderDatesEditor();
+}
 
 function destroyDatePickers() {
   flatpickrInstances.forEach(fp => fp.destroy());
@@ -14,11 +23,24 @@ function renderDatesEditor() {
   list.innerHTML = "";
   addTile.innerHTML = "";
 
-  const dates = loadDates();
+  let dates = loadDates();
   const categories = loadCategories();
   const images = loadImages();
 
-  dates.forEach((d, index) => {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  const filtered = dates
+    .map((d, i) => ({ d, i }))
+    .filter(({ d }) => {
+      if (currentDatesTab === "annual") return d.type === "annual";
+      if (d.type === "annual") return false;
+      const date = new Date(d.year || today.getFullYear(), (d.month || 1) - 1, d.day || 1);
+      if (currentDatesTab === "past") return date < today;
+      return date >= today;
+    });
+
+  filtered.forEach(({ d, i: index }) => {
     const category = categories.find(c => c.name === d.category) || categories[0];
     let imageName = category ? category.image : null;
     if (category && !imageName) {

@@ -69,6 +69,14 @@
   background: transparent;
   color: #e0e0e0;
 }
+[data-bs-theme="dark"] .flatpickr-current-month .flatpickr-monthDropdown-months {
+  background: #1e1e1e;
+  color: #e0e0e0;
+}
+[data-bs-theme="dark"] .flatpickr-current-month .flatpickr-monthDropdown-months option {
+  background: #1e1e1e;
+  color: #e0e0e0;
+}
 [data-bs-theme="dark"] .flatpickr-current-month input.cur-year {
   color: #e0e0e0;
 }
