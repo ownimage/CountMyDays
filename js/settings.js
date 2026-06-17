@@ -58,7 +58,7 @@ function openSettings() {
   const formatSel = document.getElementById("formatSelector");
   if (formatSel) formatSel.value = savedFormat;
 
-  const savedFontSize = localStorage.getItem("fontSize") || "normal";
+  const savedFontSize = localStorage.getItem("fontSize") || "xlarge";
   const fontSizeSel = document.getElementById("fontSizeSelector");
   if (fontSizeSel) fontSizeSel.value = savedFontSize;
 }
@@ -74,7 +74,7 @@ function closeSettings() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const savedFontSize = localStorage.getItem("fontSize") || "normal";
+  const savedFontSize = localStorage.getItem("fontSize") || "xlarge";
   if (savedFontSize !== "normal") {
     document.body.classList.add("font-size-" + savedFontSize);
   }

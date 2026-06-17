@@ -130,14 +130,18 @@
 }
 
 /* FONT SIZE */
-body.font-size-large .navbar,
+body.font-size-large,
+body.font-size-large .navbar .btn,
+body.font-size-large .navbar .dropdown-item,
 body.font-size-large #settingsPage,
 body.font-size-large #datesEditor,
 body.font-size-large #categoriesEditor,
 body.font-size-large #imagesEditor {
   font-size: 1.125rem;
 }
-body.font-size-xlarge .navbar,
+body.font-size-xlarge,
+body.font-size-xlarge .navbar .btn,
+body.font-size-xlarge .navbar .dropdown-item,
 body.font-size-xlarge #settingsPage,
 body.font-size-xlarge #datesEditor,
 body.font-size-xlarge #categoriesEditor,
