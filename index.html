@@ -7,13 +7,13 @@
   <link id="bootstrap-theme-css" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/darkly/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
   <link rel="stylesheet" href="css/styles.css">
-  <script>const BUILD_NUMBER = "202606161945";</script>
+  <script>const BUILD_NUMBER = "202606171225";</script>
 </head>
 
 <body>
 
   <!-- FIXED TOOLBAR -->
-  <nav class="navbar navbar-expand px-3 py-2 gap-3">
+  <nav id="mainNav" class="navbar navbar-expand px-3 py-2 gap-3">
 
     <div class="dropdown">
       <button class="btn dropdown-toggle" data-bs-toggle="dropdown">Edit</button>
@@ -82,13 +82,16 @@
         <div class="col-8">
           <select id="themeSelector" class="form-select" onchange="changeTheme(this.value)">
             <option value="darkly">Darkly (dark)</option>
+            <option value="flatly">Flatly (light)</option>
+            <option value="zephyr">Zephyr (light)</option>
+            <option value="superhero">Superhero (dark)</option>
             <option value="quartz">Light (default)</option>
             <option value="cyborg">Cyborg (midnight)</option>
           </select>
         </div>
       </div>
 
-      <div class="row mb-4 align-items-center col-md-8">
+      <div class="row mb-3 align-items-center col-md-8">
         <div class="col-4 text-end"><label class="form-label mb-0">Countdown display</label></div>
         <div class="col-8">
           <select id="formatSelector" class="form-select" onchange="changeFormat(this.value)">
@@ -98,9 +101,41 @@
         </div>
       </div>
 
+      <div class="row mb-4 align-items-center col-md-8">
+        <div class="col-4 text-end"><label class="form-label mb-0">Font size</label></div>
+        <div class="col-8">
+          <select id="fontSizeSelector" class="form-select" onchange="changeFontSize(this.value)">
+            <option value="normal">Normal</option>
+            <option value="large">Large</option>
+            <option value="xlarge">Extra large</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row mb-3 align-items-center col-md-8">
+        <div class="col-4 text-end"><label class="form-label mb-0">Max countdowns</label></div>
+        <div class="col-8">
+          <select id="maxCountdownsSelector" class="form-select" onchange="changeMaxCountdowns(this.value)">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="0">All</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row mb-4 align-items-center col-md-8">
+        <div class="col-4 text-end"><label class="form-label mb-0">Auto-hide menu</label></div>
+        <div class="col-8">
+          <div class="form-check form-switch mt-1">
+            <input id="autoHideMenu" class="form-check-input" type="checkbox" onchange="changeAutoHideMenu(this.checked)">
+          </div>
+        </div>
+      </div>
+
       <button class="btn btn-primary" onclick="closeSettings()">Done</button>
 
-      <div class="mt-5 text-secondary small">Build <span id="buildNumber"></span></div>
+      <div class="mt-5 small build-number">Build <span id="buildNumber"></span></div>
     </div>
     <script>document.getElementById("buildNumber").textContent = BUILD_NUMBER;</script>
 
@@ -147,6 +182,7 @@
   document.write('<script src="js/sampleImages.js?v=' + BUILD_NUMBER + '"><\/script>');
   document.write('<script src="js/sampleCategories.js?v=' + BUILD_NUMBER + '"><\/script>');
   document.write('<script src="js/sampleDates.js?v=' + BUILD_NUMBER + '"><\/script>');
+  document.write('<script src="js/settings.js?v=' + BUILD_NUMBER + '"><\/script>');
   document.write('<script src="js/app.js?v=' + BUILD_NUMBER + '"><\/script>');
   document.write('<script src="js/dates.js?v=' + BUILD_NUMBER + '"><\/script>');
   document.write('<script src="js/categories.js?v=' + BUILD_NUMBER + '"><\/script>');

@@ -101,28 +101,6 @@ function importData() {
 }
 
 // -------------------------------
-// THEME HELPERS
-// -------------------------------
-
-const themeConfig = {
-  darkly: { css: "https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/darkly/bootstrap.min.css", bsTheme: "dark" },
-  quartz: { css: "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css", bsTheme: "light" },
-  cyborg: { css: "https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/cyborg/bootstrap.min.css", bsTheme: "dark" }
-};
-
-function applyTheme(name) {
-  const config = themeConfig[name] || themeConfig.darkly;
-  const link = document.getElementById("bootstrap-theme-css");
-  if (link) link.href = config.css;
-  document.documentElement.setAttribute("data-bs-theme", config.bsTheme);
-  localStorage.setItem("theme", name);
-}
-
-function changeTheme(name) {
-  applyTheme(name);
-}
-
-// -------------------------------
 // UI UTILITIES
 // -------------------------------
 
@@ -180,11 +158,16 @@ function renderCountdowns() {
   const categories = loadCategories();
   const images = loadImages();
 
+  const maxCountdowns = parseInt(localStorage.getItem("maxCountdowns") || "10", 10);
+  const showAll = container.dataset.showAll === "true" || maxCountdowns === 0;
+
   const sorted = dates
     .map(d => ({ ...d, days: daysUntil(d) }))
     .sort((a, b) => a.days - b.days);
 
-  sorted.forEach(d => {
+  const visible = showAll ? sorted : sorted.slice(0, maxCountdowns);
+
+  visible.forEach(d => {
     const category = categories.find(c => c.name === d.category);
     const imageName = category ? category.image : null;
     const image = images.find(i => i.name === imageName);
@@ -225,6 +208,22 @@ function renderCountdowns() {
 
     container.appendChild(card);
   });
+
+  if (!showAll && sorted.length > maxCountdowns) {
+    const more = document.createElement("div");
+    more.className = "text-center mt-2";
+    const moreBtn = document.createElement("a");
+    moreBtn.href = "#";
+    moreBtn.className = "btn btn-outline-primary btn-sm";
+    moreBtn.textContent = `+ ${sorted.length - maxCountdowns} more`;
+    moreBtn.onclick = e => {
+      e.preventDefault();
+      container.dataset.showAll = "true";
+      renderCountdowns();
+    };
+    more.appendChild(moreBtn);
+    container.appendChild(more);
+  }
 }
 
 // small helper to avoid accidental HTML injection
@@ -265,32 +264,6 @@ function openImagesEditor() {
   document.getElementById("imagesEditor").classList.remove("d-none");
   document.getElementById("settingsPage").classList.add("d-none");
   renderImagesEditor();
-}
-
-function openSettings() {
-  document.getElementById("countdownContainer").classList.add("d-none");
-  document.getElementById("datesEditor").classList.add("d-none");
-  document.getElementById("categoriesEditor").classList.add("d-none");
-  document.getElementById("imagesEditor").classList.add("d-none");
-  document.getElementById("settingsPage").classList.remove("d-none");
-
-  const savedTheme = localStorage.getItem("theme") || "darkly";
-  const themeSel = document.getElementById("themeSelector");
-  if (themeSel) themeSel.value = savedTheme;
-
-  const savedFormat = localStorage.getItem("countdownFormat") || "days";
-  const formatSel = document.getElementById("formatSelector");
-  if (formatSel) formatSel.value = savedFormat;
-}
-
-function changeFormat(value) {
-  localStorage.setItem("countdownFormat", value);
-}
-
-function closeSettings() {
-  document.getElementById("settingsPage").classList.add("d-none");
-  document.getElementById("countdownContainer").classList.remove("d-none");
-  renderCountdowns();
 }
 
 // -------------------------------

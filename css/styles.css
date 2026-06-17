@@ -128,3 +128,50 @@
 [data-bs-theme="dark"] .flatpickr-calendar.arrowBottom:after {
   border-top-color: #1e1e1e;
 }
+
+/* FONT SIZE */
+body.font-size-large,
+body.font-size-large .navbar .btn,
+body.font-size-large .navbar .dropdown-item,
+body.font-size-large #settingsPage,
+body.font-size-large #datesEditor,
+body.font-size-large #categoriesEditor,
+body.font-size-large #imagesEditor {
+  font-size: 1.125rem;
+}
+body.font-size-xlarge,
+body.font-size-xlarge .navbar .btn,
+body.font-size-xlarge .navbar .dropdown-item,
+body.font-size-xlarge #settingsPage,
+body.font-size-xlarge #datesEditor,
+body.font-size-xlarge #categoriesEditor,
+body.font-size-xlarge #imagesEditor {
+  font-size: 1.3rem;
+}
+
+/* AUTO-HIDE MENU */
+body.auto-hide-menu #mainNav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030;
+  background: var(--bs-body-bg);
+  transition: transform 0.3s ease;
+}
+body.auto-hide-menu #mainNav.nav-hidden {
+  transform: translateY(-100%);
+}
+body.auto-hide-menu .container-fluid {
+  padding-top: 60px;
+  transition: padding-top 0.3s ease;
+}
+body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
+  padding-top: 0.5rem;
+}
+
+/* BUILD NUMBER */
+.build-number {
+  color: var(--bs-body-color);
+  opacity: 0.6;
+}
