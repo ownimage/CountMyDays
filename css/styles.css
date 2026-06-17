@@ -148,6 +148,34 @@ body.font-size-xlarge #categoriesEditor,
 body.font-size-xlarge #imagesEditor {
   font-size: 1.3rem;
 }
+body.font-size-jumbo,
+body.font-size-jumbo .navbar .btn,
+body.font-size-jumbo .navbar .dropdown-item,
+body.font-size-jumbo #settingsPage,
+body.font-size-jumbo #datesEditor,
+body.font-size-jumbo #categoriesEditor,
+body.font-size-jumbo #imagesEditor {
+  font-size: 1.6rem;
+}
+
+/* COUNTDOWN TILE HEADINGS */
+.countdown-card h4,
+.countdown-card .h4 {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+body.font-size-large .countdown-card h4,
+body.font-size-large .countdown-card .h4 {
+  font-size: 1.6rem;
+}
+body.font-size-xlarge .countdown-card h4,
+body.font-size-xlarge .countdown-card .h4 {
+  font-size: 1.75rem;
+}
+body.font-size-jumbo .countdown-card h4,
+body.font-size-jumbo .countdown-card .h4 {
+  font-size: 2rem;
+}
 
 /* AUTO-HIDE MENU */
 body.auto-hide-menu #mainNav {
@@ -157,9 +185,12 @@ body.auto-hide-menu #mainNav {
   right: 0;
   z-index: 1030;
   background: var(--bs-body-bg);
+  will-change: transform;
+  -webkit-transition: -webkit-transform 0.3s ease;
   transition: transform 0.3s ease;
 }
 body.auto-hide-menu #mainNav.nav-hidden {
+  -webkit-transform: translateY(-100%);
   transform: translateY(-100%);
 }
 body.auto-hide-menu .container-fluid {

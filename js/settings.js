@@ -33,7 +33,7 @@ function getAvailableThemes() {
 
 function changeFontSize(value) {
   localStorage.setItem("fontSize", value);
-  document.body.classList.remove("font-size-normal", "font-size-large", "font-size-xlarge");
+  document.body.classList.remove("font-size-normal", "font-size-large", "font-size-xlarge", "font-size-jumbo");
   if (value !== "normal") {
     document.body.classList.add("font-size-" + value);
   }
@@ -137,8 +137,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (autoHide) {
     document.body.classList.add("auto-hide-menu");
     resetAutoHideTimer();
-    ["pointerdown", "touchstart"].forEach(evt => {
+    ["pointerdown", "touchstart", "click"].forEach(evt => {
       document.addEventListener(evt, resetAutoHideTimer, { passive: true });
     });
+    window.addEventListener("scroll", resetAutoHideTimer, { passive: true });
   }
 });
