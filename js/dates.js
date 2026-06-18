@@ -90,8 +90,8 @@ function renderDatesEditor() {
               <span class="ms-3">${d.type === "annual" ? "Annual" : "Once"}</span>
             </div>
             <div class="d-flex gap-2">
-              ${editingIndex >= 0 ? '' : `<button class="btn btn-primary editor-btn" onclick="editDate(${index})">Edit</button>`}
-              <button class="btn btn-danger editor-btn ${editingIndex >= 0 ? '' : 'ms-auto'}" onclick="confirmDeleteDate(${index})">Delete</button>
+              <button class="btn btn-primary editor-btn" onclick="editDate(${index})" ${editingIndex >= 0 ? 'disabled' : ''}>Edit</button>
+              <button class="btn btn-danger editor-btn ms-auto" onclick="confirmDeleteDate(${index})" ${editingIndex >= 0 ? 'disabled' : ''}>Delete</button>
             </div>
           </div>
         </div>
