@@ -1,6 +1,8 @@
 let editingIndex = -1;
 let editBuffer = null;
 let isNewDate = false;
+let categoryFilter = "";
+let titleSearch = "";
 
 function renderDatesEditor() {
   const list = document.getElementById("editorList");
@@ -9,13 +11,22 @@ function renderDatesEditor() {
   list.innerHTML = "";
   addTile.innerHTML = "";
 
-  const dates = loadDates();
+  const allDates = loadDates();
   const categories = loadCategories();
   const images = loadImages();
   const now = new Date();
   const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-  dates.forEach((d, index) => {
+  const filtered = allDates
+    .map((d, i) => ({ d, i }))
+    .filter(({ d }) => {
+      if (editingIndex >= 0) return true;
+      if (categoryFilter && d.category !== categoryFilter) return false;
+      if (titleSearch && !d.name.toLowerCase().includes(titleSearch.toLowerCase())) return false;
+      return true;
+    });
+
+  filtered.forEach(({ d, index }) => {
     const dateData = (editingIndex === index && editBuffer) ? editBuffer : d;
 
     const category = categories.find(c => c.name === dateData.category) || categories[0];
@@ -107,6 +118,8 @@ function renderDatesEditor() {
     }
   });
 
+  renderEditorFilters(allDates);
+
   const topTile = document.getElementById("addDateTileTop");
   topTile.innerHTML = `
     <div class="d-flex gap-2">
@@ -124,6 +137,42 @@ function renderDatesEditor() {
 
   if (editingIndex >= 0) {
     initSingleFlatpickr(editingIndex);
+  }
+}
+
+function renderEditorFilters(allDates) {
+  const el = document.getElementById("editorFilters");
+  if (!el) return;
+  if (editingIndex >= 0) {
+    el.classList.add("d-none");
+    return;
+  }
+  el.classList.remove("d-none");
+  const cats = [...new Set(allDates.map(d => d.category).filter(Boolean))];
+  el.innerHTML = `
+    <div class="d-flex gap-1 align-items-center">
+      <div class="flex-shrink-0" style="width:100px"></div>
+      <select class="form-select" style="width:auto;min-width:160px" onchange="setCategoryFilter(this.value)">
+        <option value="">All Categories</option>
+        ${cats.map(c => `<option value="${c}" ${categoryFilter === c ? 'selected' : ''}>${c}</option>`).join("")}
+      </select>
+      <input class="form-control" type="search" placeholder="Search titles..." style="max-width:260px" value="${escapeHtml(titleSearch)}" oninput="setTitleSearch(this.value)">
+    </div>
+  `;
+}
+
+function setCategoryFilter(val) {
+  categoryFilter = val;
+  renderDatesEditor();
+}
+
+function setTitleSearch(val) {
+  titleSearch = val;
+  renderDatesEditor();
+  const input = document.querySelector('#editorFilters input[type="search"]');
+  if (input) {
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
   }
 }
 
