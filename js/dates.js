@@ -90,8 +90,8 @@ function renderDatesEditor() {
               <span class="ms-3">${d.type === "annual" ? "Annual" : "Once"}</span>
             </div>
             <div class="d-flex gap-2">
-              <button class="btn btn-primary editor-btn" onclick="editDate(${index})">Edit</button>
-              <button class="btn btn-danger editor-btn ms-auto" onclick="confirmDeleteDate(${index})">Delete</button>
+              ${editingIndex >= 0 ? '' : `<button class="btn btn-primary editor-btn" onclick="editDate(${index})">Edit</button>`}
+              <button class="btn btn-danger editor-btn ${editingIndex >= 0 ? '' : 'ms-auto'}" onclick="confirmDeleteDate(${index})">Delete</button>
             </div>
           </div>
         </div>
@@ -177,7 +177,7 @@ function updateDateField(index, field, value) {
     }
   }
   saveDates(dates);
-  if (field === "type") {
+  if (field === "type" || field === "category") {
     renderDatesEditor();
   }
 }
