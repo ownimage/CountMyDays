@@ -67,11 +67,15 @@ function renderImagesEditor() {
           <div class="col">
             <label class="form-label">Name</label>
             <input class="form-control" value="${escapeHtml(img.name)}" onchange="editImageField('name', this.value)">
-            <div class="d-flex gap-3 mt-2 align-items-center">
+            <div class="d-flex gap-3 mt-2 align-items-center flex-wrap">
               <label class="form-label mb-0">Line:</label>
-              <input type="color" value="${colors.line || '#000000'}" onchange="editImageColor(${index}, 'stroke', this.value)">
+              <input type="color" value="${colors.line && colors.line !== 'none' ? colors.line : '#000000'}" oninput="editImageColor(${index}, 'stroke', this.value)">
+              <label class="form-check-label mb-0">
+                <input type="checkbox" ${colors.line === 'none' || !colors.line ? 'checked' : ''} onchange="editImageStrokeNone(${index}, this.checked)">
+                none
+              </label>
               <label class="form-label mb-0">Fill:</label>
-              <input type="color" value="${colors.fill && colors.fill !== 'none' ? colors.fill : '#ffffff'}" onchange="editImageColor(${index}, 'fill', this.value)">
+              <input type="color" value="${colors.fill && colors.fill !== 'none' ? colors.fill : '#ffffff'}" oninput="editImageColor(${index}, 'fill', this.value)">
               <label class="form-check-label mb-0">
                 <input type="checkbox" ${colors.fill === 'none' || !colors.fill ? 'checked' : ''} onchange="editImageFillNone(${index}, this.checked)">
                 none
@@ -95,7 +99,7 @@ function renderImagesEditor() {
             <div class="mb-1"><strong>Name:</strong> ${escapeHtml(img.name)}</div>
             <div class="d-flex gap-2 align-items-center flex-wrap">
               <button class="btn btn-primary editor-btn" onclick="startEditImage(${index})">Edit</button>
-              ${colors.line ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.line}"></span>Line</span>` : ''}
+              ${colors.line ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.line === 'none' ? 'transparent' : colors.line}"></span>Line${colors.line === 'none' ? ': none' : ''}</span>` : ''}
               ${colors.fill ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.fill === 'none' ? 'transparent' : colors.fill}"></span>Fill${colors.fill === 'none' ? ': none' : ''}</span>` : ''}
             </div>
           </div>
@@ -148,6 +152,17 @@ function editImageFillNone(index, checked) {
   const fillVal = checked ? "none" : "#000000";
   img.data = updateSvgColor(img.data, "fill", fillVal);
   img.fillColor = fillVal;
+  saveImages(images);
+  renderImagesEditor();
+}
+
+function editImageStrokeNone(index, checked) {
+  const images = loadImages();
+  if (index < 0 || index >= images.length) return;
+  const img = images[index];
+  const strokeVal = checked ? "none" : "#000000";
+  img.data = updateSvgColor(img.data, "stroke", strokeVal);
+  img.lineColor = strokeVal;
   saveImages(images);
   renderImagesEditor();
 }
