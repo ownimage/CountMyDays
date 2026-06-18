@@ -86,7 +86,7 @@ function renderImagesEditor() {
           <div class="col">
             <div class="mb-1"><strong>Name:</strong> ${escapeHtml(img.name)}</div>
             <div class="d-flex gap-2 align-items-center flex-wrap">
-              <button class="btn btn-sm btn-outline-secondary" onclick="startEditImage(${index})">Edit</button>
+              <button class="btn btn-primary editor-btn" onclick="startEditImage(${index})">Edit</button>
               ${colors.line ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.line}"></span>Line: ${colors.line}</span>` : ''}
               ${colors.fill ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.fill === 'none' ? 'transparent' : colors.fill}"></span>Fill: ${colors.fill}</span>` : ''}
             </div>
@@ -103,8 +103,8 @@ function renderImagesEditor() {
 
   topTile.innerHTML = `
     <div class="d-flex gap-2">
-      <button class="btn btn-success editor-btn" onclick="addNewImage()" ${editingImageIndex >= 0 ? 'disabled' : ''}>Add Image</button>
-      <button class="btn btn-primary editor-btn ms-auto" onclick="closeImagesEditor()" ${editingImageIndex >= 0 ? 'disabled' : ''}>Done</button>
+      <button class="btn btn-primary editor-btn btn-wide" onclick="addNewImage()" ${editingImageIndex >= 0 ? 'disabled' : ''}>Add Image</button>
+      <button class="btn btn-success editor-btn btn-wide ms-auto" onclick="closeImagesEditor()" ${editingImageIndex >= 0 ? 'disabled' : ''}>Done</button>
     </div>
   `;
 }
