@@ -46,36 +46,24 @@ function renderDatesEditor() {
 
       card.innerHTML = `
         <div class="d-flex gap-1">
-          <div class="flex-shrink-0 d-flex align-items-center">
+          <div class="flex-shrink-0 text-center me-3">
             ${imgSrc ? `<img src="${imgSrc}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
+            <select class="form-select mt-1" onchange="updateDateField(${index}, 'category', this.value)">${categories.map(c => `<option value="${c.name}" ${c.name === (d.category || (categories[0] ? categories[0].name : "")) ? "selected" : ""}>${c.name}</option>`).join("")}</select>
           </div>
           <div class="flex-fill" style="min-width:0">
-            <div class="d-flex mb-2">
-              <div class="d-flex align-items-center flex-fill">
-                <label class="form-label mb-0 text-end flex-shrink-0" style="width:120px">Title</label>
-                <input class="form-control ms-2 flex-fill" value="${escapeHtml(d.name || "")}" oninput="updateDateField(${index}, 'name', this.value)">
-              </div>
-              <div class="d-flex align-items-center flex-fill ms-3">
-                <label class="form-label mb-0 text-end flex-shrink-0" style="width:120px">Category</label>
-                <select class="form-select ms-2 flex-fill" onchange="updateDateField(${index}, 'category', this.value)">${categories.map(c => `<option value="${c.name}" ${c.name === (d.category || (categories[0] ? categories[0].name : "")) ? "selected" : ""}>${c.name}</option>`).join("")}</select>
-              </div>
+            <div class="mb-2">
+              <input class="form-control" value="${escapeHtml(d.name || "")}" oninput="updateDateField(${index}, 'name', this.value)">
             </div>
-            <div class="d-flex mb-2 align-items-center">
-              <div class="d-flex align-items-center flex-fill">
-                <label class="form-label mb-0 text-end flex-shrink-0" style="width:120px">Type</label>
-                <select class="form-select ms-2 type-select" onchange="updateDateField(${index}, 'type', this.value)">
-                  <option value="annual" ${d.type === "annual" ? "selected" : ""}>Annual</option>
-                  <option value="once" ${d.type === "once" ? "selected" : ""}>Once</option>
-                </select>
-              </div>
-              <div class="d-flex align-items-center flex-fill ms-3">
-                <label class="form-label mb-0 text-end flex-shrink-0" style="width:120px">Date</label>
-                <div class="d-flex flex-nowrap gap-1 ms-2 flex-fill">${dateHtml}</div>
-              </div>
+            <div class="d-flex mb-1">
+              <div class="d-flex flex-nowrap gap-1 flex-fill">${dateHtml}</div>
+              <select class="form-select ms-3 type-select" onchange="updateDateField(${index}, 'type', this.value)">
+                <option value="annual" ${d.type === "annual" ? "selected" : ""}>Annual</option>
+                <option value="once" ${d.type === "once" ? "selected" : ""}>Once</option>
+              </select>
             </div>
-            <div class="d-flex gap-2 mt-3 justify-content-end">
+            <div class="d-flex gap-2">
               <button class="btn btn-primary editor-btn" onclick="doneEditing()">OK</button>
-              <button class="btn btn-secondary editor-btn" onclick="cancelEditing()">Cancel</button>
+              <button class="btn btn-secondary editor-btn ms-auto" onclick="cancelEditing()">Cancel</button>
             </div>
           </div>
         </div>
@@ -91,7 +79,7 @@ function renderDatesEditor() {
 
       card.innerHTML = `
         <div class="d-flex gap-1">
-          <div class="flex-shrink-0 text-center">
+          <div class="flex-shrink-0 text-center me-3">
             ${imgSrc ? `<img src="${imgSrc}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
             <div class="mt-1">${escapeHtml(d.category)}</div>
           </div>
@@ -99,7 +87,7 @@ function renderDatesEditor() {
             <div class="fw-bold editor-title mb-2">${escapeHtml(d.name)}</div>
             <div class="d-flex mb-1">
               <span>${dateStr}</span>
-              <span class="ms-3"><span class="fw-bold">Type:</span> ${d.type === "annual" ? "Annual" : "Once"}</span>
+              <span class="ms-3">${d.type === "annual" ? "Annual" : "Once"}</span>
             </div>
             <div class="d-flex gap-2">
               <button class="btn btn-primary editor-btn" onclick="editDate(${index})">Edit</button>
