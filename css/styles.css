@@ -169,7 +169,9 @@ body.font-size-large #imagesEditor,
 body.font-size-large #imagesEditor .btn,
 body.font-size-large #imagesEditor .form-label,
 body.font-size-large #imagesEditor .form-control,
-body.font-size-large #imagesEditor .form-select {
+body.font-size-large #imagesEditor .form-select,
+body.font-size-large #deleteConfirmModal,
+body.font-size-large #deleteConfirmModal .btn {
   font-size: 1.125rem;
 }
 body.font-size-xlarge,
@@ -194,7 +196,9 @@ body.font-size-xlarge #imagesEditor,
 body.font-size-xlarge #imagesEditor .btn,
 body.font-size-xlarge #imagesEditor .form-label,
 body.font-size-xlarge #imagesEditor .form-control,
-body.font-size-xlarge #imagesEditor .form-select {
+body.font-size-xlarge #imagesEditor .form-select,
+body.font-size-xlarge #deleteConfirmModal,
+body.font-size-xlarge #deleteConfirmModal .btn {
   font-size: 1.3rem;
 }
 body.font-size-jumbo,
@@ -219,7 +223,9 @@ body.font-size-jumbo #imagesEditor,
 body.font-size-jumbo #imagesEditor .btn,
 body.font-size-jumbo #imagesEditor .form-label,
 body.font-size-jumbo #imagesEditor .form-control,
-body.font-size-jumbo #imagesEditor .form-select {
+body.font-size-jumbo #imagesEditor .form-select,
+body.font-size-jumbo #deleteConfirmModal,
+body.font-size-jumbo #deleteConfirmModal .btn {
   font-size: 1.6rem;
 }
 
@@ -287,7 +293,7 @@ body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
   min-width: 100px;
 }
 .btn-wide {
-  min-width: 180px;
+  min-width: 220px;
 }
 
 /* BUILD NUMBER */

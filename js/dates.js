@@ -3,6 +3,7 @@ let editBuffer = null;
 let isNewDate = false;
 let categoryFilter = "";
 let titleSearch = "";
+let deletePendingIndex = -1;
 
 function renderDatesEditor() {
   const list = document.getElementById("editorList");
@@ -268,17 +269,25 @@ function updateDateField(index, field, value) {
 }
 
 function confirmDeleteDate(index) {
-  if (confirm("Delete this date?")) {
-    if (editingIndex === index) {
-      editingIndex = -1;
-      editBuffer = null;
-      isNewDate = false;
-    }
-    const dates = loadDates();
-    dates.splice(index, 1);
-    saveDates(dates);
-    renderDatesEditor();
+  deletePendingIndex = index;
+  const modalEl = document.getElementById("deleteConfirmModal");
+  document.getElementById("deleteConfirmBtn").onclick = function() {
+    doDelete(deletePendingIndex);
+    bootstrap.Modal.getInstance(modalEl).hide();
+  };
+  new bootstrap.Modal(modalEl).show();
+}
+
+function doDelete(index) {
+  if (editingIndex === index) {
+    editingIndex = -1;
+    editBuffer = null;
+    isNewDate = false;
   }
+  const dates = loadDates();
+  dates.splice(index, 1);
+  saveDates(dates);
+  renderDatesEditor();
 }
 
 function addNewDate() {
