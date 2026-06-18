@@ -272,8 +272,22 @@ body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
   padding-top: 0.5rem;
 }
 
-/* EDITOR TOP SPACING */
-#datesEditor, #categoriesEditor, #imagesEditor, #settingsPage {
+/* EDITOR LAYOUT */
+#datesEditor {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 56px);
+  padding-top: 20px;
+}
+#datesEditorHeader {
+  flex-shrink: 0;
+}
+#datesEditor #editorList {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+#categoriesEditor, #imagesEditor, #settingsPage {
   padding-top: 20px;
 }
 
