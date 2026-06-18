@@ -319,7 +319,7 @@ function renderImagesEditor() {
 function closeDatesEditor() {
   document.getElementById("datesEditor").classList.add("d-none");
   document.getElementById("countdownContainer").classList.remove("d-none");
-  lastEditedIndex = -1;
+  editingIndex = -1;
   renderCountdowns();
 }
 

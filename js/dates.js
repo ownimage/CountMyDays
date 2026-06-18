@@ -1,68 +1,19 @@
-let flatpickrInstances = [];
-let currentDatesTab = "current";
-let lastEditedIndex = -1;
-
-function switchDatesTab(tab) {
-  currentDatesTab = tab;
-  document.querySelectorAll("#datesTab .nav-link").forEach(el => {
-    el.classList.toggle("active", el.dataset.tab === tab);
-  });
-  renderDatesEditor();
-}
-
-function switchToTabForIndex(index) {
-  const dates = loadDates();
-  const d = dates[index];
-  if (!d) return;
-  if (d.type === "annual") {
-    switchDatesTab("annual");
-  } else {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const date = new Date(d.year || today.getFullYear(), (d.month || 1) - 1, d.day || 1);
-    switchDatesTab(date < today ? "past" : "current");
-  }
-}
-
-function destroyDatePickers() {
-  flatpickrInstances.forEach(fp => fp.destroy());
-  flatpickrInstances = [];
-}
+let editingIndex = -1;
 
 function renderDatesEditor() {
-  destroyDatePickers();
-
   const list = document.getElementById("editorList");
   const addTile = document.getElementById("addDateTile");
 
   list.innerHTML = "";
   addTile.innerHTML = "";
 
-  let dates = loadDates();
+  const dates = loadDates();
   const categories = loadCategories();
   const images = loadImages();
-
   const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-  const filtered = dates
-    .map((d, i) => ({ d, i }))
-    .filter(({ d }) => {
-      if (currentDatesTab === "annual") return d.type === "annual";
-      if (d.type === "annual") return false;
-      const date = new Date(d.year || today.getFullYear(), (d.month || 1) - 1, d.day || 1);
-      if (currentDatesTab === "past") return date < today;
-      return date >= today;
-    })
-    .sort((a, b) => {
-      const da = a.d, db = b.d;
-      if (currentDatesTab === "annual") {
-        return (da.month || 1) - (db.month || 1) || (da.day || 1) - (db.day || 1);
-      }
-      return (da.year || 0) - (db.year || 0) || (da.month || 1) - (db.month || 1) || (da.day || 1) - (db.day || 1);
-    });
-
-  filtered.forEach(({ d, i: index }) => {
+  dates.forEach((d, index) => {
     const category = categories.find(c => c.name === d.category) || categories[0];
     let imageName = category ? category.image : null;
     if (category && !imageName) {
@@ -71,69 +22,110 @@ function renderDatesEditor() {
     const image = images.find(i => i.name === imageName);
     const imgSrc = image ? image.data : "";
 
-    const showYear = d.type === "once";
-
     const card = document.createElement("div");
-    card.className = "card p-3 mb-3" + (index === lastEditedIndex ? " card-edited" : "");
+    card.className = "card p-3 mb-3" + (index === editingIndex ? " card-edited" : "");
 
-    const day = d.day || 1;
-    const month = d.month || 1;
-    const year = d.year || new Date().getFullYear();
+    if (editingIndex === index) {
+      const showYear = d.type === "once";
+      const day = d.day || 1;
+      const month = d.month || 1;
+      const year = d.year || now.getFullYear();
 
-    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    let dateHtml;
-    if (showYear) {
-      dateHtml = `
-        <input type="text" class="form-control flatpickr-date"
-               data-index="${index}"
-               data-showyear="true"
-               placeholder="dd/mm/yyyy">`;
+      let dateHtml;
+      if (showYear) {
+        dateHtml = `<input type="text" class="form-control flatpickr-date" data-index="${index}" data-showyear="true" placeholder="dd/mm/yyyy">`;
+      } else {
+        dateHtml = `
+          <select class="form-select date-day-select" onchange="updateDateField(${index}, 'day', parseInt(this.value))">
+            ${Array.from({length: 31}, (_, i) => `<option value="${i+1}" ${i+1 === day ? "selected" : ""}>${i+1}</option>`).join("")}
+          </select>
+          <select class="form-select date-month-select" onchange="updateDateField(${index}, 'month', parseInt(this.value))">
+            ${months.map((m, i) => `<option value="${i+1}" ${i+1 === month ? "selected" : ""}>${m}</option>`).join("")}
+          </select>`;
+      }
+
+      card.innerHTML = `
+        <div class="d-flex gap-1">
+          <div class="flex-shrink-0 d-flex align-items-center">
+            ${imgSrc ? `<img src="${imgSrc}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
+          </div>
+          <div class="flex-fill" style="min-width:0">
+            <div class="d-flex mb-2">
+              <div class="d-flex align-items-center flex-fill">
+                <label class="form-label mb-0 text-end flex-shrink-0" style="width:120px">Title</label>
+                <input class="form-control ms-2 flex-fill" value="${escapeHtml(d.name || "")}" oninput="updateDateField(${index}, 'name', this.value)">
+              </div>
+              <div class="d-flex align-items-center flex-fill ms-3">
+                <label class="form-label mb-0 text-end flex-shrink-0" style="width:120px">Category</label>
+                <select class="form-select ms-2 flex-fill" onchange="updateDateField(${index}, 'category', this.value)">${categories.map(c => `<option value="${c.name}" ${c.name === (d.category || (categories[0] ? categories[0].name : "")) ? "selected" : ""}>${c.name}</option>`).join("")}</select>
+              </div>
+            </div>
+            <div class="d-flex mb-2 align-items-center">
+              <div class="d-flex align-items-center flex-fill">
+                <label class="form-label mb-0 text-end flex-shrink-0" style="width:120px">Type</label>
+                <select class="form-select ms-2 type-select" onchange="updateDateField(${index}, 'type', this.value)">
+                  <option value="annual" ${d.type === "annual" ? "selected" : ""}>Annual</option>
+                  <option value="once" ${d.type === "once" ? "selected" : ""}>Once</option>
+                </select>
+              </div>
+              <div class="d-flex align-items-center flex-fill ms-3">
+                <label class="form-label mb-0 text-end flex-shrink-0" style="width:120px">Date</label>
+                <div class="d-flex flex-nowrap gap-1 ms-2 flex-fill">${dateHtml}</div>
+              </div>
+            </div>
+            <div class="d-flex gap-2 mt-3 justify-content-end">
+              <button class="btn btn-primary editor-btn" onclick="doneEditing()">OK</button>
+              <button class="btn btn-secondary editor-btn" onclick="cancelEditing()">Cancel</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      list.appendChild(card);
     } else {
-      dateHtml = `
-        <select class="form-select date-day-select" onchange="updateDateField(${index}, 'day', parseInt(this.value))">
-          ${Array.from({length: 31}, (_, i) => `<option value="${i+1}" ${i+1 === day ? "selected" : ""}>${i+1}</option>`).join("")}
-        </select>
-        <select class="form-select date-month-select" onchange="updateDateField(${index}, 'month', parseInt(this.value))">
-          ${months.map((m, i) => `<option value="${i+1}" ${i+1 === month ? "selected" : ""}>${m}</option>`).join("")}
-        </select>`;
+      const showYear = d.type === "once";
+      const day = d.day || 1;
+      const month = d.month || 1;
+      const year = d.year || now.getFullYear();
+      const dateStr = showYear ? `${day} ${months[month-1]} ${year}` : `${day} ${months[month-1]}`;
+
+      card.innerHTML = `
+        <div class="d-flex gap-1">
+          <div class="flex-shrink-0 d-flex align-items-center">
+            ${imgSrc ? `<img src="${imgSrc}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
+          </div>
+          <div class="flex-fill" style="min-width:0">
+            <div class="d-flex mb-1">
+              <div class="d-flex align-items-center flex-fill">
+                <span class="text-end flex-shrink-0 fw-bold" style="width:120px">Title</span>
+                <span class="ms-2">${escapeHtml(d.name)}</span>
+              </div>
+              <div class="d-flex align-items-center flex-fill ms-3">
+                <span class="text-end flex-shrink-0 fw-bold" style="width:120px">Category</span>
+                <span class="ms-2">${escapeHtml(d.category)}</span>
+              </div>
+            </div>
+            <div class="d-flex mb-1">
+              <div class="d-flex align-items-center flex-fill">
+                <span class="text-end flex-shrink-0 fw-bold" style="width:120px">Type</span>
+                <span class="ms-2">${d.type === "annual" ? "Annual" : "Once"}</span>
+              </div>
+              <div class="d-flex align-items-center flex-fill ms-3">
+                <span class="text-end flex-shrink-0 fw-bold" style="width:120px">Date</span>
+                <span class="ms-2">${dateStr}</span>
+              </div>
+            </div>
+            <div class="d-flex gap-2 mt-3">
+              <button class="btn btn-primary editor-btn" onclick="editDate(${index})">Edit</button>
+              <button class="btn btn-danger editor-btn ms-auto" onclick="confirmDeleteDate(${index})">Delete</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      list.appendChild(card);
     }
-
-    card.innerHTML = `
-      <div class="d-flex gap-1">
-
-        <div class="flex-shrink-0 d-flex align-items-center">
-          ${imgSrc ? `<img src="${imgSrc}" class="date-img">`
-                   : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
-        </div>
-
-        <div class="flex-fill" style="min-width:0">
-          <div class="d-flex align-items-center mb-2">
-            <label class="form-label mb-0 text-end flex-shrink-0" style="width:120px">Title</label>
-            <input class="form-control ms-2 flex-fill" value="${d.name || ""}" onchange="updateDateField(${index}, 'name', this.value)">
-          </div>
-          <div class="d-flex align-items-center mb-2">
-            <label class="form-label mb-0 text-end flex-shrink-0" style="width:120px">Category</label>
-            <select class="form-select ms-2 flex-fill" onchange="updateDateField(${index}, 'category', this.value)">${categories.map(c => `<option value="${c.name}" ${c.name === (d.category || (categories[0] ? categories[0].name : "")) ? "selected" : ""}>${c.name}</option>`).join("")}</select>
-          </div>
-          <div class="d-flex align-items-center">
-            <label class="form-label mb-0 text-end flex-shrink-0 text-nowrap" style="width:120px">Type</label>
-            <select class="form-select ms-2" style="width:120px;flex-shrink:0" onchange="updateDateField(${index}, 'type', this.value)">
-              <option value="annual" ${d.type === "annual" ? "selected" : ""}>Annual</option>
-              <option value="once" ${d.type === "once" ? "selected" : ""}>Once</option>
-            </select>
-            <label class="form-label mb-0 text-end flex-shrink-0 text-nowrap ms-2" style="width:50px">Date</label>
-            <div class="d-flex flex-nowrap gap-1 ms-2 flex-fill">${dateHtml}</div>
-            <button class="btn btn-danger editor-btn ms-2" onclick="deleteDate(${index})">Delete</button>
-          </div>
-        </div>
-
-      </div>
-    `;
-
-    list.appendChild(card);
   });
-
-  initFlatpickrDates();
 
   const topTile = document.getElementById("addDateTileTop");
   topTile.innerHTML = `
@@ -147,40 +139,56 @@ function renderDatesEditor() {
       <button class="btn btn-primary editor-btn" onclick="closeDatesEditor()">Done</button>
     </div>
   `;
+
+  if (editingIndex >= 0) {
+    initSingleFlatpickr(editingIndex);
+  }
 }
 
-function initFlatpickrDates() {
-  if (typeof flatpickr === 'undefined') return;
-  document.querySelectorAll('.flatpickr-date').forEach(input => {
-    const showYear = input.dataset.showyear === 'true';
-    const dates = loadDates();
-    const idx = parseInt(input.dataset.index);
-    const d = dates[idx];
-    if (!d) return;
-    const day = d.day || 1;
-    const month = d.month || 1;
-    const year = d.year || new Date().getFullYear();
-    const defaultDate = new Date(year, month - 1, day);
+function editDate(index) {
+  editingIndex = index;
+  renderDatesEditor();
+}
 
-    const fp = flatpickr(input, {
-      dateFormat: showYear ? 'd/m/Y' : 'd/m',
-      defaultDate: defaultDate,
-      allowInput: true,
-      onChange: function(selectedDates, dateStr, instance) {
-        if (selectedDates.length > 0) {
-          const sel = selectedDates[0];
-          const index = parseInt(instance.element.dataset.index);
-          const dates = loadDates();
-          dates[index].day = sel.getDate();
-          dates[index].month = sel.getMonth() + 1;
-          if (showYear) {
-            dates[index].year = sel.getFullYear();
-          }
-          saveDates(dates);
+function cancelEditing() {
+  editingIndex = -1;
+  renderDatesEditor();
+}
+
+function doneEditing() {
+  editingIndex = -1;
+  renderDatesEditor();
+}
+
+function initSingleFlatpickr(index) {
+  if (typeof flatpickr === 'undefined') return;
+  const input = document.querySelector(`.flatpickr-date[data-index="${index}"]`);
+  if (!input) return;
+  const showYear = input.dataset.showyear === 'true';
+  const dates = loadDates();
+  const d = dates[index];
+  if (!d) return;
+  const day = d.day || 1;
+  const month = d.month || 1;
+  const year = d.year || new Date().getFullYear();
+  const defaultDate = new Date(year, month - 1, day);
+
+  flatpickr(input, {
+    dateFormat: showYear ? 'd/m/Y' : 'd/m',
+    defaultDate: defaultDate,
+    allowInput: true,
+    onChange: function(selectedDates, dateStr, instance) {
+      if (selectedDates.length > 0) {
+        const sel = selectedDates[0];
+        const dates = loadDates();
+        dates[index].day = sel.getDate();
+        dates[index].month = sel.getMonth() + 1;
+        if (showYear) {
+          dates[index].year = sel.getFullYear();
         }
+        saveDates(dates);
       }
-    });
-    flatpickrInstances.push(fp);
+    }
   });
 }
 
@@ -195,25 +203,19 @@ function updateDateField(index, field, value) {
     }
   }
   saveDates(dates);
-  lastEditedIndex = index;
   if (field === "type") {
-    switchToTabForIndex(index);
-  } else {
     renderDatesEditor();
   }
 }
 
-function updateDateFieldSilent(index, field, value) {
-  const dates = loadDates();
-  dates[index][field] = value;
-  saveDates(dates);
-}
-
-function deleteDate(index) {
-  const dates = loadDates();
-  dates.splice(index, 1);
-  saveDates(dates);
-  renderDatesEditor();
+function confirmDeleteDate(index) {
+  if (confirm("Delete this date?")) {
+    if (editingIndex === index) editingIndex = -1;
+    const dates = loadDates();
+    dates.splice(index, 1);
+    saveDates(dates);
+    renderDatesEditor();
+  }
 }
 
 function addNewDate() {
@@ -227,5 +229,6 @@ function addNewDate() {
     day: 1
   });
   saveDates(dates);
+  editingIndex = dates.length - 1;
   renderDatesEditor();
 }

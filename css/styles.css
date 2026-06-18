@@ -276,14 +276,6 @@ body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
   padding-top: 60px;
 }
 
-/* ACTIVE TAB HIGHLIGHT */
-#datesTab .nav-link.active {
-  font-weight: 700;
-  border-bottom: 2px solid var(--bs-primary) !important;
-  background-color: rgba(var(--bs-primary-rgb), 0.08);
-  border-bottom-color: var(--bs-primary) !important;
-}
-
 /* EDIT HIGHLIGHT */
 .card-edited {
   box-shadow: inset 0 0 0 3px var(--bs-primary);
