@@ -13,22 +13,30 @@ function getImageColors(dataUrl) {
   if (!dataUrl || !dataUrl.startsWith("data:image/svg+xml,")) {
     return { line: "", fill: "" };
   }
-  const lineMatch = dataUrl.match(/stroke='([^']+)'/);
-  const fillMatch = dataUrl.match(/fill='([^']+)'/);
-  const decode = v => v.startsWith("%23") ? "#" + v.substring(3) : v;
+  const svgPart = dataUrl.substring("data:image/svg+xml,".length);
+  const decoded = decodeURIComponent(svgPart);
+  const decodeVal = v => v && v.startsWith("%23") ? "#" + v.substring(3) : v;
+  const lineMatch = decoded.match(/\bstroke\s*=\s*["']([^"']+)["']/i);
+  const fillMatch = decoded.match(/\bfill\s*=\s*["']([^"']+)["']/i);
   return {
-    line: lineMatch ? decode(lineMatch[1]) : "",
-    fill: fillMatch ? decode(fillMatch[1]) : ""
+    line: lineMatch ? decodeVal(lineMatch[1]) : "",
+    fill: fillMatch ? decodeVal(fillMatch[1]) : ""
   };
 }
 
 function updateSvgColor(dataUrl, attr, newColor) {
   if (!dataUrl || !dataUrl.startsWith("data:image/svg+xml,")) return dataUrl;
+  const svgPart = dataUrl.substring("data:image/svg+xml,".length);
+  const decoded = decodeURIComponent(svgPart);
+  const regex = new RegExp(`\\b${attr}\\s*=\\s*["'][^"']*["']`);
   const encoded = newColor && newColor.startsWith("#")
-    ? "%23" + newColor.substring(1)
+    ? newColor
     : newColor || "none";
-  const regex = new RegExp(attr + `='[^']*'`);
-  return dataUrl.replace(regex, attr + `='${encoded}'`);
+  const updated = decoded.replace(regex, (m) => {
+    const quote = m.includes('"') ? '"' : "'";
+    return `${attr}=${quote}${encoded}${quote}`;
+  });
+  return "data:image/svg+xml," + encodeURIComponent(updated);
 }
 
 function renderImagesEditor() {
@@ -144,6 +152,23 @@ function editImageFillNone(index, checked) {
   renderImagesEditor();
 }
 
+function normalizeSvgForEditing(svgText) {
+  svgText = svgText.replace(/<\?xml[^>]*\?>/g, "").replace(/<!--[\s\S]*?-->/g, "");
+  const rootHasStroke = /<svg[^>]*\bstroke\s*=/i.test(svgText);
+  const rootHasFill = /<svg[^>]*\bfill\s*=/i.test(svgText);
+  const firstStroke = svgText.match(/\bstroke\s*=\s*["']([^"']+)["']/i);
+  const firstFill = svgText.match(/\bfill\s*=\s*["']([^"']+)["']/i);
+  if (!rootHasStroke) {
+    const val = firstStroke ? firstStroke[1] : "currentColor";
+    svgText = svgText.replace(/<svg/i, `<svg stroke="${val}"`);
+  }
+  if (!rootHasFill) {
+    const val = firstFill ? firstFill[1] : "none";
+    svgText = svgText.replace(/<svg/i, `<svg fill="${val}"`);
+  }
+  return svgText;
+}
+
 function openImageUpload(index) {
   const input = document.createElement("input");
   input.type = "file";
@@ -155,11 +180,20 @@ function openImageUpload(index) {
     reader.onload = evt => {
       const images = loadImages();
       if (index < 0 || index >= images.length) return;
-      images[index].data = evt.target.result;
+      if (file.type === "image/svg+xml" || file.name.toLowerCase().endsWith(".svg")) {
+        const svgText = normalizeSvgForEditing(evt.target.result);
+        images[index].data = "data:image/svg+xml," + encodeURIComponent(svgText);
+      } else {
+        images[index].data = evt.target.result;
+      }
       saveImages(images);
       renderImagesEditor();
     };
-    reader.readAsDataURL(file);
+    if (file.type === "image/svg+xml" || (file.name && file.name.toLowerCase().endsWith(".svg"))) {
+      reader.readAsText(file);
+    } else {
+      reader.readAsDataURL(file);
+    }
   };
   input.click();
 }
