@@ -287,7 +287,21 @@ body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
   overflow-y: auto;
   min-height: 0;
 }
-#categoriesEditor, #imagesEditor, #settingsPage {
+#imagesEditor {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 56px);
+  padding-top: 20px;
+}
+#imagesEditorHeader {
+  flex-shrink: 0;
+}
+#imagesEditor #imagesList {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+#categoriesEditor, #settingsPage {
   padding-top: 20px;
 }
 
