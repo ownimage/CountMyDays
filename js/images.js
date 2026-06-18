@@ -87,8 +87,8 @@ function renderImagesEditor() {
             <div class="mb-1"><strong>Name:</strong> ${escapeHtml(img.name)}</div>
             <div class="d-flex gap-2 align-items-center flex-wrap">
               <button class="btn btn-primary editor-btn" onclick="startEditImage(${index})">Edit</button>
-              ${colors.line ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.line}"></span>Line: ${colors.line}</span>` : ''}
-              ${colors.fill ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.fill === 'none' ? 'transparent' : colors.fill}"></span>Fill: ${colors.fill}</span>` : ''}
+              ${colors.line ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.line}"></span>Line</span>` : ''}
+              ${colors.fill ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.fill === 'none' ? 'transparent' : colors.fill}"></span>Fill${colors.fill === 'none' ? ': none' : ''}</span>` : ''}
             </div>
           </div>
           <div class="col-auto">
