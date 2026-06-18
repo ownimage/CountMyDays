@@ -118,6 +118,7 @@ function hideAllEditors() {
 
 function targetDate(d) {
   const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   let year = now.getFullYear();
 
   if (d.type === "once") {
@@ -126,7 +127,7 @@ function targetDate(d) {
 
   const target = new Date(year, d.month - 1, d.day);
 
-  if (d.type === "annual" && target < now) {
+  if (d.type === "annual" && target < today) {
     target.setFullYear(target.getFullYear() + 1);
   }
 
@@ -318,7 +319,9 @@ function renderImagesEditor() {
 function closeDatesEditor() {
   document.getElementById("datesEditor").classList.add("d-none");
   document.getElementById("countdownContainer").classList.remove("d-none");
-  lastEditedIndex = -1;
+  editingIndex = -1;
+  editBuffer = null;
+  isNewDate = false;
   renderCountdowns();
 }
 
