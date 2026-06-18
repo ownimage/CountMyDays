@@ -68,7 +68,7 @@ function renderDatesEditor() {
               </select>
             </div>
             <div class="d-flex gap-2">
-              <button class="btn btn-primary editor-btn" onclick="doneEditing()">OK</button>
+              <button class="btn btn-success editor-btn" onclick="doneEditing()">OK</button>
               <button class="btn btn-secondary editor-btn ms-auto" onclick="cancelEditing()">Cancel</button>
             </div>
           </div>
@@ -110,15 +110,15 @@ function renderDatesEditor() {
   const topTile = document.getElementById("addDateTileTop");
   topTile.innerHTML = `
     <div class="d-flex gap-2">
-      <button class="btn btn-success editor-btn btn-wide" onclick="addNewDate()" ${editingIndex >= 0 ? 'disabled' : ''}>Add Date</button>
-      <button class="btn btn-primary editor-btn btn-wide ms-auto" onclick="closeDatesEditor()" ${editingIndex >= 0 ? 'disabled' : ''}>Done</button>
+      <button class="btn btn-primary editor-btn btn-wide" onclick="addNewDate()" ${editingIndex >= 0 ? 'disabled' : ''}>Add Date</button>
+      <button class="btn btn-success editor-btn btn-wide ms-auto" onclick="closeDatesEditor()" ${editingIndex >= 0 ? 'disabled' : ''}>Done</button>
     </div>
   `;
 
   addTile.innerHTML = `
     <div class="d-flex mt-4">
-      <button class="btn btn-success editor-btn btn-wide" onclick="addNewDate()" ${editingIndex >= 0 ? 'disabled' : ''}>Add Date</button>
-      <button class="btn btn-primary editor-btn btn-wide ms-auto" onclick="closeDatesEditor()" ${editingIndex >= 0 ? 'disabled' : ''}>Done</button>
+      <button class="btn btn-primary editor-btn btn-wide" onclick="addNewDate()" ${editingIndex >= 0 ? 'disabled' : ''}>Add Date</button>
+      <button class="btn btn-success editor-btn btn-wide ms-auto" onclick="closeDatesEditor()" ${editingIndex >= 0 ? 'disabled' : ''}>Done</button>
     </div>
   `;
 

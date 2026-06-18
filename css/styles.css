@@ -268,7 +268,7 @@ body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
 
 /* EDITOR TOP SPACING */
 #datesEditor, #categoriesEditor, #imagesEditor, #settingsPage {
-  padding-top: 60px;
+  padding-top: 20px;
 }
 
 /* EDITOR TITLE WEIGHT */
