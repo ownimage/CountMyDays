@@ -287,13 +287,37 @@ body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
   overflow-y: auto;
   min-height: 0;
 }
-#categoriesEditor, #imagesEditor, #settingsPage {
+#imagesEditor {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 56px);
+  padding-top: 20px;
+}
+#imagesEditorHeader {
+  flex-shrink: 0;
+}
+#imagesEditor #imagesList {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+#categoriesEditor, #settingsPage {
   padding-top: 20px;
 }
 
 /* EDITOR TITLE WEIGHT */
 #datesEditor .editor-title {
   font-weight: 800;
+}
+
+/* COLOUR SWATCH */
+.color-swatch {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid rgba(128,128,128,0.3);
+  flex-shrink: 0;
 }
 
 /* EDIT HIGHLIGHT */

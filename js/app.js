@@ -334,6 +334,8 @@ function closeCategoriesEditor() {
 function closeImagesEditor() {
   document.getElementById("imagesEditor").classList.add("d-none");
   document.getElementById("countdownContainer").classList.remove("d-none");
+  editingImageIndex = -1;
+  isNewImage = false;
   renderCountdowns();
 }
 
