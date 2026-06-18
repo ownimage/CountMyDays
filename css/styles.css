@@ -286,6 +286,9 @@ body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
 .editor-btn {
   min-width: 100px;
 }
+.btn-wide {
+  min-width: 180px;
+}
 
 /* BUILD NUMBER */
 .build-number {

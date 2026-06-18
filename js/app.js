@@ -320,6 +320,8 @@ function closeDatesEditor() {
   document.getElementById("datesEditor").classList.add("d-none");
   document.getElementById("countdownContainer").classList.remove("d-none");
   editingIndex = -1;
+  editBuffer = null;
+  isNewDate = false;
   renderCountdowns();
 }
 
