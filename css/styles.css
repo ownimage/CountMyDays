@@ -276,6 +276,11 @@ body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
   padding-top: 60px;
 }
 
+/* EDITOR TITLE WEIGHT */
+#datesEditor .editor-title {
+  font-weight: 800;
+}
+
 /* EDIT HIGHLIGHT */
 .card-edited {
   box-shadow: inset 0 0 0 3px var(--bs-primary);

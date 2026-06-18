@@ -91,31 +91,17 @@ function renderDatesEditor() {
 
       card.innerHTML = `
         <div class="d-flex gap-1">
-          <div class="flex-shrink-0 d-flex align-items-center">
+          <div class="flex-shrink-0 text-center">
             ${imgSrc ? `<img src="${imgSrc}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
+            <div class="mt-1">${escapeHtml(d.category)}</div>
           </div>
           <div class="flex-fill" style="min-width:0">
+            <div class="fw-bold editor-title mb-2">${escapeHtml(d.name)}</div>
             <div class="d-flex mb-1">
-              <div class="d-flex align-items-center flex-fill">
-                <span class="text-end flex-shrink-0 fw-bold" style="width:120px">Title</span>
-                <span class="ms-2">${escapeHtml(d.name)}</span>
-              </div>
-              <div class="d-flex align-items-center flex-fill ms-3">
-                <span class="text-end flex-shrink-0 fw-bold" style="width:120px">Category</span>
-                <span class="ms-2">${escapeHtml(d.category)}</span>
-              </div>
+              <span>${dateStr}</span>
+              <span class="ms-3"><span class="fw-bold">Type:</span> ${d.type === "annual" ? "Annual" : "Once"}</span>
             </div>
-            <div class="d-flex mb-1">
-              <div class="d-flex align-items-center flex-fill">
-                <span class="text-end flex-shrink-0 fw-bold" style="width:120px">Type</span>
-                <span class="ms-2">${d.type === "annual" ? "Annual" : "Once"}</span>
-              </div>
-              <div class="d-flex align-items-center flex-fill ms-3">
-                <span class="text-end flex-shrink-0 fw-bold" style="width:120px">Date</span>
-                <span class="ms-2">${dateStr}</span>
-              </div>
-            </div>
-            <div class="d-flex gap-2 mt-3">
+            <div class="d-flex gap-2">
               <button class="btn btn-primary editor-btn" onclick="editDate(${index})">Edit</button>
               <button class="btn btn-danger editor-btn ms-auto" onclick="confirmDeleteDate(${index})">Delete</button>
             </div>
