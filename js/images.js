@@ -1,5 +1,6 @@
 let editingImageIndex = -1;
 let isNewImage = false;
+let editImageBackup = null;
 
 function loadImages() {
   return JSON.parse(localStorage.getItem("images") || "[]");
@@ -55,6 +56,8 @@ function renderImagesEditor() {
     if (editingImageIndex === index) {
       const hasData = img.data && img.data.length > 0;
       const colors = getImageColors(img.data);
+      const lineVal = colors.line !== "none" ? colors.line : (img._prevStroke || "#000000");
+      const fillVal = colors.fill !== "none" ? colors.fill : (img._prevFill || "#ffffff");
       card.innerHTML = `
         <div class="row align-items-center">
           <div class="col-auto">
@@ -69,13 +72,13 @@ function renderImagesEditor() {
             <input class="form-control" value="${escapeHtml(img.name)}" onchange="editImageField('name', this.value)">
             <div class="d-flex gap-3 mt-2 align-items-center flex-wrap">
               <label class="form-label mb-0">Line:</label>
-              <input type="color" value="${colors.line && colors.line !== 'none' ? colors.line : '#000000'}" oninput="editImageColor(${index}, 'stroke', this.value)">
+              <input type="color" value="${lineVal}" oninput="editImageColor(${index}, 'stroke', this.value)">
               <label class="form-check-label mb-0">
                 <input type="checkbox" ${colors.line === 'none' || !colors.line ? 'checked' : ''} onchange="editImageStrokeNone(${index}, this.checked)">
                 none
               </label>
               <label class="form-label mb-0">Fill:</label>
-              <input type="color" value="${colors.fill && colors.fill !== 'none' ? colors.fill : '#ffffff'}" oninput="editImageColor(${index}, 'fill', this.value)">
+              <input type="color" value="${fillVal}" oninput="editImageColor(${index}, 'fill', this.value)">
               <label class="form-check-label mb-0">
                 <input type="checkbox" ${colors.fill === 'none' || !colors.fill ? 'checked' : ''} onchange="editImageFillNone(${index}, this.checked)">
                 none
@@ -122,6 +125,8 @@ function renderImagesEditor() {
 }
 
 function startEditImage(index) {
+  const images = loadImages();
+  editImageBackup = JSON.parse(JSON.stringify(images[index]));
   editingImageIndex = index;
   isNewImage = false;
   renderImagesEditor();
@@ -149,9 +154,16 @@ function editImageFillNone(index, checked) {
   const images = loadImages();
   if (index < 0 || index >= images.length) return;
   const img = images[index];
-  const fillVal = checked ? "none" : "#000000";
-  img.data = updateSvgColor(img.data, "fill", fillVal);
-  img.fillColor = fillVal;
+  if (checked) {
+    const colors = getImageColors(img.data);
+    img._prevFill = colors.fill && colors.fill !== "none" ? colors.fill : null;
+    img.data = updateSvgColor(img.data, "fill", "none");
+    img.fillColor = "none";
+  } else {
+    const restore = img._prevFill || "#000000";
+    img.data = updateSvgColor(img.data, "fill", restore);
+    img.fillColor = restore;
+  }
   saveImages(images);
   renderImagesEditor();
 }
@@ -160,9 +172,16 @@ function editImageStrokeNone(index, checked) {
   const images = loadImages();
   if (index < 0 || index >= images.length) return;
   const img = images[index];
-  const strokeVal = checked ? "none" : "#000000";
-  img.data = updateSvgColor(img.data, "stroke", strokeVal);
-  img.lineColor = strokeVal;
+  if (checked) {
+    const colors = getImageColors(img.data);
+    img._prevStroke = colors.line && colors.line !== "none" ? colors.line : null;
+    img.data = updateSvgColor(img.data, "stroke", "none");
+    img.lineColor = "none";
+  } else {
+    const restore = img._prevStroke || "#000000";
+    img.data = updateSvgColor(img.data, "stroke", restore);
+    img.lineColor = restore;
+  }
   saveImages(images);
   renderImagesEditor();
 }
@@ -229,17 +248,23 @@ function addNewImage() {
 function doneImageEdit(index) {
   editingImageIndex = -1;
   isNewImage = false;
+  editImageBackup = null;
   renderImagesEditor();
 }
 
 function cancelImageEdit() {
-  if (isNewImage && editingImageIndex >= 0) {
+  if (editingImageIndex >= 0) {
     const images = loadImages();
-    images.splice(editingImageIndex, 1);
+    if (isNewImage) {
+      images.splice(editingImageIndex, 1);
+    } else if (editImageBackup) {
+      images[editingImageIndex] = editImageBackup;
+    }
     saveImages(images);
   }
   editingImageIndex = -1;
   isNewImage = false;
+  editImageBackup = null;
   renderImagesEditor();
 }
 
