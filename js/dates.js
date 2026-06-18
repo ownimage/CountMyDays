@@ -18,7 +18,7 @@ function renderDatesEditor() {
   const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
   const filtered = allDates
-    .map((d, i) => ({ d, i }))
+    .map((d, index) => ({ d, index }))
     .filter(({ d }) => {
       if (editingIndex >= 0) return true;
       if (categoryFilter && d.category !== categoryFilter) return false;
@@ -148,12 +148,11 @@ function renderEditorFilters(allDates) {
     return;
   }
   el.classList.remove("d-none");
-  const cats = [...new Set(allDates.map(d => d.category).filter(Boolean))];
+  const cats = loadCategories().map(c => c.name).filter(Boolean);
   el.innerHTML = `
-    <div class="d-flex gap-1 align-items-center">
-      <div class="flex-shrink-0" style="width:100px"></div>
+    <div class="d-flex gap-2 align-items-center">
       <select class="form-select" style="width:auto;min-width:160px" onchange="setCategoryFilter(this.value)">
-        <option value="">All Categories</option>
+        <option value="">All</option>
         ${cats.map(c => `<option value="${c}" ${categoryFilter === c ? 'selected' : ''}>${c}</option>`).join("")}
       </select>
       <input class="form-control" type="search" placeholder="Search titles..." style="max-width:260px" value="${escapeHtml(titleSearch)}" oninput="setTitleSearch(this.value)">
@@ -294,8 +293,13 @@ function addNewDate() {
   };
   dates.push(newDate);
   saveDates(dates);
+  categoryFilter = "";
+  titleSearch = "";
   editBuffer = JSON.parse(JSON.stringify(newDate));
   editingIndex = dates.length - 1;
   isNewDate = true;
   renderDatesEditor();
+  const cards = document.querySelectorAll("#editorList .card");
+  const lastCard = cards[cards.length - 1];
+  if (lastCard) lastCard.scrollIntoView({ behavior: "smooth", block: "center" });
 }
