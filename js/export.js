@@ -166,7 +166,6 @@ function renderExportWizard() {
       <div class="d-flex gap-2 align-items-center mb-3">
         <input class="form-control" type="search" placeholder="Search category names..." value="${escapeHtml(ew.catFilterName)}" oninput="ew.catFilterName=this.value;ewSaveCheckboxes();renderExportWizard()">
       </div>
-      <p class="mb-2">Choose which categories to export:</p>
       ${sorted.map(c => {
         const realIndex = allCats.indexOf(c);
         const imgName = c.image;
