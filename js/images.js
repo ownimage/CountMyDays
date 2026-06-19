@@ -1,6 +1,7 @@
 let editingImageIndex = -1;
 let isNewImage = false;
 let editImageBackup = null;
+let imageNameSearch = "";
 
 function loadImages() {
   return JSON.parse(localStorage.getItem("images") || "[]");
@@ -43,17 +44,26 @@ function updateSvgColor(dataUrl, attr, newColor) {
 function renderImagesEditor() {
   const list = document.getElementById("imagesList");
   const topTile = document.getElementById("addImageTileTop");
+  const filterEl = document.getElementById("imageFilters");
 
   list.innerHTML = "";
   topTile.innerHTML = "";
+  filterEl.innerHTML = "";
 
   const images = loadImages();
 
-  images.forEach((img, index) => {
-    const card = document.createElement("div");
-    card.className = "card p-3 mb-3" + (index === editingImageIndex ? " card-edited" : "");
+  const filtered = images.filter(img => {
+    if (editingImageIndex >= 0) return true;
+    if (imageNameSearch && !img.name.toLowerCase().includes(imageNameSearch.toLowerCase())) return false;
+    return true;
+  });
 
-    if (editingImageIndex === index) {
+  filtered.forEach((img, index) => {
+    const realIndex = images.indexOf(img);
+    const card = document.createElement("div");
+    card.className = "card p-3 mb-3" + (realIndex === editingImageIndex ? " card-edited" : "");
+
+    if (editingImageIndex === realIndex) {
       const hasData = img.data && img.data.length > 0;
       const colors = getImageColors(img.data);
       const lineVal = colors.line !== "none" ? colors.line : (img._prevStroke || "#000000");
@@ -65,28 +75,28 @@ function renderImagesEditor() {
               ? `<img src="${img.data}" class="date-img">`
               : `<div class="date-img d-flex align-items-center justify-content-center text-secondary border rounded">No image</div>`
             }
-            <button class="btn btn-outline-primary btn-sm mt-2 w-100" onclick="openImageUpload(${index})">${hasData ? "Change" : "Upload"}</button>
+            <button class="btn btn-outline-primary btn-sm mt-2 w-100" onclick="openImageUpload(${realIndex})">${hasData ? "Change" : "Upload"}</button>
           </div>
           <div class="col">
             <label class="form-label">Name</label>
             <input class="form-control" value="${escapeHtml(img.name)}" onchange="editImageField('name', this.value)">
             <div class="d-flex gap-3 mt-2 align-items-center flex-wrap">
               <label class="form-label mb-0">Line:</label>
-              <input type="color" value="${lineVal}" oninput="editImageColor(${index}, 'stroke', this.value)">
+              <input type="color" value="${lineVal}" oninput="editImageColor(${realIndex}, 'stroke', this.value)">
               <label class="form-check-label mb-0">
-                <input type="checkbox" ${colors.line === 'none' || !colors.line ? 'checked' : ''} onchange="editImageStrokeNone(${index}, this.checked)">
+                <input type="checkbox" ${colors.line === 'none' || !colors.line ? 'checked' : ''} onchange="editImageStrokeNone(${realIndex}, this.checked)">
                 none
               </label>
               <label class="form-label mb-0">Fill:</label>
-              <input type="color" value="${fillVal}" oninput="editImageColor(${index}, 'fill', this.value)">
+              <input type="color" value="${fillVal}" oninput="editImageColor(${realIndex}, 'fill', this.value)">
               <label class="form-check-label mb-0">
-                <input type="checkbox" ${colors.fill === 'none' || !colors.fill ? 'checked' : ''} onchange="editImageFillNone(${index}, this.checked)">
+                <input type="checkbox" ${colors.fill === 'none' || !colors.fill ? 'checked' : ''} onchange="editImageFillNone(${realIndex}, this.checked)">
                 none
               </label>
             </div>
           </div>
           <div class="col-auto d-flex gap-2">
-            <button class="btn btn-success editor-btn" onclick="doneImageEdit(${index})">OK</button>
+            <button class="btn btn-success editor-btn" onclick="doneImageEdit(${realIndex})">OK</button>
             <button class="btn btn-secondary editor-btn" onclick="cancelImageEdit()">Cancel</button>
           </div>
         </div>
@@ -101,13 +111,13 @@ function renderImagesEditor() {
           <div class="col">
             <div class="mb-1"><strong>Name:</strong> ${escapeHtml(img.name)}</div>
             <div class="d-flex gap-2 align-items-center flex-wrap">
-              <button class="btn btn-primary editor-btn" onclick="startEditImage(${index})">Edit</button>
+              <button class="btn btn-primary editor-btn" onclick="startEditImage(${realIndex})">Edit</button>
               ${colors.line ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.line === 'none' ? 'transparent' : colors.line}"></span>Line${colors.line === 'none' ? ': none' : ''}</span>` : ''}
               ${colors.fill ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.fill === 'none' ? 'transparent' : colors.fill}"></span>Fill${colors.fill === 'none' ? ': none' : ''}</span>` : ''}
             </div>
           </div>
           <div class="col-auto">
-            <button class="btn btn-danger editor-btn" onclick="deleteImage(${index})">Delete</button>
+            <button class="btn btn-danger editor-btn" onclick="deleteImage(${realIndex})">Delete</button>
           </div>
         </div>
       `;
@@ -122,6 +132,27 @@ function renderImagesEditor() {
       <button class="btn btn-success editor-btn btn-wide ms-auto" onclick="closeImagesEditor()" ${editingImageIndex >= 0 ? 'disabled' : ''}>Done</button>
     </div>
   `;
+
+  if (editingImageIndex >= 0) {
+    filterEl.classList.add("d-none");
+  } else {
+    filterEl.classList.remove("d-none");
+    filterEl.innerHTML = `
+      <div class="d-flex gap-2 align-items-center">
+        <input class="form-control" type="search" placeholder="Search image names..." value="${escapeHtml(imageNameSearch)}" oninput="setImageNameSearch(this.value)">
+      </div>
+    `;
+  }
+}
+
+function setImageNameSearch(val) {
+  imageNameSearch = val;
+  renderImagesEditor();
+  const input = document.querySelector('#imageFilters input[type="search"]');
+  if (input) {
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+  }
 }
 
 function startEditImage(index) {
@@ -237,6 +268,7 @@ function addNewImage() {
   const name = "New Image " + (images.length + 1);
   images.push({ name, data: "" });
   saveImages(images);
+  imageNameSearch = "";
   editingImageIndex = images.length - 1;
   isNewImage = true;
   renderImagesEditor();
