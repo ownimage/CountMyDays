@@ -298,15 +298,6 @@ function renderDatesEditor() {
   list.innerHTML = dates.map((d, i) => `<div class="mb-2"><strong>${escapeHtml(d.name)}</strong> — ${escapeHtml(d.category)} — ${d.type}</div>`).join("");
 }
 
-function renderCategoriesEditor() {
-  const el = document.getElementById("categoriesEditor");
-  if (!el) return;
-  const categories = loadCategories();
-  el.innerHTML = `<h2 class="mb-3">Edit Categories</h2><div id="categoriesList"></div><div class="mt-3"><button class="btn btn-primary" onclick="addSampleCategory()">Add Sample Category</button> <button class="btn btn-secondary" onclick="closeCategoriesEditor()">Done</button></div>`;
-  const list = document.getElementById("categoriesList");
-  list.innerHTML = categories.map((c, i) => `<div class="mb-2"><strong>${escapeHtml(c.name)}</strong></div>`).join("");
-}
-
 function renderImagesEditor() {
   const el = document.getElementById("imagesEditor");
   if (!el) return;

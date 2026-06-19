@@ -301,7 +301,21 @@ body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
   overflow-y: auto;
   min-height: 0;
 }
-#categoriesEditor, #settingsPage {
+#categoriesEditor {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 56px);
+  padding-top: 20px;
+}
+#categoriesEditorHeader {
+  flex-shrink: 0;
+}
+#categoriesEditor #categoriesList {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+#settingsPage {
   padding-top: 20px;
 }
 
