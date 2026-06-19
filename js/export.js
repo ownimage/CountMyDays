@@ -23,7 +23,8 @@ function startExportWizard(type) {
     selectedCategoryIndices: [],
     catFilterName: "",
     imagesChoice: "all",
-    selectedImageIndices: []
+    selectedImageIndices: [],
+    imageFilterName: ""
   };
   document.getElementById("exportWizardModal").classList.remove("d-none");
   renderExportWizard();
@@ -116,7 +117,7 @@ function renderExportWizard() {
         const imgSrc = img ? img.data : "";
         return `
         <div class="d-flex align-items-center gap-2 mb-2">
-          ${imgSrc ? `<img src="${imgSrc}" style="width:32px;height:32px;object-fit:contain">` : `<div style="width:32px;height:32px" class="text-secondary d-flex align-items-center justify-content-center">No img</div>`}
+          ${imgSrc ? `<img src="${imgSrc}" style="width:32px;height:32px;object-fit:contain">` : `<div style="width:32px;height:32px"></div>`}
           <div class="form-check mb-0">
             <input class="form-check-input ew-date-cb" type="checkbox" value="${item.index}" data-index="${item.index}" ${ew.selectedDateIndices.includes(item.index) ? "checked" : ""}>
             <label class="form-check-label">${escapeHtml(item.name)} — ${formatDate(item.target)} — ${escapeHtml(item.category || "No category")}</label>
@@ -173,7 +174,7 @@ function renderExportWizard() {
         const imgSrc = img ? img.data : "";
         return `
         <div class="d-flex align-items-center gap-2 mb-2">
-          ${imgSrc ? `<img src="${imgSrc}" style="width:32px;height:32px;object-fit:contain">` : `<div style="width:32px;height:32px" class="text-secondary d-flex align-items-center justify-content-center">No img</div>`}
+          ${imgSrc ? `<img src="${imgSrc}" style="width:32px;height:32px;object-fit:contain">` : `<div style="width:32px;height:32px"></div>`}
           <div class="form-check mb-0">
             <input class="form-check-input ew-cat-cb" type="checkbox" value="${realIndex}" data-index="${realIndex}" ${ew.selectedCategoryIndices.includes(realIndex) ? "checked" : ""}>
             <label class="form-check-label">${escapeHtml(c.name)}</label>
@@ -208,18 +209,26 @@ function renderExportWizard() {
   } else if (ew.step === "images2") {
     title.textContent = "Select Images";
     const images = loadImages();
+    const filtered = images.filter(img => {
+      if (ew.imageFilterName && !img.name.toLowerCase().includes(ew.imageFilterName.toLowerCase())) return false;
+      return true;
+    });
+    const sorted = filtered.sort((a, b) => a.name.localeCompare(b.name));
     body.innerHTML = `
-      <p class="mb-2">Choose which images to export:</p>
-      <div class="form-check mb-2">
-        <input class="form-check-input" type="checkbox" id="ewImgsToggleAll" onchange="ewImgsToggleAll(this.checked)">
-        <label class="form-check-label" for="ewImgsToggleAll"><strong>Select all</strong></label>
+      <div class="d-flex gap-2 align-items-center mb-3">
+        <input class="form-control" type="search" placeholder="Search image names..." value="${escapeHtml(ew.imageFilterName)}" oninput="ew.imageFilterName=this.value;ewSaveCheckboxes();renderExportWizard()">
       </div>
-      ${images.map((img, i) => `
-        <div class="form-check">
-          <input class="form-check-input ew-img-cb" type="checkbox" value="${i}" data-index="${i}" ${ew.selectedImageIndices.includes(i) ? "checked" : ""}>
-          <label class="form-check-label">${escapeHtml(img.name)}</label>
-        </div>
-      `).join("")}
+      ${sorted.map(img => {
+        const realIndex = images.indexOf(img);
+        return `
+        <div class="d-flex align-items-center gap-2 mb-2">
+          ${img.data ? `<img src="${img.data}" style="width:32px;height:32px;object-fit:contain">` : `<div style="width:32px;height:32px"></div>`}
+          <div class="form-check mb-0">
+            <input class="form-check-input ew-img-cb" type="checkbox" value="${realIndex}" data-index="${realIndex}" ${ew.selectedImageIndices.includes(realIndex) ? "checked" : ""}>
+            <label class="form-check-label">${escapeHtml(img.name)}</label>
+          </div>
+        </div>`;
+      }).join("")}
     `;
     footer.innerHTML = `
       <button class="btn btn-secondary editor-btn btn-wide" onclick="exportWizardBack()">Back</button>
@@ -344,10 +353,6 @@ function toggleCategoriesCascade() {
   const specific = document.getElementById("ewCatsSpecific");
   if (!wrapper || !all || !specific) return;
   wrapper.style.display = (all.checked || specific.checked) ? "block" : "none";
-}
-
-function ewImgsToggleAll(checked) {
-  document.querySelectorAll(".ew-img-cb").forEach(cb => cb.checked = checked);
 }
 
 function finishExportWizard() {
