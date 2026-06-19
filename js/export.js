@@ -21,6 +21,7 @@ function startExportWizard(type) {
     categoriesCascade: true,
     categoriesChoice: "all",
     selectedCategoryIndices: [],
+    catFilterName: "",
     imagesChoice: "all",
     selectedImageIndices: []
   };
@@ -96,11 +97,11 @@ function renderExportWizard() {
       .sort((a, b) => a.target - b.target);
     body.innerHTML = `
       <div class="d-flex gap-2 align-items-center mb-3">
-        <select class="form-select" style="width:auto;min-width:160px" onchange="ew.dateFilterCategory=this.value;renderExportWizard()">
+        <select class="form-select" style="width:auto;min-width:160px" onchange="ew.dateFilterCategory=this.value;ewSaveCheckboxes();renderExportWizard()">
           <option value="">All</option>
           ${catNames.map(c => `<option value="${c}" ${ew.dateFilterCategory === c ? 'selected' : ''}>${escapeHtml(c)}</option>`).join("")}
         </select>
-        <input class="form-control" type="search" placeholder="Search date names..." value="${escapeHtml(ew.dateFilterName)}" oninput="ew.dateFilterName=this.value;renderExportWizard()">
+        <input class="form-control" type="search" placeholder="Search date names..." value="${escapeHtml(ew.dateFilterName)}" oninput="ew.dateFilterName=this.value;ewSaveCheckboxes();renderExportWizard()">
       </div>
       ${withDate.map(item => {
         const category = categories.find(c => c.name === item.category);
@@ -148,19 +149,32 @@ function renderExportWizard() {
     `;
   } else if (ew.step === "categories2") {
     title.textContent = "Select Categories";
-    const categories = loadCategories();
+    const allCats = loadCategories();
+    const images = loadImages();
+    const filtered = allCats.filter(c => {
+      if (ew.catFilterName && !c.name.toLowerCase().includes(ew.catFilterName.toLowerCase())) return false;
+      return true;
+    });
+    const sorted = filtered.sort((a, b) => a.name.localeCompare(b.name));
     body.innerHTML = `
-      <p class="mb-2">Choose which categories to export:</p>
-      <div class="form-check mb-2">
-        <input class="form-check-input" type="checkbox" id="ewCatsToggleAll" onchange="ewCatsToggleAll(this.checked)">
-        <label class="form-check-label" for="ewCatsToggleAll"><strong>Select all</strong></label>
+      <div class="d-flex gap-2 align-items-center mb-3">
+        <input class="form-control" type="search" placeholder="Search category names..." value="${escapeHtml(ew.catFilterName)}" oninput="ew.catFilterName=this.value;ewSaveCheckboxes();renderExportWizard()">
       </div>
-      ${categories.map((c, i) => `
-        <div class="form-check">
-          <input class="form-check-input ew-cat-cb" type="checkbox" value="${i}" data-index="${i}" ${ew.selectedCategoryIndices.includes(i) ? "checked" : ""}>
-          <label class="form-check-label">${escapeHtml(c.name)}</label>
-        </div>
-      `).join("")}
+      <p class="mb-2">Choose which categories to export:</p>
+      ${sorted.map(c => {
+        const realIndex = allCats.indexOf(c);
+        const imgName = c.image;
+        const img = images.find(i => i.name === imgName);
+        const imgSrc = img ? img.data : "";
+        return `
+        <div class="d-flex align-items-center gap-2 mb-2">
+          ${imgSrc ? `<img src="${imgSrc}" style="width:32px;height:32px;object-fit:contain">` : `<div style="width:32px;height:32px" class="text-secondary d-flex align-items-center justify-content-center">No img</div>`}
+          <div class="form-check mb-0">
+            <input class="form-check-input ew-cat-cb" type="checkbox" value="${realIndex}" data-index="${realIndex}" ${ew.selectedCategoryIndices.includes(realIndex) ? "checked" : ""}>
+            <label class="form-check-label">${escapeHtml(c.name)}</label>
+          </div>
+        </div>`;
+      }).join("")}
     `;
     footer.innerHTML = `
       <button class="btn btn-secondary editor-btn btn-wide" onclick="exportWizardBack()">Back</button>
@@ -274,6 +288,36 @@ function exportWizardBack() {
   }
 }
 
+function ewSaveCheckboxes() {
+  const dateCbs = document.querySelectorAll(".ew-date-cb");
+  if (dateCbs.length > 0) {
+    const checked = new Set(Array.from(document.querySelectorAll(".ew-date-cb:checked")).map(cb => parseInt(cb.value)));
+    const visible = new Set(Array.from(dateCbs).map(cb => parseInt(cb.value)));
+    const kept = new Set(ew.selectedDateIndices);
+    checked.forEach(i => kept.add(i));
+    visible.forEach(i => { if (!checked.has(i)) kept.delete(i); });
+    ew.selectedDateIndices = Array.from(kept);
+  }
+  const catCbs = document.querySelectorAll(".ew-cat-cb");
+  if (catCbs.length > 0) {
+    const checked = new Set(Array.from(document.querySelectorAll(".ew-cat-cb:checked")).map(cb => parseInt(cb.value)));
+    const visible = new Set(Array.from(catCbs).map(cb => parseInt(cb.value)));
+    const kept = new Set(ew.selectedCategoryIndices);
+    checked.forEach(i => kept.add(i));
+    visible.forEach(i => { if (!checked.has(i)) kept.delete(i); });
+    ew.selectedCategoryIndices = Array.from(kept);
+  }
+  const imgCbs = document.querySelectorAll(".ew-img-cb");
+  if (imgCbs.length > 0) {
+    const checked = new Set(Array.from(document.querySelectorAll(".ew-img-cb:checked")).map(cb => parseInt(cb.value)));
+    const visible = new Set(Array.from(imgCbs).map(cb => parseInt(cb.value)));
+    const kept = new Set(ew.selectedImageIndices);
+    checked.forEach(i => kept.add(i));
+    visible.forEach(i => { if (!checked.has(i)) kept.delete(i); });
+    ew.selectedImageIndices = Array.from(kept);
+  }
+}
+
 function toggleDatesCascade() {
   const wrapper = document.getElementById("ewDatesCascadeWrapper");
   const all = document.getElementById("ewDatesAll");
@@ -288,14 +332,6 @@ function toggleCategoriesCascade() {
   const specific = document.getElementById("ewCatsSpecific");
   if (!wrapper || !all || !specific) return;
   wrapper.style.display = (all.checked || specific.checked) ? "block" : "none";
-}
-
-function ewDatesToggleAll(checked) {
-  document.querySelectorAll(".ew-date-cb").forEach(cb => cb.checked = checked);
-}
-
-function ewCatsToggleAll(checked) {
-  document.querySelectorAll(".ew-cat-cb").forEach(cb => cb.checked = checked);
 }
 
 function ewImgsToggleAll(checked) {
