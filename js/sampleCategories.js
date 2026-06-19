@@ -1,9 +1,9 @@
 const defaultCategories = [
-  { name: "Birthday", image: null },
-  { name: "Holiday", image: null },
-  { name: "Event", image: null },
-  { name: "Travel", image: null },
-  { name: "Work", image: null }
+  { name: "Birthday", image: "Person" },
+  { name: "Holiday", image: "Island" },
+  { name: "Event", image: "Event" },
+  { name: "Travel", image: "Plane" },
+  { name: "Work", image: "Work" }
 ];
 
 if (!localStorage.getItem("categories")) {
