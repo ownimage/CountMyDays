@@ -136,9 +136,9 @@ function confirmClearAllData() {
   const modalEl = document.getElementById("deleteConfirmModal");
   document.getElementById("deleteConfirmMessage").textContent = "Clear ALL data? This cannot be undone.";
   document.getElementById("deleteConfirmBtn").onclick = function() {
-    localStorage.removeItem("dates");
-    localStorage.removeItem("categories");
-    localStorage.removeItem("images");
+    localStorage.setItem("dates", "[]");
+    localStorage.setItem("categories", "[]");
+    localStorage.setItem("images", "[]");
     localStorage.setItem("selectedCategory", "");
     bootstrap.Modal.getInstance(modalEl).hide();
     closeSettings();
