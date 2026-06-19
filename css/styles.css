@@ -181,7 +181,9 @@ body.font-size-large #imagesEditor .form-select,
 body.font-size-large #deleteConfirmModal,
 body.font-size-large #deleteConfirmModal .btn,
 body.font-size-large #exportWizardModal,
-body.font-size-large #exportWizardModal .btn {
+body.font-size-large #exportWizardModal .btn,
+body.font-size-large #qrExportModal,
+body.font-size-large #qrExportModal .btn {
   font-size: 1.125rem;
 }
 body.font-size-xlarge,
@@ -210,7 +212,9 @@ body.font-size-xlarge #imagesEditor .form-select,
 body.font-size-xlarge #deleteConfirmModal,
 body.font-size-xlarge #deleteConfirmModal .btn,
 body.font-size-xlarge #exportWizardModal,
-body.font-size-xlarge #exportWizardModal .btn {
+body.font-size-xlarge #exportWizardModal .btn,
+body.font-size-xlarge #qrExportModal,
+body.font-size-xlarge #qrExportModal .btn {
   font-size: 1.3rem;
 }
 body.font-size-jumbo,
@@ -239,7 +243,9 @@ body.font-size-jumbo #imagesEditor .form-select,
 body.font-size-jumbo #deleteConfirmModal,
 body.font-size-jumbo #deleteConfirmModal .btn,
 body.font-size-jumbo #exportWizardModal,
-body.font-size-jumbo #exportWizardModal .btn {
+body.font-size-jumbo #exportWizardModal .btn,
+body.font-size-jumbo #qrExportModal,
+body.font-size-jumbo #qrExportModal .btn {
   font-size: 1.6rem;
 }
 
