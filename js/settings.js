@@ -66,6 +66,12 @@ function openSettings() {
   const autoHideCb = document.getElementById("autoHideMenu");
   if (autoHideCb) autoHideCb.checked = autoHide;
 
+  const showDanger = localStorage.getItem("showDanger") === "true";
+  const showDangerCb = document.getElementById("showDanger");
+  if (showDangerCb) showDangerCb.checked = showDanger;
+  const dangerRow = document.getElementById("clearAllDataRow");
+  if (dangerRow) dangerRow.classList.toggle("d-none", !showDanger);
+
   const savedMax = localStorage.getItem("maxCountdowns") || "10";
   const maxSel = document.getElementById("maxCountdownsSelector");
   if (maxSel) maxSel.value = savedMax;
@@ -118,6 +124,26 @@ function resetAutoHideTimer() {
 
 function changeMaxCountdowns(value) {
   localStorage.setItem("maxCountdowns", value);
+}
+
+function changeShowDanger(enabled) {
+  localStorage.setItem("showDanger", enabled);
+  const row = document.getElementById("clearAllDataRow");
+  if (row) row.classList.toggle("d-none", !enabled);
+}
+
+function confirmClearAllData() {
+  const modalEl = document.getElementById("deleteConfirmModal");
+  document.getElementById("deleteConfirmMessage").textContent = "Clear ALL data? This cannot be undone.";
+  document.getElementById("deleteConfirmBtn").onclick = function() {
+    localStorage.setItem("dates", "[]");
+    localStorage.setItem("categories", "[]");
+    localStorage.setItem("images", "[]");
+    localStorage.setItem("selectedCategory", "");
+    bootstrap.Modal.getInstance(modalEl).hide();
+    closeSettings();
+  };
+  new bootstrap.Modal(modalEl).show();
 }
 
 function changeAutoHideMenu(enabled) {

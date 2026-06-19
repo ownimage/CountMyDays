@@ -76,6 +76,7 @@
       <div id="imagesEditorHeader">
         <h2 class="mb-3">Edit Images</h2>
         <div id="addImageTileTop" class="mb-3"></div>
+        <div id="imageFilters" class="mb-3"></div>
       </div>
       <div id="imagesList"></div>
       <div id="addImageTile" class="mt-3"></div>
@@ -146,6 +147,15 @@
         </div>
       </div>
 
+      <div class="row mb-4 align-items-center col-md-8">
+        <div class="col-4 text-end"><label class="form-label mb-0">Show danger</label></div>
+        <div class="col-8">
+          <div class="form-check form-switch mt-1">
+            <input id="showDanger" class="form-check-input" type="checkbox" onchange="changeShowDanger(this.checked)">
+          </div>
+        </div>
+      </div>
+
       <div class="mt-4 row align-items-center col-md-8">
         <div class="col-4 text-end"></div>
         <div class="col-8">
@@ -156,9 +166,24 @@
       </div>
 
       <div class="mt-5 small build-number">Build <span id="buildNumber"></span></div>
+      <div id="clearAllDataRow" class="mt-4 row align-items-center col-md-8 d-none">
+        <div class="col-4 text-end"></div>
+        <div class="col-8">
+          <button class="btn btn-danger editor-btn btn-wide" onclick="confirmClearAllData()">Clear All Data</button>
+        </div>
+      </div>
     </div>
     <script>document.getElementById("buildNumber").textContent = BUILD_NUMBER;</script>
 
+  </div>
+
+  <!-- EXPORT WIZARD MODAL -->
+  <div id="exportWizardModal" class="qr-modal d-none">
+    <div class="qr-modal-content">
+      <h3 id="exportWizardTitle">Export Wizard</h3>
+      <div id="exportWizardBody" class="qr-scroll" style="text-align:left"></div>
+      <div id="exportWizardFooter" class="d-flex gap-2 mt-3 justify-content-center"></div>
+    </div>
   </div>
 
   <!-- QR EXPORT MODAL -->
@@ -169,7 +194,7 @@
 
       <div id="qrList" class="qr-scroll"></div>
 
-      <button class="btn btn-secondary mt-3" onclick="closeQRExportModal()">Close</button>
+      <button class="btn btn-success editor-btn btn-wide mt-3" onclick="closeQRExportModal()">Close</button>
     </div>
   </div>
 
@@ -222,6 +247,7 @@
   document.write('<script src="js/dates.js?v=' + BUILD_NUMBER + '"><\/script>');
   document.write('<script src="js/categories.js?v=' + BUILD_NUMBER + '"><\/script>');
   document.write('<script src="js/images.js?v=' + BUILD_NUMBER + '"><\/script>');
+  document.write('<script src="js/export.js?v=' + BUILD_NUMBER + '"><\/script>');
   </script>
 
 </body>
