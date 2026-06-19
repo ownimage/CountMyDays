@@ -151,7 +151,7 @@ function renderEditorFilters(allDates) {
         <option value="">All</option>
         ${cats.map(c => `<option value="${c}" ${categoryFilter === c ? 'selected' : ''}>${c}</option>`).join("")}
       </select>
-      <input class="form-control" type="search" placeholder="Search titles..." style="max-width:260px" value="${escapeHtml(titleSearch)}" oninput="setTitleSearch(this.value)">
+      <input class="form-control" type="search" placeholder="Search titles..." value="${escapeHtml(titleSearch)}" oninput="setTitleSearch(this.value)">
     </div>
   `;
 }
