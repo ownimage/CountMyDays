@@ -75,7 +75,7 @@ function renderImagesEditor() {
               ? `<img src="${img.data}" class="date-img">`
               : `<div class="date-img d-flex align-items-center justify-content-center text-secondary border rounded">No image</div>`
             }
-            <button class="btn btn-outline-primary btn-sm mt-2 w-100" onclick="openImageUpload(${realIndex})">Upload</button>
+            <button class="btn btn-primary btn-sm mt-2 w-100" onclick="openImageUpload(${realIndex})">Upload</button>
           </div>
           <div class="col">
             <input class="form-control" value="${escapeHtml(img.name)}" onchange="editImageField('name', this.value)">
@@ -108,7 +108,7 @@ function renderImagesEditor() {
             <img src="${img.data}" class="date-img">
           </div>
           <div class="col">
-            <div class="mb-1"><strong>Name:</strong> ${escapeHtml(img.name)}</div>
+            <div class="mb-1">${escapeHtml(img.name)}</div>
             <div class="d-flex gap-2 align-items-center flex-wrap">
               <button class="btn btn-primary editor-btn" onclick="startEditImage(${realIndex})">Edit</button>
               ${colors.line ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.line === 'none' ? 'transparent' : colors.line}"></span>Line${colors.line === 'none' ? ': none' : ''}</span>` : ''}
