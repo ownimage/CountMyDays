@@ -110,13 +110,13 @@ function renderImagesEditor() {
           <div class="col">
             <div class="mb-1">${escapeHtml(img.name)}</div>
             <div class="d-flex gap-2 align-items-center flex-wrap">
-              <button class="btn btn-primary editor-btn" onclick="startEditImage(${realIndex})">Edit</button>
+              <button class="btn btn-primary editor-btn" onclick="startEditImage(${realIndex})" ${editingImageIndex >= 0 ? 'disabled' : ''}>Edit</button>
               ${colors.line ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.line === 'none' ? 'transparent' : colors.line}"></span>Line${colors.line === 'none' ? ': none' : ''}</span>` : ''}
               ${colors.fill ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.fill === 'none' ? 'transparent' : colors.fill}"></span>Fill${colors.fill === 'none' ? ': none' : ''}</span>` : ''}
             </div>
           </div>
           <div class="col-auto">
-            <button class="btn btn-danger editor-btn" onclick="deleteImage(${realIndex})">Delete</button>
+            <button class="btn btn-danger editor-btn" onclick="deleteImage(${realIndex})" ${editingImageIndex >= 0 ? 'disabled' : ''}>Delete</button>
           </div>
         </div>
       `;
