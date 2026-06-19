@@ -185,12 +185,12 @@ function renderCountdowns() {
           <div class="d-flex gap-1">
             <div>
               ${imgSrc ? `<img src="${imgSrc}" class="countdown-img d-block mx-auto">` : `<div class="countdown-img d-flex align-items-center justify-content-center text-secondary">No img</div>`}
+              <div class="mt-1">${escapeHtml(d.category)}</div>
             </div>
             <div>
-              ${dateImgSrc ? `<img src="${dateImgSrc}" class="countdown-img d-block mx-auto">` : ""}
+              ${dateImgSrc ? `<img src="${dateImgSrc}" class="countdown-img d-block mx-auto">` : `<div class="countdown-img"></div>`}
             </div>
           </div>
-          <div class="mt-1">${escapeHtml(d.category)}</div>
         </div>
         <div class="col">
           <h4 class="mb-1">${escapeHtml(d.name)}</h4>
