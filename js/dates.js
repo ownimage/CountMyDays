@@ -76,10 +76,10 @@ function renderDatesEditor() {
                 ${dateData.category || "No Category"}
               </button>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#" onclick="editBufferField('category', '')">No Category</a></li>
+                <li><a class="dropdown-item" href="#" onclick="editBufferField('category', '')"><span style="display:inline-block;width:16px;height:16px;margin-right:6px"></span>No Category</a></li>
                 ${categories.map(c => `
                   <li><a class="dropdown-item" href="#" onclick="editBufferField('category', '${escapeHtml(c.name)}')">
-                    ${catImgMap[c.name] ? `<img src="${catImgMap[c.name]}" style="width:16px;height:16px;object-fit:contain;margin-right:6px">` : ""}
+                    ${catImgMap[c.name] ? `<img src="${catImgMap[c.name]}" style="width:16px;height:16px;object-fit:contain;margin-right:6px">` : `<span style="display:inline-block;width:16px;height:16px;margin-right:6px"></span>`}
                     ${escapeHtml(c.name)}
                   </a></li>
                 `).join("")}
