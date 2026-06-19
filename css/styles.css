@@ -27,15 +27,14 @@
 
 .qr-modal-content {
   background: var(--bs-body-bg);
-  padding: 20px;
+  padding: 24px;
   border-radius: 10px;
-  width: 90%;
-  max-width: 420px;
+  width: 95vw;
+  max-width: 95vw;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
   text-align: center;
-}
-
-#exportWizardModal .qr-modal-content {
-  max-width: 540px;
 }
 #exportWizardModal #exportWizardFooter {
   flex-wrap: wrap;
@@ -43,8 +42,9 @@
 
 
 .qr-scroll {
-  max-height: 60vh;
+  flex: 1;
   overflow-y: auto;
+  min-height: 0;
 }
 
 .type-select {

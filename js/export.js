@@ -470,8 +470,8 @@ function doQRExport(data) {
     wrapper.appendChild(qrBox);
     new QRCode(qrDiv, {
       text: JSON.stringify({ index, total: chunks.length, chunk }),
-      width: 220,
-      height: 220,
+      width: 280,
+      height: 280,
       margin: 16
     });
     const label = document.createElement("div");
