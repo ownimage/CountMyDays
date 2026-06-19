@@ -70,12 +70,12 @@ function renderImagesEditor() {
       const fillVal = colors.fill !== "none" ? colors.fill : (img._prevFill || "#ffffff");
       card.innerHTML = `
         <div class="row align-items-center">
-          <div class="col-auto">
+          <div class="col-auto" style="width:130px;flex:0 0 auto">
             ${hasData
               ? `<img src="${img.data}" class="date-img">`
               : `<div class="date-img d-flex align-items-center justify-content-center text-secondary border rounded">No image</div>`
             }
-            <button class="btn btn-primary btn-sm mt-2 w-100" onclick="openImageUpload(${realIndex})">Upload</button>
+            <button class="btn btn-primary btn-sm mt-2 w-100 text-nowrap" onclick="openImageUpload(${realIndex})">Upload</button>
           </div>
           <div class="col">
             <input class="form-control" value="${escapeHtml(img.name)}" onchange="editImageField('name', this.value)">
@@ -104,7 +104,7 @@ function renderImagesEditor() {
       const colors = getImageColors(img.data);
       card.innerHTML = `
         <div class="row align-items-center">
-          <div class="col-auto">
+          <div class="col-auto" style="width:130px;flex:0 0 auto">
             <img src="${img.data}" class="date-img">
           </div>
           <div class="col">
