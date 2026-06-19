@@ -30,13 +30,13 @@ function renderDatesEditor() {
   filtered.forEach(({ d, index }) => {
     const dateData = (editingIndex === index && editBuffer) ? editBuffer : d;
 
-    const category = categories.find(c => c.name === dateData.category) || categories[0];
-    let imageName = category ? category.image : null;
-    if (category && !imageName) {
-      imageName = category.name;
-    }
-    const image = images.find(i => i.name === imageName);
-    const imgSrc = image ? image.data : "";
+    const category = dateData.category ? categories.find(c => c.name === dateData.category) : null;
+    const imgSrc = (() => {
+      if (!category) return "";
+      const imageName = category.image || category.name;
+      const image = images.find(i => i.name === imageName);
+      return image ? image.data : "";
+    })();
 
     const card = document.createElement("div");
     card.className = "card p-3 mb-3" + (index === editingIndex ? " card-edited" : "");
@@ -60,13 +60,31 @@ function renderDatesEditor() {
           </select>`;
       }
 
+      const catImgMap = {};
+      categories.forEach(c => {
+        const imageName = c.image || c.name;
+        const img = images.find(i => i.name === imageName);
+        catImgMap[c.name] = img ? img.data : "";
+      });
+
       card.innerHTML = `
         <div class="d-flex gap-1">
           <div class="flex-shrink-0 text-center me-3">
             ${imgSrc ? `<img src="${imgSrc}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
-            <select class="form-select mt-1" onchange="editBufferField('category', this.value)">
-              ${categories.map(c => `<option value="${c.name}" ${c.name === (dateData.category || (categories[0] ? categories[0].name : "")) ? "selected" : ""}>${c.name}</option>`).join("")}
-            </select>
+            <div class="dropdown mt-1">
+              <button class="btn btn-outline-secondary btn-sm dropdown-toggle w-100" type="button" data-bs-toggle="dropdown">
+                ${dateData.category || "No Category"}
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="editBufferField('category', '')">No Category</a></li>
+                ${categories.map(c => `
+                  <li><a class="dropdown-item" href="#" onclick="editBufferField('category', '${escapeHtml(c.name)}')">
+                    ${catImgMap[c.name] ? `<img src="${catImgMap[c.name]}" style="width:16px;height:16px;object-fit:contain;margin-right:6px">` : ""}
+                    ${escapeHtml(c.name)}
+                  </a></li>
+                `).join("")}
+              </ul>
+            </div>
           </div>
           <div class="flex-fill" style="min-width:0">
             <div class="mb-2">
@@ -99,7 +117,7 @@ function renderDatesEditor() {
         <div class="d-flex gap-1">
           <div class="flex-shrink-0 text-center me-3">
             ${imgSrc ? `<img src="${imgSrc}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
-            <div class="mt-1">${escapeHtml(dateData.category)}</div>
+            ${dateData.category ? `<div class="mt-1">${escapeHtml(dateData.category)}</div>` : ""}
           </div>
           <div class="flex-fill" style="min-width:0">
             <div class="fw-bold editor-title mb-2">${escapeHtml(dateData.name)}</div>

@@ -14,15 +14,15 @@ function startExportWizard(type) {
     step: "main",
     backStack: [],
     datesCascade: false,
-    datesChoice: "all",
+    datesChoice: "none",
     selectedDateIndices: [],
     dateFilterCategory: "",
     dateFilterName: "",
-    categoriesCascade: true,
-    categoriesChoice: "all",
+    categoriesCascade: false,
+    categoriesChoice: "none",
     selectedCategoryIndices: [],
     catFilterName: "",
-    imagesChoice: "all",
+    imagesChoice: "none",
     selectedImageIndices: [],
     imageFilterName: ""
   };
@@ -68,12 +68,12 @@ function renderExportWizard() {
     const showCascade = ew.datesChoice === "all" || ew.datesChoice === "specific";
     body.innerHTML = `
       <div class="form-check mb-2">
-        <input class="form-check-input" type="radio" name="ewDatesChoice" id="ewDatesAll" value="all" ${ew.datesChoice === "all" ? "checked" : ""} onchange="toggleDatesCascade()">
-        <label class="form-check-label" for="ewDatesAll">All dates</label>
-      </div>
-      <div class="form-check mb-2">
         <input class="form-check-input" type="radio" name="ewDatesChoice" id="ewDatesNone" value="none" ${ew.datesChoice === "none" ? "checked" : ""} onchange="toggleDatesCascade()">
         <label class="form-check-label" for="ewDatesNone">None</label>
+      </div>
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="radio" name="ewDatesChoice" id="ewDatesAll" value="all" ${ew.datesChoice === "all" ? "checked" : ""} onchange="toggleDatesCascade()">
+        <label class="form-check-label" for="ewDatesAll">All dates</label>
       </div>
       <div class="form-check mb-3">
         <input class="form-check-input" type="radio" name="ewDatesChoice" id="ewDatesSpecific" value="specific" ${ew.datesChoice === "specific" ? "checked" : ""} onchange="toggleDatesCascade()">
@@ -134,12 +134,12 @@ function renderExportWizard() {
     const showCatsCascade = ew.categoriesChoice === "all" || ew.categoriesChoice === "specific";
     body.innerHTML = `
       <div class="form-check mb-2">
-        <input class="form-check-input" type="radio" name="ewCategoriesChoice" id="ewCatsAll" value="all" ${ew.categoriesChoice === "all" ? "checked" : ""} onchange="toggleCategoriesCascade()">
-        <label class="form-check-label" for="ewCatsAll">All categories</label>
-      </div>
-      <div class="form-check mb-2">
         <input class="form-check-input" type="radio" name="ewCategoriesChoice" id="ewCatsNone" value="none" ${ew.categoriesChoice === "none" ? "checked" : ""} onchange="toggleCategoriesCascade()">
         <label class="form-check-label" for="ewCatsNone">None</label>
+      </div>
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="radio" name="ewCategoriesChoice" id="ewCatsAll" value="all" ${ew.categoriesChoice === "all" ? "checked" : ""} onchange="toggleCategoriesCascade()">
+        <label class="form-check-label" for="ewCatsAll">All categories</label>
       </div>
       <div class="form-check mb-3">
         <input class="form-check-input" type="radio" name="ewCategoriesChoice" id="ewCatsSpecific" value="specific" ${ew.categoriesChoice === "specific" ? "checked" : ""} onchange="toggleCategoriesCascade()">
@@ -190,12 +190,12 @@ function renderExportWizard() {
     title.textContent = "Export Images";
     body.innerHTML = `
       <div class="form-check mb-2">
-        <input class="form-check-input" type="radio" name="ewImagesChoice" id="ewImgsAll" value="all" ${ew.imagesChoice === "all" ? "checked" : ""}>
-        <label class="form-check-label" for="ewImgsAll">All images</label>
-      </div>
-      <div class="form-check mb-2">
         <input class="form-check-input" type="radio" name="ewImagesChoice" id="ewImgsNone" value="none" ${ew.imagesChoice === "none" ? "checked" : ""}>
         <label class="form-check-label" for="ewImgsNone">None</label>
+      </div>
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="radio" name="ewImagesChoice" id="ewImgsAll" value="all" ${ew.imagesChoice === "all" ? "checked" : ""}>
+        <label class="form-check-label" for="ewImgsAll">All images</label>
       </div>
       <div class="form-check">
         <input class="form-check-input" type="radio" name="ewImagesChoice" id="ewImgsSpecific" value="specific" ${ew.imagesChoice === "specific" ? "checked" : ""}>

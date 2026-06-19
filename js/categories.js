@@ -121,6 +121,7 @@ function editCategory(index) {
 
 function doneCategoryEditing() {
   if (editingCategoryIndex >= 0 && editCategoryBuffer) {
+    if (!editCategoryBuffer.image) editCategoryBuffer.image = null;
     const categories = loadCategories();
     categories[editingCategoryIndex] = editCategoryBuffer;
     saveCategories(categories);
