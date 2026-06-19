@@ -37,22 +37,31 @@ function renderCategoriesEditor() {
     }
 
     if (editingCategoryIndex === realIndex) {
+      const imgPreviewMap = {};
+      images.forEach(img => { imgPreviewMap[img.name] = img.data; });
+
       card.innerHTML = `
         <div class="d-flex gap-1">
           <div class="flex-shrink-0 text-center me-3">
             ${imageData ? `<img src="${imageData}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
+            <div class="dropdown mt-1">
+              <button class="btn btn-outline-secondary btn-sm dropdown-toggle w-100" type="button" data-bs-toggle="dropdown">
+                ${catData.image || "None"}
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="editCategoryBufferField('image', '');renderCategoriesEditor()"><span style="display:inline-block;width:16px;height:16px;margin-right:6px"></span>None</a></li>
+                ${images.map(img => `
+                  <li><a class="dropdown-item" href="#" onclick="editCategoryBufferField('image', '${escapeHtml(img.name)}');renderCategoriesEditor()">
+                    <img src="${imgPreviewMap[img.name]}" style="width:16px;height:16px;object-fit:contain;margin-right:6px">
+                    ${escapeHtml(img.name)}
+                  </a></li>
+                `).join("")}
+              </ul>
+            </div>
           </div>
           <div class="flex-fill" style="min-width:0">
             <div class="mb-2">
-              <label class="form-label mb-0">Name</label>
               <input class="form-control" value="${escapeHtml(catData.name || "")}" oninput="editCategoryBufferField('name', this.value)">
-            </div>
-            <div class="mb-2">
-              <label class="form-label mb-0">Image</label>
-              <select class="form-select" onchange="editCategoryBufferField('image', this.value)">
-                <option value="">-- None --</option>
-                ${images.map(img => `<option value="${img.name}" ${img.name === catData.image ? "selected" : ""}>${img.name}</option>`).join("")}
-              </select>
             </div>
             <div class="d-flex gap-2">
               <button class="btn btn-success editor-btn" onclick="doneCategoryEditing()">OK</button>
