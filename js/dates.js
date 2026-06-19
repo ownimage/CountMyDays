@@ -37,6 +37,7 @@ function renderDatesEditor() {
       const image = images.find(i => i.name === imageName);
       return image ? image.data : "";
     })();
+    const dateImgSrc = dateData.image ? (images.find(i => i.name === dateData.image)?.data || "") : "";
 
     const card = document.createElement("div");
     card.className = "card p-3 mb-3" + (index === editingIndex ? " card-edited" : "");
@@ -66,24 +67,45 @@ function renderDatesEditor() {
         const img = images.find(i => i.name === imageName);
         catImgMap[c.name] = img ? img.data : "";
       });
+      const allImgMap = {};
+      images.forEach(img => { allImgMap[img.name] = img.data; });
 
       card.innerHTML = `
         <div class="d-flex gap-1">
-          <div class="flex-shrink-0 text-center me-3">
-            ${imgSrc ? `<img src="${imgSrc}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
-            <div class="dropdown mt-1">
-              <button class="btn btn-outline-secondary btn-sm dropdown-toggle w-100" type="button" data-bs-toggle="dropdown">
-                ${dateData.category || "No Category"}
-              </button>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#" onclick="editBufferField('category', '')"><span style="display:inline-block;width:16px;height:16px;margin-right:6px"></span>No Category</a></li>
-                ${categories.map(c => `
-                  <li><a class="dropdown-item" href="#" onclick="editBufferField('category', '${escapeHtml(c.name)}')">
-                    ${catImgMap[c.name] ? `<img src="${catImgMap[c.name]}" style="width:16px;height:16px;object-fit:contain;margin-right:6px">` : `<span style="display:inline-block;width:16px;height:16px;margin-right:6px"></span>`}
-                    ${escapeHtml(c.name)}
-                  </a></li>
-                `).join("")}
-              </ul>
+          <div class="flex-shrink-0 text-center me-3 d-flex gap-2">
+            <div>
+              ${imgSrc ? `<img src="${imgSrc}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
+              <div class="dropdown mt-1">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle w-100" type="button" data-bs-toggle="dropdown">
+                  ${dateData.category || "No Category"}
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#" onclick="editBufferField('category', '')"><span style="display:inline-block;width:16px;height:16px;margin-right:6px"></span>No Category</a></li>
+                  ${categories.map(c => `
+                    <li><a class="dropdown-item" href="#" onclick="editBufferField('category', '${escapeHtml(c.name)}')">
+                      ${catImgMap[c.name] ? `<img src="${catImgMap[c.name]}" style="width:16px;height:16px;object-fit:contain;margin-right:6px">` : `<span style="display:inline-block;width:16px;height:16px;margin-right:6px"></span>`}
+                      ${escapeHtml(c.name)}
+                    </a></li>
+                  `).join("")}
+                </ul>
+              </div>
+            </div>
+            <div>
+              ${dateImgSrc ? `<img src="${dateImgSrc}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
+              <div class="dropdown mt-1">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle w-100" type="button" data-bs-toggle="dropdown">
+                  ${dateData.image || "None"}
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#" onclick="editBufferField('image', '');renderDatesEditor()"><span style="display:inline-block;width:16px;height:16px;margin-right:6px"></span>None</a></li>
+                  ${images.map(img => `
+                    <li><a class="dropdown-item" href="#" onclick="editBufferField('image', '${escapeHtml(img.name)}');renderDatesEditor()">
+                      ${allImgMap[img.name] ? `<img src="${allImgMap[img.name]}" style="width:16px;height:16px;object-fit:contain;margin-right:6px">` : `<span style="display:inline-block;width:16px;height:16px;margin-right:6px"></span>`}
+                      ${escapeHtml(img.name)}
+                    </a></li>
+                  `).join("")}
+                </ul>
+              </div>
             </div>
           </div>
           <div class="flex-fill" style="min-width:0">
@@ -115,9 +137,14 @@ function renderDatesEditor() {
 
       card.innerHTML = `
         <div class="d-flex gap-1">
-          <div class="flex-shrink-0 text-center me-3">
-            ${imgSrc ? `<img src="${imgSrc}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
-            ${dateData.category ? `<div class="mt-1">${escapeHtml(dateData.category)}</div>` : ""}
+          <div class="flex-shrink-0 text-center me-3 d-flex gap-2">
+            <div>
+              ${imgSrc ? `<img src="${imgSrc}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
+              ${dateData.category ? `<div class="mt-1">${escapeHtml(dateData.category)}</div>` : ""}
+            </div>
+            <div>
+              ${dateImgSrc ? `<img src="${dateImgSrc}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
+            </div>
           </div>
           <div class="flex-fill" style="min-width:0">
             <div class="fw-bold editor-title mb-2">${escapeHtml(dateData.name)}</div>
@@ -233,7 +260,7 @@ function editBufferField(field, value) {
     }
     renderDatesEditor();
   }
-  if (field === "category") {
+  if (field === "category" || field === "image") {
     renderDatesEditor();
   }
 }
@@ -310,6 +337,7 @@ function addNewDate() {
   const newDate = {
     name: "New Event",
     category: categories.length > 0 ? categories[0].name : "",
+    image: "",
     type: "annual",
     month: 1,
     day: 1
