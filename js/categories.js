@@ -21,7 +21,7 @@ function renderCategoriesEditor() {
     if (editingCategoryIndex >= 0) return true;
     if (categoryNameSearch && !c.name.toLowerCase().includes(categoryNameSearch.toLowerCase())) return false;
     return true;
-  });
+  }).sort((a, b) => a.name.localeCompare(b.name));
 
   filtered.forEach((c, index) => {
     const realIndex = categories.indexOf(c);

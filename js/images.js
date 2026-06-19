@@ -56,7 +56,7 @@ function renderImagesEditor() {
     if (editingImageIndex >= 0) return true;
     if (imageNameSearch && !img.name.toLowerCase().includes(imageNameSearch.toLowerCase())) return false;
     return true;
-  });
+  }).sort((a, b) => a.name.localeCompare(b.name));
 
   filtered.forEach((img, index) => {
     const realIndex = images.indexOf(img);
