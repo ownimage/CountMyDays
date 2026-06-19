@@ -234,6 +234,71 @@ function renderExportWizard() {
       <button class="btn btn-secondary editor-btn btn-wide" onclick="exportWizardBack()">Back</button>
       <button class="btn btn-primary editor-btn btn-wide" onclick="exportWizardNext()">Export</button>
     `;
+  } else if (ew.step === "summary") {
+    const data = buildExportData();
+    const categories = loadCategories();
+    const images = loadImages();
+    const now = new Date();
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+    const dateRows = data.dates.map(d => {
+      const cat = categories.find(c => c.name === d.category);
+      let imgSrc = "";
+      if (cat) {
+        const imgName = cat.image || cat.name;
+        const img = images.find(i => i.name === imgName);
+        if (img) imgSrc = img.data;
+      }
+      const t = targetDate(d);
+      const dateStr = d.type === "once"
+        ? `${d.day} ${months[(d.month||1)-1]} ${d.year}`
+        : `${d.day} ${months[(d.month||1)-1]}`;
+      return { imgSrc, name: d.name, dateStr, category: d.category || "" };
+    });
+
+    const catRows = data.categories.map(c => {
+      const imgName = c.image || c.name;
+      const img = images.find(i => i.name === imgName);
+      return { imgSrc: img ? img.data : "", name: c.name };
+    });
+
+    const imgRows = data.images.map(i => ({ imgSrc: i.data, name: i.name }));
+
+    title.textContent = "Export Summary";
+    body.innerHTML = `
+      ${data.dates.length > 0 ? `
+        <h5 class="mb-2">Dates (${data.dates.length})</h5>
+        ${dateRows.map(r => `
+          <div class="d-flex align-items-center gap-2 mb-1">
+            ${r.imgSrc ? `<img src="${r.imgSrc}" style="width:20px;height:20px;object-fit:contain">` : `<span style="display:inline-block;width:20px;height:20px"></span>`}
+            <span>${escapeHtml(r.name)} — ${r.dateStr} — ${escapeHtml(r.category)}</span>
+          </div>
+        `).join("")}
+      ` : ""}
+      ${data.categories.length > 0 ? `
+        <h5 class="mt-3 mb-2">Categories (${data.categories.length})</h5>
+        ${catRows.map(r => `
+          <div class="d-flex align-items-center gap-2 mb-1">
+            ${r.imgSrc ? `<img src="${r.imgSrc}" style="width:20px;height:20px;object-fit:contain">` : `<span style="display:inline-block;width:20px;height:20px"></span>`}
+            <span>${escapeHtml(r.name)}</span>
+          </div>
+        `).join("")}
+      ` : ""}
+      ${data.images.length > 0 ? `
+        <h5 class="mt-3 mb-2">Images (${data.images.length})</h5>
+        ${imgRows.map(r => `
+          <div class="d-flex align-items-center gap-2 mb-1">
+            ${r.imgSrc ? `<img src="${r.imgSrc}" style="width:20px;height:20px;object-fit:contain">` : `<span style="display:inline-block;width:20px;height:20px"></span>`}
+            <span>${escapeHtml(r.name)}</span>
+          </div>
+        `).join("")}
+      ` : ""}
+      ${data.dates.length === 0 && data.categories.length === 0 && data.images.length === 0 ? `<p class="text-secondary">Nothing selected for export.</p>` : ""}
+    `;
+    footer.innerHTML = `
+      <button class="btn btn-secondary editor-btn btn-wide" onclick="exportWizardBack()">Back</button>
+      <button class="btn btn-primary editor-btn btn-wide" onclick="finishExportWizard()">Export</button>
+    `;
   }
   if (focusInfo) {
     const input = body.querySelector(`input[placeholder="${focusInfo.placeholder}"]`);
@@ -273,7 +338,7 @@ function ewReadForm() {
 
 function getNextStep() {
   if (ew.step === "main") {
-    return ew.scope === "partial" ? "dates1" : null;
+    return ew.scope === "partial" ? "dates1" : "summary";
   }
   if (ew.step === "dates1") {
     return ew.datesChoice === "specific" ? "dates2" : "categories1";
@@ -284,9 +349,9 @@ function getNextStep() {
   }
   if (ew.step === "categories2") return "images1";
   if (ew.step === "images1") {
-    return ew.imagesChoice === "specific" ? "images2" : null;
+    return ew.imagesChoice === "specific" ? "images2" : "summary";
   }
-  if (ew.step === "images2") return null;
+  if (ew.step === "images2") return "summary";
   return null;
 }
 
