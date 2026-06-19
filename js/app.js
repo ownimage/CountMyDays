@@ -33,31 +33,6 @@ function saveImages(images) {
 }
 
 // -------------------------------
-// JSON EXPORT
-// -------------------------------
-
-function exportData() {
-  const data = {
-    dates: loadDates(),
-    categories: loadCategories(),
-    images: loadImages()
-  };
-
-  const blob = new Blob([JSON.stringify(data, null, 2)], {
-    type: "application/json"
-  });
-
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "countmydays-export.json";
-  a.click();
-
-  URL.revokeObjectURL(url);
-}
-
-// -------------------------------
 // JSON IMPORT
 // -------------------------------
 
@@ -110,6 +85,17 @@ function hideAllEditors() {
   document.getElementById("categoriesEditor").classList.add("d-none");
   document.getElementById("imagesEditor").classList.add("d-none");
   document.getElementById("settingsPage").classList.add("d-none");
+}
+
+function updateNavState() {
+  const nav = document.getElementById("mainNav");
+  if (!nav) return;
+  const editing = (
+    (typeof editingIndex !== 'undefined' && editingIndex >= 0) ||
+    (typeof editingCategoryIndex !== 'undefined' && editingCategoryIndex >= 0) ||
+    (typeof editingImageIndex !== 'undefined' && editingImageIndex >= 0)
+  );
+  nav.classList.toggle("nav-inactive", editing);
 }
 
 // -------------------------------
@@ -243,6 +229,7 @@ function renderCountdowns() {
       container.appendChild(more);
     }
   }
+  updateNavState();
 }
 
 // small helper to avoid accidental HTML injection
@@ -353,69 +340,6 @@ function addSampleImage() {
   images.push({ name: "Sample", data: "" });
   saveImages(images);
   renderImagesEditor();
-}
-
-// -------------------------------
-// QR EXPORT
-// -------------------------------
-
-function exportToQR() {
-  const modal = document.getElementById("qrExportModal");
-  const list = document.getElementById("qrList");
-  if (!modal || !list) {
-    alert("QR export UI not found.");
-    return;
-  }
-  list.innerHTML = "";
-
-  const data = {
-    dates: loadDates(),
-    categories: loadCategories(),
-    images: loadImages()
-  };
-
-  const json = JSON.stringify(data);
-  const compressed = LZString.compressToEncodedURIComponent(json);
-
-  // chunk size tuned for reliability
-  const chunkSize = 400;
-  const chunks = [];
-  for (let i = 0; i < compressed.length; i += chunkSize) {
-    chunks.push(compressed.substring(i, i + chunkSize));
-  }
-
-  chunks.forEach((chunk, index) => {
-    const wrapper = document.createElement("div");
-    wrapper.className = "mb-4 text-center";
-
-    // white quiet zone container
-    const qrBox = document.createElement("div");
-    qrBox.style.background = "white";
-    qrBox.style.padding = "20px";
-    qrBox.style.display = "inline-block";
-    qrBox.style.borderRadius = "8px";
-
-    const qrDiv = document.createElement("div");
-    qrBox.appendChild(qrDiv);
-    wrapper.appendChild(qrBox);
-
-    // generate QR
-    new QRCode(qrDiv, {
-      text: JSON.stringify({ index, total: chunks.length, chunk }),
-      width: 220,
-      height: 220,
-      margin: 16
-    });
-
-    const label = document.createElement("div");
-    label.className = "mt-2 text-secondary";
-    label.innerText = `QR ${index + 1} of ${chunks.length}`;
-    wrapper.appendChild(label);
-
-    list.appendChild(wrapper);
-  });
-
-  modal.classList.remove("d-none");
 }
 
 function closeQRExportModal() {

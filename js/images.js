@@ -143,6 +143,7 @@ function renderImagesEditor() {
       </div>
     `;
   }
+  updateNavState();
 }
 
 function setImageNameSearch(val) {

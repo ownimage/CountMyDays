@@ -134,6 +134,7 @@ function renderDatesEditor() {
   if (editingIndex >= 0) {
     initSingleFlatpickr(editingIndex);
   }
+  updateNavState();
 }
 
 function renderEditorFilters(allDates) {

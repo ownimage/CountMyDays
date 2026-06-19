@@ -34,6 +34,14 @@
   text-align: center;
 }
 
+#exportWizardModal .qr-modal-content {
+  max-width: 540px;
+}
+#exportWizardModal #exportWizardFooter {
+  flex-wrap: wrap;
+}
+
+
 .qr-scroll {
   max-height: 60vh;
   overflow-y: auto;
@@ -171,7 +179,9 @@ body.font-size-large #imagesEditor .form-label,
 body.font-size-large #imagesEditor .form-control,
 body.font-size-large #imagesEditor .form-select,
 body.font-size-large #deleteConfirmModal,
-body.font-size-large #deleteConfirmModal .btn {
+body.font-size-large #deleteConfirmModal .btn,
+body.font-size-large #exportWizardModal,
+body.font-size-large #exportWizardModal .btn {
   font-size: 1.125rem;
 }
 body.font-size-xlarge,
@@ -198,7 +208,9 @@ body.font-size-xlarge #imagesEditor .form-label,
 body.font-size-xlarge #imagesEditor .form-control,
 body.font-size-xlarge #imagesEditor .form-select,
 body.font-size-xlarge #deleteConfirmModal,
-body.font-size-xlarge #deleteConfirmModal .btn {
+body.font-size-xlarge #deleteConfirmModal .btn,
+body.font-size-xlarge #exportWizardModal,
+body.font-size-xlarge #exportWizardModal .btn {
   font-size: 1.3rem;
 }
 body.font-size-jumbo,
@@ -225,7 +237,9 @@ body.font-size-jumbo #imagesEditor .form-label,
 body.font-size-jumbo #imagesEditor .form-control,
 body.font-size-jumbo #imagesEditor .form-select,
 body.font-size-jumbo #deleteConfirmModal,
-body.font-size-jumbo #deleteConfirmModal .btn {
+body.font-size-jumbo #deleteConfirmModal .btn,
+body.font-size-jumbo #exportWizardModal,
+body.font-size-jumbo #exportWizardModal .btn {
   font-size: 1.6rem;
 }
 
@@ -270,6 +284,12 @@ body.auto-hide-menu .container-fluid {
 }
 body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
   padding-top: 0.5rem;
+}
+
+/* INACTIVE MENU DURING EDITING */
+#mainNav.nav-inactive {
+  pointer-events: none;
+  opacity: 0.4;
 }
 
 /* EDITOR LAYOUT */

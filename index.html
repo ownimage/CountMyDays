@@ -162,6 +162,15 @@
 
   </div>
 
+  <!-- EXPORT WIZARD MODAL -->
+  <div id="exportWizardModal" class="qr-modal d-none">
+    <div class="qr-modal-content">
+      <h3 id="exportWizardTitle">Export Wizard</h3>
+      <div id="exportWizardBody" class="qr-scroll" style="text-align:left"></div>
+      <div id="exportWizardFooter" class="d-flex gap-2 mt-3 justify-content-center"></div>
+    </div>
+  </div>
+
   <!-- QR EXPORT MODAL -->
   <div id="qrExportModal" class="qr-modal d-none">
     <div class="qr-modal-content">
@@ -223,6 +232,7 @@
   document.write('<script src="js/dates.js?v=' + BUILD_NUMBER + '"><\/script>');
   document.write('<script src="js/categories.js?v=' + BUILD_NUMBER + '"><\/script>');
   document.write('<script src="js/images.js?v=' + BUILD_NUMBER + '"><\/script>');
+  document.write('<script src="js/export.js?v=' + BUILD_NUMBER + '"><\/script>');
   </script>
 
 </body>

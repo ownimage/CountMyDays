@@ -98,6 +98,7 @@ function renderCategoriesEditor() {
       </div>
     `;
   }
+  updateNavState();
 }
 
 function setCategoryNameSearch(val) {
