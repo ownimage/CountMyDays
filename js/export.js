@@ -115,9 +115,12 @@ function renderExportWizard() {
         const imgName = category ? category.image : null;
         const img = images.find(i => i.name === imgName);
         const imgSrc = img ? img.data : "";
+        const dateImg = item.image ? images.find(i => i.name === item.image) : null;
+        const dateImgSrc = dateImg ? dateImg.data : "";
         return `
         <div class="d-flex align-items-center gap-2 mb-2">
           ${imgSrc ? `<img src="${imgSrc}" style="width:32px;height:32px;object-fit:contain">` : `<div style="width:32px;height:32px"></div>`}
+          ${dateImgSrc ? `<img src="${dateImgSrc}" style="width:32px;height:32px;object-fit:contain">` : `<div style="width:32px;height:32px"></div>`}
           <div class="form-check mb-0">
             <input class="form-check-input ew-date-cb" type="checkbox" value="${item.index}" data-index="${item.index}" ${ew.selectedDateIndices.includes(item.index) ? "checked" : ""}>
             <label class="form-check-label">${escapeHtml(item.name)} — ${formatDate(item.target)} — ${escapeHtml(item.category || "No category")}</label>
@@ -249,11 +252,13 @@ function renderExportWizard() {
         const img = images.find(i => i.name === imgName);
         if (img) imgSrc = img.data;
       }
+      const dateImg = d.image ? images.find(i => i.name === d.image) : null;
+      const dateImgSrc = dateImg ? dateImg.data : "";
       const t = targetDate(d);
       const dateStr = d.type === "once"
         ? `${d.day} ${months[(d.month||1)-1]} ${d.year}`
         : `${d.day} ${months[(d.month||1)-1]}`;
-      return { imgSrc, name: d.name, dateStr, category: d.category || "" };
+      return { imgSrc, dateImgSrc, name: d.name, dateStr, category: d.category || "" };
     });
 
     const catRows = data.categories.map(c => {
@@ -272,6 +277,7 @@ function renderExportWizard() {
           ${dateRows.map(r => `
             <div class="d-flex align-items-center gap-2 mb-1">
               ${r.imgSrc ? `<img src="${r.imgSrc}" style="width:20px;height:20px;object-fit:contain">` : `<span style="display:inline-block;width:20px;height:20px"></span>`}
+              ${r.dateImgSrc ? `<img src="${r.dateImgSrc}" style="width:20px;height:20px;object-fit:contain">` : `<span style="display:inline-block;width:20px;height:20px"></span>`}
               <span>${escapeHtml(r.name)} — ${r.dateStr} — ${escapeHtml(r.category)}</span>
             </div>
           `).join("")}
@@ -464,6 +470,7 @@ function buildExportData() {
     const usedCatNames = new Set(resultDates.map(d => d.category).filter(Boolean));
     resultCategories = allCats.filter(c => usedCatNames.has(c.name));
     const usedImgNames = new Set(resultCategories.map(c => c.image).filter(Boolean));
+    resultDates.forEach(d => { if (d.image) usedImgNames.add(d.image); });
     resultImages = allImgs.filter(i => usedImgNames.has(i.name));
   }
 
