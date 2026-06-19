@@ -39,6 +39,12 @@ function renderExportWizard() {
   const footer = document.getElementById("exportWizardFooter");
   const title = document.getElementById("exportWizardTitle");
 
+  const active = document.activeElement;
+  let focusInfo = null;
+  if (active && active.tagName === "INPUT" && body.contains(active)) {
+    focusInfo = { placeholder: active.placeholder, value: active.value };
+  }
+
   if (ew.step === "main") {
     title.textContent = "Export Wizard";
     body.innerHTML = `
@@ -220,6 +226,13 @@ function renderExportWizard() {
       <button class="btn btn-secondary editor-btn btn-wide" onclick="exportWizardBack()">Back</button>
       <button class="btn btn-primary editor-btn btn-wide" onclick="exportWizardNext()">Export</button>
     `;
+  }
+  if (focusInfo) {
+    const input = body.querySelector(`input[placeholder="${focusInfo.placeholder}"]`);
+    if (input) {
+      input.focus();
+      input.setSelectionRange(focusInfo.value.length, focusInfo.value.length);
+    }
   }
 }
 
