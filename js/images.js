@@ -75,12 +75,12 @@ function renderImagesEditor() {
               ? `<img src="${img.data}" class="date-img">`
               : `<div class="date-img d-flex align-items-center justify-content-center text-secondary border rounded">No image</div>`
             }
-            <button class="btn btn-outline-primary btn-sm mt-2 w-100" onclick="openImageUpload(${realIndex})">${hasData ? "Change" : "Upload"}</button>
+            <button class="btn btn-outline-primary btn-sm mt-2 w-100" onclick="openImageUpload(${realIndex})">Upload</button>
           </div>
           <div class="col">
-            <label class="form-label">Name</label>
             <input class="form-control" value="${escapeHtml(img.name)}" onchange="editImageField('name', this.value)">
-            <div class="d-flex gap-3 mt-2 align-items-center flex-wrap">
+            <div class="d-flex gap-2 mt-2 align-items-center flex-wrap">
+              <button class="btn btn-success editor-btn" onclick="doneImageEdit(${realIndex})">OK</button>
               <label class="form-label mb-0">Line:</label>
               <input type="color" value="${lineVal}" oninput="editImageColor(${realIndex}, 'stroke', this.value)">
               <label class="form-check-label mb-0">
@@ -95,8 +95,7 @@ function renderImagesEditor() {
               </label>
             </div>
           </div>
-          <div class="col-auto d-flex gap-2">
-            <button class="btn btn-success editor-btn" onclick="doneImageEdit(${realIndex})">OK</button>
+          <div class="col-auto d-flex align-items-center">
             <button class="btn btn-secondary editor-btn" onclick="cancelImageEdit()">Cancel</button>
           </div>
         </div>
