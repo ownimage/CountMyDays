@@ -1,4 +1,7 @@
 let categoryNameSearch = "";
+let editingCategoryIndex = -1;
+let editCategoryBuffer = null;
+let isNewCategory = false;
 
 function renderCategoriesEditor() {
   const list = document.getElementById("categoriesList");
@@ -12,66 +15,89 @@ function renderCategoriesEditor() {
   filterEl.innerHTML = "";
 
   const categories = loadCategories();
+  const images = loadImages();
 
   const filtered = categories.filter(c => {
+    if (editingCategoryIndex >= 0) return true;
     if (categoryNameSearch && !c.name.toLowerCase().includes(categoryNameSearch.toLowerCase())) return false;
     return true;
   });
 
-  const images = loadImages();
-
   filtered.forEach((c, index) => {
     const realIndex = categories.indexOf(c);
+    const catData = (editingCategoryIndex === realIndex && editCategoryBuffer) ? editCategoryBuffer : c;
 
     const card = document.createElement("div");
-    card.className = "card p-3 mb-3";
+    card.className = "card p-3 mb-3" + (realIndex === editingCategoryIndex ? " card-edited" : "");
 
     let imageData = "";
-    if (c.image) {
-      const found = images.find(img => img.name === c.image);
+    if (catData.image) {
+      const found = images.find(img => img.name === catData.image);
       if (found) imageData = found.data;
     }
 
-    card.innerHTML = `
-      <div class="row align-items-center g-2">
-        <div class="col-auto">
-          ${imageData ? `<img src="${imageData}" class="date-img">`
-                     : `<div class="text-secondary">No image</div>`}
-        </div>
-        <div class="col">
-          <div class="row mb-2">
-            <div class="col-3 text-end"><label class="form-label mb-0">Name</label></div>
-            <div class="col"><input class="form-control" value="${escapeHtml(c.name)}" onchange="updateCategoryName(${realIndex}, this.value)"></div>
+    if (editingCategoryIndex === realIndex) {
+      card.innerHTML = `
+        <div class="d-flex gap-1">
+          <div class="flex-shrink-0 text-center me-3">
+            ${imageData ? `<img src="${imageData}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
           </div>
-          <div class="row">
-            <div class="col-3 text-end"><label class="form-label mb-0">Image</label></div>
-            <div class="col"><select class="form-select" onchange="updateCategoryImage(${realIndex}, this.value)">
-              <option value="">-- None --</option>
-              ${images.map(img => `<option value="${img.name}" ${img.name === c.image ? "selected" : ""}>${img.name}</option>`).join("")}
-            </select></div>
+          <div class="flex-fill" style="min-width:0">
+            <div class="mb-2">
+              <label class="form-label mb-0">Name</label>
+              <input class="form-control" value="${escapeHtml(catData.name || "")}" oninput="editCategoryBufferField('name', this.value)">
+            </div>
+            <div class="mb-2">
+              <label class="form-label mb-0">Image</label>
+              <select class="form-select" onchange="editCategoryBufferField('image', this.value)">
+                <option value="">-- None --</option>
+                ${images.map(img => `<option value="${img.name}" ${img.name === catData.image ? "selected" : ""}>${img.name}</option>`).join("")}
+              </select>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-success editor-btn" onclick="doneCategoryEditing()">OK</button>
+              <button class="btn btn-secondary editor-btn ms-auto" onclick="cancelCategoryEditing()">Cancel</button>
+            </div>
           </div>
         </div>
-        <div class="col-auto">
-          <button class="btn btn-danger editor-btn" onclick="deleteCategory(${realIndex})">Delete</button>
+      `;
+    } else {
+      card.innerHTML = `
+        <div class="d-flex gap-1">
+          <div class="flex-shrink-0 text-center me-3">
+            ${imageData ? `<img src="${imageData}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
+          </div>
+          <div class="flex-fill" style="min-width:0">
+            <div class="fw-bold editor-title mb-2">${escapeHtml(catData.name)}</div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-primary editor-btn" onclick="editCategory(${realIndex})" ${editingCategoryIndex >= 0 ? 'disabled' : ''}>Edit</button>
+              <button class="btn btn-danger editor-btn ms-auto" onclick="deleteCategory(${realIndex})" ${editingCategoryIndex >= 0 ? 'disabled' : ''}>Delete</button>
+            </div>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    }
 
     list.appendChild(card);
   });
 
   topTile.innerHTML = `
     <div class="d-flex gap-2">
-      <button class="btn btn-primary editor-btn btn-wide" onclick="addNewCategory()">Add Category</button>
-      <button class="btn btn-success editor-btn btn-wide ms-auto" onclick="closeCategoriesEditor()">Done</button>
+      <button class="btn btn-primary editor-btn btn-wide" onclick="addNewCategory()" ${editingCategoryIndex >= 0 ? 'disabled' : ''}>Add Category</button>
+      <button class="btn btn-success editor-btn btn-wide ms-auto" onclick="closeCategoriesEditor()" ${editingCategoryIndex >= 0 ? 'disabled' : ''}>Done</button>
     </div>
   `;
 
-  filterEl.innerHTML = `
-    <div class="d-flex gap-2 align-items-center">
-      <input class="form-control" type="search" placeholder="Search category names..." value="${escapeHtml(categoryNameSearch)}" oninput="setCategoryNameSearch(this.value)">
-    </div>
-  `;
+  if (editingCategoryIndex >= 0) {
+    filterEl.classList.add("d-none");
+  } else {
+    filterEl.classList.remove("d-none");
+    filterEl.innerHTML = `
+      <div class="d-flex gap-2 align-items-center">
+        <input class="form-control" type="search" placeholder="Search category names..." value="${escapeHtml(categoryNameSearch)}" oninput="setCategoryNameSearch(this.value)">
+      </div>
+    `;
+  }
 }
 
 function setCategoryNameSearch(val) {
@@ -84,20 +110,49 @@ function setCategoryNameSearch(val) {
   }
 }
 
-function updateCategoryName(index, value) {
+function editCategory(index) {
   const categories = loadCategories();
-  categories[index].name = value;
-  saveCategories(categories);
-}
-
-function updateCategoryImage(index, value) {
-  const categories = loadCategories();
-  categories[index].image = value || null;
-  saveCategories(categories);
+  editCategoryBuffer = JSON.parse(JSON.stringify(categories[index]));
+  editingCategoryIndex = index;
+  isNewCategory = false;
   renderCategoriesEditor();
 }
 
+function doneCategoryEditing() {
+  if (editingCategoryIndex >= 0 && editCategoryBuffer) {
+    const categories = loadCategories();
+    categories[editingCategoryIndex] = editCategoryBuffer;
+    saveCategories(categories);
+  }
+  editingCategoryIndex = -1;
+  editCategoryBuffer = null;
+  isNewCategory = false;
+  renderCategoriesEditor();
+}
+
+function cancelCategoryEditing() {
+  if (isNewCategory && editingCategoryIndex >= 0) {
+    const categories = loadCategories();
+    categories.splice(editingCategoryIndex, 1);
+    saveCategories(categories);
+  }
+  editingCategoryIndex = -1;
+  editCategoryBuffer = null;
+  isNewCategory = false;
+  renderCategoriesEditor();
+}
+
+function editCategoryBufferField(field, value) {
+  if (!editCategoryBuffer) return;
+  editCategoryBuffer[field] = value;
+}
+
 function deleteCategory(index) {
+  if (editingCategoryIndex === index) {
+    editingCategoryIndex = -1;
+    editCategoryBuffer = null;
+    isNewCategory = false;
+  }
   const categories = loadCategories();
   categories.splice(index, 1);
   saveCategories(categories);
@@ -109,5 +164,11 @@ function addNewCategory() {
   categories.push({ name: "New Category", image: null });
   saveCategories(categories);
   categoryNameSearch = "";
+  editCategoryBuffer = JSON.parse(JSON.stringify(categories[categories.length - 1]));
+  editingCategoryIndex = categories.length - 1;
+  isNewCategory = true;
   renderCategoriesEditor();
+  const cards = document.querySelectorAll("#categoriesList .card");
+  const lastCard = cards[cards.length - 1];
+  if (lastCard) lastCard.scrollIntoView({ behavior: "smooth", block: "center" });
 }
