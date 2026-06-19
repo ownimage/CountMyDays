@@ -268,7 +268,7 @@ function renderExportWizard() {
     body.innerHTML = `
       ${data.dates.length > 0 ? `
         <div class="card mb-3 p-3">
-          <h5 class="mb-2">Dates (${data.dates.length})</h5>
+          <h5 class="card-title">Dates (${data.dates.length})</h5>
           ${dateRows.map(r => `
             <div class="d-flex align-items-center gap-2 mb-1">
               ${r.imgSrc ? `<img src="${r.imgSrc}" style="width:20px;height:20px;object-fit:contain">` : `<span style="display:inline-block;width:20px;height:20px"></span>`}
@@ -279,7 +279,7 @@ function renderExportWizard() {
       ` : ""}
       ${data.categories.length > 0 ? `
         <div class="card mb-3 p-3">
-          <h5 class="mb-2">Categories (${data.categories.length})</h5>
+          <h5 class="card-title">Categories (${data.categories.length})</h5>
           ${catRows.map(r => `
             <div class="d-flex align-items-center gap-2 mb-1">
               ${r.imgSrc ? `<img src="${r.imgSrc}" style="width:20px;height:20px;object-fit:contain">` : `<span style="display:inline-block;width:20px;height:20px"></span>`}
@@ -290,7 +290,7 @@ function renderExportWizard() {
       ` : ""}
       ${data.images.length > 0 ? `
         <div class="card p-3">
-          <h5 class="mb-2">Images (${data.images.length})</h5>
+          <h5 class="card-title">Images (${data.images.length})</h5>
           ${imgRows.map(r => `
             <div class="d-flex align-items-center gap-2 mb-1">
               ${r.imgSrc ? `<img src="${r.imgSrc}" style="width:20px;height:20px;object-fit:contain">` : `<span style="display:inline-block;width:20px;height:20px"></span>`}

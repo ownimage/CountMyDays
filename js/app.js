@@ -160,6 +160,8 @@ function renderCountdowns() {
     const imageName = category ? category.image : null;
     const image = images.find(i => i.name === imageName);
     const imgSrc = image ? image.data : "";
+    const dateImg = d.image ? images.find(i => i.name === d.image) : null;
+    const dateImgSrc = dateImg ? dateImg.data : "";
 
     const card = document.createElement("div");
     card.className = "card countdown-card mb-2";
@@ -180,7 +182,14 @@ function renderCountdowns() {
     card.innerHTML = `
       <div class="row align-items-center">
         <div class="col-auto text-center">
-          ${imgSrc ? `<img src="${imgSrc}" class="countdown-img d-block mx-auto">` : `<div class="text-secondary">No image</div>`}
+          <div class="d-flex gap-1">
+            <div>
+              ${imgSrc ? `<img src="${imgSrc}" class="countdown-img d-block mx-auto">` : `<div class="countdown-img d-flex align-items-center justify-content-center text-secondary">No img</div>`}
+            </div>
+            <div>
+              ${dateImgSrc ? `<img src="${dateImgSrc}" class="countdown-img d-block mx-auto">` : ""}
+            </div>
+          </div>
           <div class="mt-1">${escapeHtml(d.category)}</div>
         </div>
         <div class="col">
