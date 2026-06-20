@@ -65,6 +65,8 @@ function renderImportWizard() {
 
   if (state.step === "images") {
     renderImageStage(body, footer, title);
+  } else if (state.step === "categories") {
+    renderCategoryStage(body, footer, title);
   } else if (state.step === "complete") {
     renderComplete(body, footer, title);
   }
@@ -247,6 +249,214 @@ function finishImageStage() {
   saveImages(existingImages);
 
   state.renameMapGlobal = renameMap;
+
+  (state.data.categories || []).forEach(c => {
+    if (c.image && renameMap[c.image]) c.image = renameMap[c.image];
+  });
+  (state.data.dates || []).forEach(d => {
+    if (d.image && renameMap[d.image]) d.image = renameMap[d.image];
+  });
+
+  preprocessCategories();
+  state.step = "categories";
+  renderImportWizard();
+}
+
+function preprocessCategories() {
+  const state = importWizardState;
+  const existingCategories = loadCategories();
+  const catStatus = [];
+  const catDecisions = [];
+  const catConflicts = [];
+
+  (state.data.categories || []).forEach((cat, idx) => {
+    const existing = existingCategories.find(e => e.name === cat.name);
+    if (!existing) {
+      catStatus[idx] = "autoImport";
+      catDecisions[idx] = { action: "import" };
+    } else if (existing.image === cat.image) {
+      catStatus[idx] = "autoDiscard";
+      catDecisions[idx] = { action: "discard" };
+    } else {
+      catStatus[idx] = "conflict";
+      catConflicts.push(idx);
+      catDecisions[idx] = null;
+    }
+  });
+
+  state.catStatus = catStatus;
+  state.catDecisions = catDecisions;
+  state.catConflicts = catConflicts;
+  state.catConflictIdx = 0;
+  state.catRenameMap = {};
+}
+
+function renderCategoryStage(body, footer, title) {
+  const state = importWizardState;
+  const totalConflicts = state.catConflicts.length;
+
+  if (state.catConflictIdx < totalConflicts) {
+    const catIdx = state.catConflicts[state.catConflictIdx];
+    const importCat = state.data.categories[catIdx];
+    const existingCategories = loadCategories();
+    const existingCat = existingCategories.find(e => e.name === importCat.name);
+    const allImages = loadImages();
+
+    const existingImg = existingCat && existingCat.image ? allImages.find(i => i.name === existingCat.image) : null;
+    const importImg = importCat.image ? allImages.find(i => i.name === importCat.image) : null;
+
+    title.textContent = `Category ${state.catConflictIdx + 1} of ${totalConflicts}`;
+
+    body.innerHTML = `
+      <p class="mb-3">A category with the name "<strong>${escapeHtml(importCat.name)}</strong>" already exists with a different image. Choose what to do:</p>
+      <div class="row mb-3">
+        <div class="col-6 text-center">
+          <h6>Current Category</h6>
+          <div class="fw-bold mb-1">${escapeHtml(existingCat ? existingCat.name : '')}</div>
+          ${existingImg ? `<img src="${existingImg.data}" style="max-width:100%;max-height:100px;object-fit:contain" class="border rounded p-1">` : '<div class="text-secondary">No image</div>'}
+          <div class="small mt-1 text-secondary">Image: ${existingCat && existingCat.image ? escapeHtml(existingCat.image) : 'None'}</div>
+        </div>
+        <div class="col-6 text-center">
+          <h6>Imported Category</h6>
+          <div class="fw-bold mb-1">${escapeHtml(importCat.name)}</div>
+          ${importImg ? `<img src="${importImg.data}" style="max-width:100%;max-height:100px;object-fit:contain" class="border rounded p-1">` : '<div class="text-secondary">No image</div>'}
+          <div class="small mt-1 text-secondary">Image: ${importCat.image ? escapeHtml(importCat.image) : 'None'}</div>
+        </div>
+      </div>
+      <div class="mb-2">
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="radio" name="catConflictChoice" id="catSkip" value="skip" checked onchange="toggleCategoryRenameInput()">
+          <label class="form-check-label" for="catSkip">Skip - don't import this category</label>
+        </div>
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="radio" name="catConflictChoice" id="catOverwrite" value="overwrite" onchange="toggleCategoryRenameInput()">
+          <label class="form-check-label" for="catOverwrite">Replace - overwrite the existing category with the imported one</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="catConflictChoice" id="catKeepBoth" value="keepBoth" onchange="toggleCategoryRenameInput()">
+          <label class="form-check-label" for="catKeepBoth">Keep Both - import with a different name:
+            <input type="text" id="catNewName" class="form-control form-control-sm d-inline-block" style="width:auto;min-width:180px" value="${escapeHtml(importCat.name)}" disabled onclick="event.stopPropagation()" oninput="validateNewCategoryName(this)">
+          </label>
+          <div id="catNewNameError" class="text-danger small" style="display:none">ERROR: There is already a category with this name.</div>
+        </div>
+      </div>
+    `;
+
+    footer.innerHTML = `
+      <button class="btn btn-secondary editor-btn btn-wide btn-lg" onclick="cancelImportWizard()">Cancel</button>
+      <button class="btn btn-primary editor-btn btn-wide btn-lg" onclick="resolveCategoryConflict()">Next</button>
+    `;
+  } else {
+    const imported = state.catDecisions.filter(d => d && (d.action === "import" || d.action === "overwrite" || d.action === "keepBoth")).length;
+    const discarded = state.catDecisions.filter(d => d && d.action === "discard").length;
+    const total = (state.data.categories || []).length;
+    const autoImport = state.catStatus.filter(s => s === "autoImport").length;
+    const autoDiscard = state.catStatus.filter(s => s === "autoDiscard").length;
+
+    title.textContent = "Category Summary";
+
+    body.innerHTML = `
+      <p>Category processing complete.</p>
+      <ul>
+        <li>${autoImport} new categor(ies) - will be imported</li>
+        <li>${autoDiscard} duplicate(s) - will be skipped</li>
+        ${state.catConflicts.length > 0 ? `<li>${state.catConflicts.length} conflict(s) resolved: ${imported - autoImport} to import, ${discarded - autoDiscard} skipped</li>` : ''}
+      </ul>
+      <p class="text-secondary">Total: ${total} categor(ies) in import.</p>
+    `;
+
+    footer.innerHTML = `
+      <button class="btn btn-secondary editor-btn btn-wide btn-lg" onclick="cancelImportWizard()">Cancel</button>
+      <button class="btn btn-primary editor-btn btn-wide btn-lg" onclick="finishCategoryStage()">Apply &amp; Continue</button>
+    `;
+  }
+}
+
+function toggleCategoryRenameInput() {
+  const keepBoth = document.getElementById("catKeepBoth");
+  const input = document.getElementById("catNewName");
+  if (keepBoth && input) {
+    input.disabled = !keepBoth.checked;
+    if (keepBoth.checked) input.focus();
+  }
+}
+
+function validateNewCategoryName(input) {
+  const name = input.value.trim();
+  const errorEl = document.getElementById("catNewNameError");
+  const existingCategories = loadCategories();
+  const state = importWizardState;
+  const catIdx = state.catConflicts[state.catConflictIdx];
+  const importName = state.data.categories[catIdx].name;
+
+  const existingConflict = existingCategories.some(e => e.name === name && e.name !== importName);
+
+  const otherDecisionsConflict = state.catDecisions.some((d, i) => {
+    if (i === catIdx || !d) return false;
+    if (d.action === "import") return state.data.categories[i].name === name;
+    if (d.action === "keepBoth") return d.renameTo === name;
+    return false;
+  });
+
+  const conflict = existingConflict || otherDecisionsConflict;
+
+  if (errorEl) {
+    errorEl.style.display = (name && !conflict) ? "none" : "block";
+  }
+}
+
+function resolveCategoryConflict() {
+  const state = importWizardState;
+  const catIdx = state.catConflicts[state.catConflictIdx];
+  const choice = document.querySelector('input[name="catConflictChoice"]:checked');
+  if (!choice) return;
+
+  if (choice.value === "skip") {
+    state.catDecisions[catIdx] = { action: "discard" };
+  } else if (choice.value === "overwrite") {
+    state.catDecisions[catIdx] = { action: "overwrite" };
+  } else if (choice.value === "keepBoth") {
+    const newName = document.getElementById("catNewName").value.trim();
+    const errorEl = document.getElementById("catNewNameError");
+    if (!newName || (errorEl && errorEl.style.display !== "none")) return;
+    state.catDecisions[catIdx] = { action: "keepBoth", renameTo: newName };
+    state.catRenameMap[catIdx] = newName;
+  }
+
+  state.catConflictIdx++;
+  renderImportWizard();
+}
+
+function finishCategoryStage() {
+  const state = importWizardState;
+  const existingCategories = loadCategories();
+  const catRenameMap = {};
+
+  (state.data.categories || []).forEach((cat, idx) => {
+    const decision = state.catDecisions[idx];
+    if (!decision) return;
+
+    if (decision.action === "import") {
+      existingCategories.push({ name: cat.name, image: cat.image || null });
+    } else if (decision.action === "overwrite") {
+      const existing = existingCategories.find(e => e.name === cat.name);
+      if (existing) {
+        existing.image = cat.image || null;
+      }
+    } else if (decision.action === "keepBoth") {
+      existingCategories.push({ name: decision.renameTo, image: cat.image || null });
+      catRenameMap[cat.name] = decision.renameTo;
+    }
+  });
+
+  saveCategories(existingCategories);
+
+  state.catRenameMapGlobal = catRenameMap;
+
+  (state.data.dates || []).forEach(d => {
+    if (d.category && catRenameMap[d.category]) d.category = catRenameMap[d.category];
+  });
+
   state.step = "complete";
   renderImportWizard();
 }
@@ -254,17 +464,18 @@ function finishImageStage() {
 function renderComplete(body, footer, title) {
   const state = importWizardState;
   const totalImages = state.data.images.length;
-  const imported = state.imageDecisions.filter(d => d && (d.action === "import" || d.action === "overwrite" || d.action === "keepBoth")).length;
+  const importedImages = state.imageDecisions.filter(d => d && (d.action === "import" || d.action === "overwrite" || d.action === "keepBoth")).length;
+  const totalCats = (state.data.categories || []).length;
+  const importedCats = state.catDecisions.filter(d => d && (d.action === "import" || d.action === "overwrite" || d.action === "keepBoth")).length;
 
   title.textContent = "Import Complete";
 
   body.innerHTML = `
     <p>Import complete!</p>
     <ul>
-      <li>${imported} of ${totalImages} image(s) imported</li>
-      <li>${totalImages - imported} image(s) skipped</li>
+      <li>${importedImages} of ${totalImages} image(s) imported</li>
+      <li>${importedCats} of ${totalCats} categor(ies) imported</li>
     </ul>
-    <p class="text-info">Categories and dates from the import will be processed in a future update.</p>
   `;
 
   footer.innerHTML = `
