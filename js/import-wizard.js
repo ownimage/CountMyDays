@@ -245,15 +245,28 @@ function resolveImageConflict() {
     if (!newName || (errorEl && errorEl.style.display !== "none")) return;
     state.imageDecisions[imgIdx] = { action: "keepBoth", renameTo: newName };
     state.renameMap[imgIdx] = newName;
+    applyImageRename(state.data.images[imgIdx].name, newName);
   } else if (choice.value === "useExisting") {
     const btn = document.getElementById("imgExistingBtn");
     const replaceWith = btn ? btn.getAttribute("data-selected") : "";
     if (!replaceWith) return;
     state.imageDecisions[imgIdx] = { action: "useExisting", replaceWith: replaceWith };
+    state.renameMap[imgIdx] = replaceWith;
+    applyImageRename(state.data.images[imgIdx].name, replaceWith);
   }
 
   state.conflictIdx++;
   renderImportWizard();
+}
+
+function applyImageRename(oldName, newName) {
+  const state = importWizardState;
+  (state.data.categories || []).forEach(c => {
+    if (c.image === oldName) c.image = newName;
+  });
+  (state.data.dates || []).forEach(d => {
+    if (d.image === oldName) d.image = newName;
+  });
 }
 
 function finishImageStage() {
@@ -369,19 +382,41 @@ function renderCategoryStage(body, footer, title) {
       </div>
       <div class="mb-2">
         <div class="form-check mb-2">
-          <input class="form-check-input" type="radio" name="catConflictChoice" id="catSkip" value="skip" checked onchange="toggleCategoryRenameInput()">
+          <input class="form-check-input" type="radio" name="catConflictChoice" id="catSkip" value="skip" checked onchange="toggleCategoryRenameInput();toggleCategoryUseExisting()">
           <label class="form-check-label" for="catSkip">Skip - don't import this category</label>
         </div>
         <div class="form-check mb-2">
-          <input class="form-check-input" type="radio" name="catConflictChoice" id="catOverwrite" value="overwrite" onchange="toggleCategoryRenameInput()">
+          <input class="form-check-input" type="radio" name="catConflictChoice" id="catOverwrite" value="overwrite" onchange="toggleCategoryRenameInput();toggleCategoryUseExisting()">
           <label class="form-check-label" for="catOverwrite">Replace - overwrite the existing category with the imported one</label>
         </div>
-        <div class="form-check">
-          <input class="form-check-input" type="radio" name="catConflictChoice" id="catKeepBoth" value="keepBoth" onchange="toggleCategoryRenameInput()">
-          <label class="form-check-label" for="catKeepBoth">Keep Both - import with a different name:
-            <input type="text" id="catNewName" class="form-control form-control-sm d-inline-block" style="width:auto;min-width:180px" value="${escapeHtml(importCat.name)}" disabled onclick="event.stopPropagation()" oninput="validateNewCategoryName(this)">
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="radio" name="catConflictChoice" id="catKeepBoth" value="keepBoth" onchange="toggleCategoryRenameInput();toggleCategoryUseExisting()">
+          <label class="form-check-label" for="catKeepBoth">
+            <span style="display:inline-block;min-width:290px">Keep Both - import with a different name:</span>
+            <input type="text" id="catNewName" class="form-control form-control-sm d-inline-block" style="width:auto;min-width:240px" value="${escapeHtml(importCat.name)}" disabled onclick="event.stopPropagation()" oninput="validateNewCategoryName(this)">
           </label>
-          <div id="catNewNameError" class="text-danger small" style="display:none">ERROR: There is already a category with this name.</div>
+          <div class="text-danger small" style="display:none;margin-left:308px" id="catNewNameError">ERROR: There is already a category with this name.</div>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="catConflictChoice" id="catUseExisting" value="useExisting" onchange="toggleCategoryRenameInput();toggleCategoryUseExisting()">
+          <label class="form-check-label" for="catUseExisting">
+            <span style="display:inline-block;min-width:290px">Use Existing - map import to existing category:</span>
+            <span class="dropdown d-inline-block" id="catExistingDropdown">
+              <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" disabled id="catExistingBtn">
+                Select category
+              </button>
+              <ul class="dropdown-menu" id="catExistingMenu">
+                ${existingCategories.filter(e => e.name !== importCat.name).sort((a, b) => a.name.localeCompare(b.name)).map(e => {
+                  const eImg = e.image ? allImages.find(i => i.name === e.image) : null;
+                  return `
+                  <li><a class="dropdown-item" href="#" data-name="${escapeHtml(e.name)}" onclick="selectExistingCategory(this); return false;">
+                    ${eImg ? `<img src="${eImg.data}" style="width:20px;height:20px;object-fit:contain;margin-right:6px">` : `<span style="display:inline-block;width:20px;height:20px;margin-right:6px"></span>`}
+                    ${escapeHtml(e.name)}
+                  </a></li>`;
+                }).join("")}
+              </ul>
+            </span>
+          </label>
         </div>
       </div>
     `;
@@ -391,7 +426,7 @@ function renderCategoryStage(body, footer, title) {
       <button class="btn btn-primary editor-btn btn-wide btn-lg" onclick="resolveCategoryConflict()">Next</button>
     `;
   } else {
-    const imported = state.catDecisions.filter(d => d && (d.action === "import" || d.action === "overwrite" || d.action === "keepBoth")).length;
+    const imported = state.catDecisions.filter(d => d && (d.action === "import" || d.action === "overwrite" || d.action === "keepBoth" || d.action === "useExisting")).length;
     const discarded = state.catDecisions.filter(d => d && d.action === "discard").length;
     const total = (state.data.categories || []).length;
     const autoImport = state.catStatus.filter(s => s === "autoImport").length;
@@ -414,6 +449,17 @@ function renderCategoryStage(body, footer, title) {
       <button class="btn btn-primary editor-btn btn-wide btn-lg" onclick="finishCategoryStage()">Apply &amp; Continue</button>
     `;
   }
+}
+
+function toggleCategoryUseExisting() {
+  const choice = document.querySelector('input[name="catConflictChoice"]:checked');
+  const btn = document.getElementById("catExistingBtn");
+  if (btn) btn.disabled = !choice || choice.value !== "useExisting";
+}
+
+function selectExistingCategory(el) {
+  document.getElementById("catExistingBtn").innerHTML = el.getAttribute("data-name");
+  document.getElementById("catExistingBtn").dataset.selected = el.getAttribute("data-name");
 }
 
 function toggleCategoryRenameInput() {
@@ -465,6 +511,11 @@ function resolveCategoryConflict() {
     if (!newName || (errorEl && errorEl.style.display !== "none")) return;
     state.catDecisions[catIdx] = { action: "keepBoth", renameTo: newName };
     state.catRenameMap[catIdx] = newName;
+  } else if (choice.value === "useExisting") {
+    const selected = document.getElementById("catExistingBtn").dataset.selected;
+    if (!selected) return;
+    state.catDecisions[catIdx] = { action: "useExisting", useExisting: selected };
+    state.catRenameMap[catIdx] = selected;
   }
 
   state.catConflictIdx++;
@@ -490,6 +541,8 @@ function finishCategoryStage() {
     } else if (decision.action === "keepBoth") {
       existingCategories.push({ name: decision.renameTo, image: cat.image || null });
       catRenameMap[cat.name] = decision.renameTo;
+    } else if (decision.action === "useExisting") {
+      catRenameMap[cat.name] = decision.useExisting;
     }
   });
 
@@ -510,7 +563,7 @@ function renderComplete(body, footer, title) {
   const totalImages = state.data.images.length;
   const importedImages = state.imageDecisions.filter(d => d && (d.action === "import" || d.action === "overwrite" || d.action === "keepBoth")).length;
   const totalCats = (state.data.categories || []).length;
-  const importedCats = state.catDecisions.filter(d => d && (d.action === "import" || d.action === "overwrite" || d.action === "keepBoth")).length;
+  const importedCats = state.catDecisions.filter(d => d && (d.action === "import" || d.action === "overwrite" || d.action === "keepBoth" || d.action === "useExisting")).length;
 
   title.textContent = "Import Complete";
 
