@@ -148,8 +148,14 @@ function doneCategoryEditing() {
     editCategoryBuffer.name = (editCategoryBuffer.name || "").trim();
     const categories = loadCategories();
     if (categories.some((c, i) => i !== editingCategoryIndex && c.name === editCategoryBuffer.name)) return;
+    const oldName = categories[editingCategoryIndex].name;
     categories[editingCategoryIndex] = editCategoryBuffer;
     saveCategories(categories);
+    if (oldName !== editCategoryBuffer.name) {
+      const dates = loadDates();
+      dates.forEach(d => { if (d.category === oldName) d.category = editCategoryBuffer.name; });
+      saveDates(dates);
+    }
   }
   editingCategoryIndex = -1;
   editCategoryBuffer = null;
