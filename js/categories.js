@@ -17,8 +17,8 @@ function renderCategoriesEditor() {
   const categories = loadCategories();
   const images = loadImages();
 
-  const filtered = categories.filter(c => {
-    if (editingCategoryIndex >= 0) return true;
+  const filtered = categories.filter((c, index) => {
+    if (editingCategoryIndex === index) return true;
     if (categoryNameSearch && !c.name.toLowerCase().includes(categoryNameSearch.toLowerCase())) return false;
     return true;
   }).sort((a, b) => a.name.localeCompare(b.name));

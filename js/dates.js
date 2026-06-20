@@ -20,8 +20,8 @@ function renderDatesEditor() {
 
   const filtered = allDates
     .map((d, index) => ({ d, index }))
-    .filter(({ d }) => {
-      if (editingIndex >= 0) return true;
+    .filter(({ d, index }) => {
+      if (editingIndex === index) return true;
       if (categoryFilter && d.category !== categoryFilter) return false;
       if (titleSearch && !d.name.toLowerCase().includes(titleSearch.toLowerCase())) return false;
       return true;

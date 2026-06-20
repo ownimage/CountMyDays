@@ -52,8 +52,8 @@ function renderImagesEditor() {
 
   const images = loadImages();
 
-  const filtered = images.filter(img => {
-    if (editingImageIndex >= 0) return true;
+  const filtered = images.filter((img, index) => {
+    if (editingImageIndex === index) return true;
     if (imageNameSearch && !img.name.toLowerCase().includes(imageNameSearch.toLowerCase())) return false;
     return true;
   }).sort((a, b) => a.name.localeCompare(b.name));
