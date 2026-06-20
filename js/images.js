@@ -201,7 +201,11 @@ function editImageColor(index, attr, value) {
   img.lineColor = attr === 'stroke' ? value : img.lineColor;
   img.fillColor = attr === 'fill' ? value : img.fillColor;
   saveImages(images);
-  renderImagesEditor();
+  const editedCard = document.querySelector('#imagesList .card.card-edited');
+  if (editedCard) {
+    const imgEl = editedCard.querySelector('img.date-img');
+    if (imgEl) imgEl.src = img.data;
+  }
 }
 
 function editImageFillNone(index, checked) {
@@ -219,7 +223,11 @@ function editImageFillNone(index, checked) {
     img.fillColor = restore;
   }
   saveImages(images);
-  renderImagesEditor();
+  const editedCard = document.querySelector('#imagesList .card.card-edited');
+  if (editedCard) {
+    const imgEl = editedCard.querySelector('img.date-img');
+    if (imgEl) imgEl.src = img.data;
+  }
 }
 
 function editImageStrokeNone(index, checked) {
@@ -237,7 +245,11 @@ function editImageStrokeNone(index, checked) {
     img.lineColor = restore;
   }
   saveImages(images);
-  renderImagesEditor();
+  const editedCard = document.querySelector('#imagesList .card.card-edited');
+  if (editedCard) {
+    const imgEl = editedCard.querySelector('img.date-img');
+    if (imgEl) imgEl.src = img.data;
+  }
 }
 
 function normalizeSvgForEditing(svgText) {
