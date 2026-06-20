@@ -61,7 +61,8 @@ function renderCategoriesEditor() {
           </div>
           <div class="flex-fill" style="min-width:0">
             <div class="mb-2">
-              <input class="form-control" value="${escapeHtml(catData.name || "")}" oninput="editCategoryBufferField('name', this.value)">
+              <input class="form-control" value="${escapeHtml(catData.name || "")}" oninput="editCategoryBufferField('name', this.value); checkDuplicateCategoryName()" onchange="editCategoryBufferField('name', this.value); checkDuplicateCategoryName()">
+              <div id="categoryNameError" class="text-danger mt-1" style="display:none">ERROR: There is already a category with this name.</div>
             </div>
             <div class="d-flex gap-2">
               <button class="btn btn-success editor-btn" onclick="doneCategoryEditing()">OK</button>
@@ -126,12 +127,27 @@ function editCategory(index) {
   editingCategoryIndex = index;
   isNewCategory = false;
   renderCategoriesEditor();
+  checkDuplicateCategoryName();
+}
+
+function checkDuplicateCategoryName() {
+  const categories = loadCategories();
+  const input = document.querySelector('#categoriesList .card-edited input.form-control');
+  if (!input) return;
+  const trimmed = input.value.trim();
+  const hasDuplicate = categories.some((c, i) => i !== editingCategoryIndex && c.name === trimmed);
+  const errorEl = document.getElementById("categoryNameError");
+  const okBtn = document.querySelector('#categoriesList .btn-success.editor-btn');
+  if (errorEl) errorEl.style.display = hasDuplicate ? "block" : "none";
+  if (okBtn) okBtn.disabled = hasDuplicate;
 }
 
 function doneCategoryEditing() {
   if (editingCategoryIndex >= 0 && editCategoryBuffer) {
     if (!editCategoryBuffer.image) editCategoryBuffer.image = null;
+    editCategoryBuffer.name = (editCategoryBuffer.name || "").trim();
     const categories = loadCategories();
+    if (categories.some((c, i) => i !== editingCategoryIndex && c.name === editCategoryBuffer.name)) return;
     categories[editingCategoryIndex] = editCategoryBuffer;
     saveCategories(categories);
   }
@@ -182,4 +198,5 @@ function addNewCategory() {
   const cards = document.querySelectorAll("#categoriesList .card");
   const lastCard = cards[cards.length - 1];
   if (lastCard) lastCard.scrollIntoView({ behavior: "smooth", block: "center" });
+  checkDuplicateCategoryName();
 }
