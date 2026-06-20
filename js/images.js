@@ -359,5 +359,11 @@ function deleteImage(index) {
   });
   saveCategories(categories);
 
+  const dates = loadDates();
+  dates.forEach(d => {
+    if (d.image === removed) d.image = null;
+  });
+  saveDates(dates);
+
   renderImagesEditor();
 }
