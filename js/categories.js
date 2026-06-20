@@ -187,8 +187,12 @@ function deleteCategory(index) {
     isNewCategory = false;
   }
   const categories = loadCategories();
+  const removed = categories[index].name;
   categories.splice(index, 1);
   saveCategories(categories);
+  const dates = loadDates();
+  dates.forEach(d => { if (d.category === removed) d.category = null; });
+  saveDates(dates);
   renderCategoriesEditor();
 }
 
