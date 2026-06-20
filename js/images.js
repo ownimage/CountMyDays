@@ -140,6 +140,7 @@ function renderImagesEditor() {
     filterEl.innerHTML = `
       <div class="d-flex gap-2 align-items-center">
         <input class="form-control" type="search" placeholder="Search image names..." value="${escapeHtml(imageNameSearch)}" oninput="setImageNameSearch(this.value)">
+        <button class="btn btn-outline-secondary btn-sm" onclick="imageNameSearch='';renderImagesEditor()">Clear</button>
       </div>
     `;
   }

@@ -198,6 +198,7 @@ function renderEditorFilters(allDates) {
         ${cats.map(c => `<option value="${c}" ${categoryFilter === c ? 'selected' : ''}>${c}</option>`).join("")}
       </select>
       <input class="form-control" type="search" placeholder="Search titles..." value="${escapeHtml(titleSearch)}" oninput="setTitleSearch(this.value)">
+      <button class="btn btn-outline-secondary btn-sm" onclick="categoryFilter='';titleSearch='';renderDatesEditor()">Clear</button>
     </div>
   `;
 }

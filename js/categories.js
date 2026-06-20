@@ -105,6 +105,7 @@ function renderCategoriesEditor() {
     filterEl.innerHTML = `
       <div class="d-flex gap-2 align-items-center">
         <input class="form-control" type="search" placeholder="Search category names..." value="${escapeHtml(categoryNameSearch)}" oninput="setCategoryNameSearch(this.value)">
+        <button class="btn btn-outline-secondary btn-sm" onclick="categoryNameSearch='';renderCategoriesEditor()">Clear</button>
       </div>
     `;
   }
