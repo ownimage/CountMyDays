@@ -56,13 +56,7 @@ function importData() {
           return;
         }
 
-        saveDates(json.dates);
-        saveCategories(json.categories);
-        saveImages(json.images);
-
-        alert("Import complete!");
-        hideAllEditors();
-        renderCountdowns();
+        startImportWizard(json);
 
       } catch (err) {
         alert("Invalid JSON file.");
@@ -605,13 +599,7 @@ function finishQRImport() {
 
   try {
     const data = JSON.parse(json);
-
-    saveDates(data.dates);
-    saveCategories(data.categories);
-    saveImages(data.images);
-
-    alert("QR import complete!");
-    renderCountdowns();
+    startImportWizard(data);
   } catch (err) {
     alert("Failed to import QR data.");
   }
