@@ -67,6 +67,8 @@ function renderImportWizard() {
     renderImageStage(body, footer, title);
   } else if (state.step === "categories") {
     renderCategoryStage(body, footer, title);
+  } else if (state.step === "dates") {
+    renderDateStage(body, footer, title);
   } else if (state.step === "complete") {
     renderComplete(body, footer, title);
   }
@@ -554,6 +556,295 @@ function finishCategoryStage() {
     if (d.category && catRenameMap[d.category]) d.category = catRenameMap[d.category];
   });
 
+  preprocessDates();
+  state.step = "dates";
+  renderImportWizard();
+}
+
+function datesEqual(a, b) {
+  if (a.type !== b.type) return false;
+  if (a.day !== b.day) return false;
+  if (a.month !== b.month) return false;
+  if (a.type === "once" && a.year !== b.year) return false;
+  if ((a.category || "") !== (b.category || "")) return false;
+  if ((a.image || "") !== (b.image || "")) return false;
+  return true;
+}
+
+function formatDateShort(d) {
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  if (d.type === "once") {
+    return `${d.day} ${months[(d.month||1)-1]} ${d.year}`;
+  }
+  return `${d.day} ${months[(d.month||1)-1]}`;
+}
+
+function preprocessDates() {
+  const state = importWizardState;
+  const existingDates = loadDates();
+  const dateStatus = [];
+  const dateDecisions = [];
+  const dateConflicts = [];
+
+  (state.data.dates || []).forEach((d, idx) => {
+    const existing = existingDates.filter(e => e.name === d.name);
+    if (existing.length === 0) {
+      dateStatus[idx] = "autoImport";
+      dateDecisions[idx] = { action: "import" };
+    } else if (existing.some(e => datesEqual(d, e))) {
+      dateStatus[idx] = "autoDiscard";
+      dateDecisions[idx] = { action: "discard" };
+    } else {
+      dateStatus[idx] = "conflict";
+      dateConflicts.push(idx);
+      dateDecisions[idx] = null;
+    }
+  });
+
+  state.dateStatus = dateStatus;
+  state.dateDecisions = dateDecisions;
+  state.dateConflicts = dateConflicts;
+  state.dateConflictIdx = 0;
+  state.dateRenameMap = {};
+}
+
+function renderDateStage(body, footer, title) {
+  const state = importWizardState;
+  const totalConflicts = state.dateConflicts.length;
+
+  if (state.dateConflictIdx < totalConflicts) {
+    const dIdx = state.dateConflicts[state.dateConflictIdx];
+    const importDate = state.data.dates[dIdx];
+    const existingDates = loadDates();
+    const existingSameName = existingDates.filter(e => e.name === importDate.name);
+    const images = loadImages();
+    const categories = loadCategories();
+
+    const existingPick = existingSameName[0];
+
+    function catImg(name) {
+      const cat = categories.find(c => c.name === name);
+      if (!cat || !cat.image) return null;
+      const img = images.find(i => i.name === cat.image);
+      return img ? img.data : null;
+    }
+    function dateImg(name) {
+      if (!name) return null;
+      const img = images.find(i => i.name === name);
+      return img ? img.data : null;
+    }
+
+    title.textContent = `Date ${state.dateConflictIdx + 1} of ${totalConflicts}`;
+
+    body.innerHTML = `
+      <p class="mb-3">A date with the title "<strong>${escapeHtml(importDate.name)}</strong>" already exists but the details are different. Choose what to do:</p>
+      <div class="row mb-3">
+        <div class="col-6 text-center">
+          <h6>Current Date</h6>
+          <div class="fw-bold mb-1">${escapeHtml(existingPick ? existingPick.name : '')}</div>
+          <div>${existingPick ? formatDateShort(existingPick) : ''}</div>
+          ${existingPick ? `<div class="small text-secondary">${existingPick.type}</div>` : ''}
+          <div class="d-flex justify-content-center gap-2 mt-2">
+            <div>
+              ${catImg(existingPick.category) ? `<img src="${catImg(existingPick.category)}" style="width:32px;height:32px;object-fit:contain" class="border rounded p-1">` : '<div style="width:32px;height:32px" class="border rounded d-flex align-items-center justify-content-center text-secondary small">No cat</div>'}
+              <div class="small mt-1 text-secondary">${escapeHtml(existingPick.category || 'None')}</div>
+            </div>
+            <div>
+              ${dateImg(existingPick.image) ? `<img src="${dateImg(existingPick.image)}" style="width:32px;height:32px;object-fit:contain" class="border rounded p-1">` : '<div style="width:32px;height:32px" class="border rounded d-flex align-items-center justify-content-center text-secondary small">No img</div>'}
+            </div>
+          </div>
+        </div>
+        <div class="col-6 text-center">
+          <h6>Imported Date</h6>
+          <div class="fw-bold mb-1">${escapeHtml(importDate.name)}</div>
+          <div>${formatDateShort(importDate)}</div>
+          <div class="small text-secondary">${importDate.type}</div>
+          <div class="d-flex justify-content-center gap-2 mt-2">
+            <div>
+              ${catImg(importDate.category) ? `<img src="${catImg(importDate.category)}" style="width:32px;height:32px;object-fit:contain" class="border rounded p-1">` : '<div style="width:32px;height:32px" class="border rounded d-flex align-items-center justify-content-center text-secondary small">No cat</div>'}
+              <div class="small mt-1 text-secondary">${escapeHtml(importDate.category || 'None')}</div>
+            </div>
+            <div>
+              ${dateImg(importDate.image) ? `<img src="${dateImg(importDate.image)}" style="width:32px;height:32px;object-fit:contain" class="border rounded p-1">` : '<div style="width:32px;height:32px" class="border rounded d-flex align-items-center justify-content-center text-secondary small">No img</div>'}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mb-2">
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="radio" name="dateConflictChoice" id="dateSkip" value="skip" checked onchange="toggleDateRenameInput();toggleDateUseExisting()">
+          <label class="form-check-label" for="dateSkip">Skip - don't import this date</label>
+        </div>
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="radio" name="dateConflictChoice" id="dateOverwrite" value="overwrite" onchange="toggleDateRenameInput();toggleDateUseExisting()">
+          <label class="form-check-label" for="dateOverwrite">Replace - overwrite the existing date with the imported one</label>
+        </div>
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="radio" name="dateConflictChoice" id="dateKeepBoth" value="keepBoth" onchange="toggleDateRenameInput();toggleDateUseExisting()">
+          <label class="form-check-label" for="dateKeepBoth">
+            <span style="display:inline-block;min-width:290px">Keep Both - import with a different name:</span>
+            <input type="text" id="dateNewName" class="form-control form-control-sm d-inline-block" style="width:auto;min-width:240px" value="${escapeHtml(importDate.name)}" disabled onclick="event.stopPropagation()" oninput="validateNewDateName(this)">
+          </label>
+          <div class="text-danger small" style="display:none;margin-left:308px" id="dateNewNameError">ERROR: There is already a date with this name.</div>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="dateConflictChoice" id="dateUseExisting" value="useExisting" onchange="toggleDateRenameInput();toggleDateUseExisting()">
+          <label class="form-check-label" for="dateUseExisting">
+            <span style="display:inline-block;min-width:290px">Use Existing - skip import, keep existing:</span>
+            <span class="dropdown d-inline-block" id="dateExistingDropdown">
+              <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" disabled id="dateExistingBtn">
+                Select date
+              </button>
+              <ul class="dropdown-menu" id="dateExistingMenu">
+                ${existingDates.slice().sort((a, b) => a.name.localeCompare(b.name)).map(e => {
+                  const eCatImg = catImg(e.category);
+                  const eDateImg = dateImg(e.image);
+                  return `
+                  <li><a class="dropdown-item" href="#" data-name="${escapeHtml(e.name)}" onclick="selectExistingDate(this); return false;">
+                    <span style="display:inline-flex;align-items:center;gap:4px">
+                      ${eCatImg ? `<img src="${eCatImg}" style="width:20px;height:20px;object-fit:contain">` : '<span style="display:inline-block;width:20px;height:20px"></span>'}
+                      ${eDateImg ? `<img src="${eDateImg}" style="width:20px;height:20px;object-fit:contain">` : '<span style="display:inline-block;width:20px;height:20px"></span>'}
+                      <span>${escapeHtml(e.name)}</span>
+                      <span class="text-muted small">${formatDateShort(e)}</span>
+                      <span class="text-muted small">${escapeHtml(e.category || '')}</span>
+                    </span>
+                  </a></li>`;
+                }).join("")}
+              </ul>
+            </span>
+          </label>
+        </div>
+      </div>
+    `;
+
+    footer.innerHTML = `
+      <button class="btn btn-secondary editor-btn btn-wide btn-lg" onclick="cancelImportWizard()">Cancel</button>
+      <button class="btn btn-primary editor-btn btn-wide btn-lg" onclick="resolveDateConflict()">Next</button>
+    `;
+  } else {
+    const imported = state.dateDecisions.filter(d => d && (d.action === "import" || d.action === "overwrite" || d.action === "keepBoth")).length;
+    const discarded = state.dateDecisions.filter(d => d && d.action === "discard").length;
+    const total = (state.data.dates || []).length;
+    const autoImport = state.dateStatus.filter(s => s === "autoImport").length;
+    const autoDiscard = state.dateStatus.filter(s => s === "autoDiscard").length;
+
+    title.textContent = "Date Summary";
+
+    body.innerHTML = `
+      <p>Date processing complete.</p>
+      <ul>
+        <li>${autoImport} new date(s) - will be imported</li>
+        <li>${autoDiscard} duplicate(s) - will be skipped</li>
+        ${state.dateConflicts.length > 0 ? `<li>${state.dateConflicts.length} conflict(s) resolved</li>` : ''}
+      </ul>
+      <p class="text-secondary">Total: ${total} date(s) in import.</p>
+    `;
+
+    footer.innerHTML = `
+      <button class="btn btn-secondary editor-btn btn-wide btn-lg" onclick="cancelImportWizard()">Cancel</button>
+      <button class="btn btn-primary editor-btn btn-wide btn-lg" onclick="finishDateStage()">Apply &amp; Continue</button>
+    `;
+  }
+}
+
+function toggleDateRenameInput() {
+  const keepBoth = document.getElementById("dateKeepBoth");
+  const input = document.getElementById("dateNewName");
+  if (keepBoth && input) {
+    input.disabled = !keepBoth.checked;
+    if (keepBoth.checked) input.focus();
+  }
+}
+
+function toggleDateUseExisting() {
+  const choice = document.querySelector('input[name="dateConflictChoice"]:checked');
+  const btn = document.getElementById("dateExistingBtn");
+  if (btn) btn.disabled = !choice || choice.value !== "useExisting";
+}
+
+function selectExistingDate(el) {
+  document.getElementById("dateExistingBtn").innerHTML = el.getAttribute("data-name");
+  document.getElementById("dateExistingBtn").dataset.selected = el.getAttribute("data-name");
+}
+
+function validateNewDateName(input) {
+  const name = input.value.trim();
+  const errorEl = document.getElementById("dateNewNameError");
+  const existingDates = loadDates();
+  const state = importWizardState;
+  const dIdx = state.dateConflicts[state.dateConflictIdx];
+  const importName = state.data.dates[dIdx].name;
+
+  const existingConflict = existingDates.some(e => e.name === name && e.name !== importName);
+
+  const otherDecisionsConflict = state.dateDecisions.some((d, i) => {
+    if (i === dIdx || !d) return false;
+    if (d.action === "import") return state.data.dates[i].name === name;
+    if (d.action === "keepBoth") return d.renameTo === name;
+    return false;
+  });
+
+  const conflict = existingConflict || otherDecisionsConflict;
+
+  if (errorEl) {
+    errorEl.style.display = (name && !conflict) ? "none" : "block";
+  }
+}
+
+function resolveDateConflict() {
+  const state = importWizardState;
+  const dIdx = state.dateConflicts[state.dateConflictIdx];
+  const choice = document.querySelector('input[name="dateConflictChoice"]:checked');
+  if (!choice) return;
+
+  if (choice.value === "skip") {
+    state.dateDecisions[dIdx] = { action: "discard" };
+  } else if (choice.value === "overwrite") {
+    state.dateDecisions[dIdx] = { action: "overwrite" };
+  } else if (choice.value === "keepBoth") {
+    const newName = document.getElementById("dateNewName").value.trim();
+    const errorEl = document.getElementById("dateNewNameError");
+    if (!newName || (errorEl && errorEl.style.display !== "none")) return;
+    state.dateDecisions[dIdx] = { action: "keepBoth", renameTo: newName };
+  } else if (choice.value === "useExisting") {
+    const btn = document.getElementById("dateExistingBtn");
+    const selected = btn ? btn.getAttribute("data-selected") : "";
+    if (!selected) return;
+    state.dateDecisions[dIdx] = { action: "discard" };
+  }
+
+  state.dateConflictIdx++;
+  renderImportWizard();
+}
+
+function finishDateStage() {
+  const state = importWizardState;
+  const existingDates = loadDates();
+
+  (state.data.dates || []).forEach((d, idx) => {
+    const decision = state.dateDecisions[idx];
+    if (!decision) return;
+
+    if (decision.action === "import") {
+      existingDates.push({ ...d });
+    } else if (decision.action === "overwrite") {
+      const existing = existingDates.find(e => e.name === d.name);
+      if (existing) {
+        existing.type = d.type;
+        existing.day = d.day;
+        existing.month = d.month;
+        if (d.type === "once") existing.year = d.year;
+        existing.category = d.category || null;
+        existing.image = d.image || null;
+      }
+    } else if (decision.action === "keepBoth") {
+      const copy = { ...d, name: decision.renameTo };
+      existingDates.push(copy);
+    }
+  });
+
+  saveDates(existingDates);
+
   state.step = "complete";
   renderImportWizard();
 }
@@ -564,6 +855,8 @@ function renderComplete(body, footer, title) {
   const importedImages = state.imageDecisions.filter(d => d && (d.action === "import" || d.action === "overwrite" || d.action === "keepBoth")).length;
   const totalCats = (state.data.categories || []).length;
   const importedCats = state.catDecisions.filter(d => d && (d.action === "import" || d.action === "overwrite" || d.action === "keepBoth" || d.action === "useExisting")).length;
+  const totalDates = (state.data.dates || []).length;
+  const importedDates = state.dateDecisions.filter(d => d && (d.action === "import" || d.action === "overwrite" || d.action === "keepBoth")).length;
 
   title.textContent = "Import Complete";
 
@@ -572,6 +865,7 @@ function renderComplete(body, footer, title) {
     <ul>
       <li>${importedImages} of ${totalImages} image(s) imported</li>
       <li>${importedCats} of ${totalCats} categor(ies) imported</li>
+      <li>${importedDates} of ${totalDates} date(s) imported</li>
     </ul>
   `;
 
