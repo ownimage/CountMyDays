@@ -428,7 +428,7 @@ function renderCategoryStage(body, footer, title) {
       <button class="btn btn-primary editor-btn btn-wide btn-lg" onclick="resolveCategoryConflict()">Next</button>
     `;
   } else {
-    const imported = state.catDecisions.filter(d => d && (d.action === "import" || d.action === "overwrite" || d.action === "keepBoth" || d.action === "useExisting")).length;
+    const imported = state.catDecisions.filter(d => d && (d.action === "import" || d.action === "overwrite" || d.action === "keepBoth")).length;
     const discarded = state.catDecisions.filter(d => d && d.action === "discard").length;
     const total = (state.data.categories || []).length;
     const autoImport = state.catStatus.filter(s => s === "autoImport").length;
@@ -854,7 +854,7 @@ function renderComplete(body, footer, title) {
   const totalImages = state.data.images.length;
   const importedImages = state.imageDecisions.filter(d => d && (d.action === "import" || d.action === "overwrite" || d.action === "keepBoth")).length;
   const totalCats = (state.data.categories || []).length;
-  const importedCats = state.catDecisions.filter(d => d && (d.action === "import" || d.action === "overwrite" || d.action === "keepBoth" || d.action === "useExisting")).length;
+  const importedCats = state.catDecisions.filter(d => d && (d.action === "import" || d.action === "overwrite" || d.action === "keepBoth")).length;
   const totalDates = (state.data.dates || []).length;
   const importedDates = state.dateDecisions.filter(d => d && (d.action === "import" || d.action === "overwrite" || d.action === "keepBoth")).length;
 
