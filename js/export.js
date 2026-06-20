@@ -60,8 +60,8 @@ function renderExportWizard() {
       </div>
     `;
     footer.innerHTML = `
-      <button class="btn btn-secondary editor-btn btn-wide" onclick="cancelExportWizard()">Cancel</button>
-      <button class="btn btn-primary editor-btn btn-wide" onclick="exportWizardNext()">Next</button>
+      <button class="btn btn-secondary editor-btn btn-wide btn-lg" onclick="cancelExportWizard()">Cancel</button>
+      <button class="btn btn-primary editor-btn btn-wide btn-lg" onclick="exportWizardNext()">Next</button>
     `;
   } else if (ew.step === "dates1") {
     title.textContent = "Export Dates";
@@ -85,8 +85,8 @@ function renderExportWizard() {
       </div>
     `;
     footer.innerHTML = `
-      <button class="btn btn-secondary editor-btn btn-wide" onclick="exportWizardBack()">Back</button>
-      <button class="btn btn-primary editor-btn btn-wide" onclick="exportWizardNext()">Next</button>
+      <button class="btn btn-secondary editor-btn btn-wide btn-lg" onclick="exportWizardBack()">Back</button>
+      <button class="btn btn-primary editor-btn btn-wide btn-lg" onclick="exportWizardNext()">Next</button>
     `;
   } else if (ew.step === "dates2") {
     title.textContent = "Select Dates";
@@ -129,8 +129,8 @@ function renderExportWizard() {
       }).join("")}
     `;
     footer.innerHTML = `
-      <button class="btn btn-secondary editor-btn btn-wide" onclick="exportWizardBack()">Back</button>
-      <button class="btn btn-primary editor-btn btn-wide" onclick="exportWizardNext()">Next</button>
+      <button class="btn btn-secondary editor-btn btn-wide btn-lg" onclick="exportWizardBack()">Back</button>
+      <button class="btn btn-primary editor-btn btn-wide btn-lg" onclick="exportWizardNext()">Next</button>
     `;
   } else if (ew.step === "categories1") {
     title.textContent = "Export Categories";
@@ -154,8 +154,8 @@ function renderExportWizard() {
       </div>
     `;
     footer.innerHTML = `
-      <button class="btn btn-secondary editor-btn btn-wide" onclick="exportWizardBack()">Back</button>
-      <button class="btn btn-primary editor-btn btn-wide" onclick="exportWizardNext()">Next</button>
+      <button class="btn btn-secondary editor-btn btn-wide btn-lg" onclick="exportWizardBack()">Back</button>
+      <button class="btn btn-primary editor-btn btn-wide btn-lg" onclick="exportWizardNext()">Next</button>
     `;
   } else if (ew.step === "categories2") {
     title.textContent = "Select Categories";
@@ -186,8 +186,8 @@ function renderExportWizard() {
       }).join("")}
     `;
     footer.innerHTML = `
-      <button class="btn btn-secondary editor-btn btn-wide" onclick="exportWizardBack()">Back</button>
-      <button class="btn btn-primary editor-btn btn-wide" onclick="exportWizardNext()">Next</button>
+      <button class="btn btn-secondary editor-btn btn-wide btn-lg" onclick="exportWizardBack()">Back</button>
+      <button class="btn btn-primary editor-btn btn-wide btn-lg" onclick="exportWizardNext()">Next</button>
     `;
   } else if (ew.step === "images1") {
     title.textContent = "Export Images";
@@ -206,8 +206,8 @@ function renderExportWizard() {
       </div>
     `;
     footer.innerHTML = `
-      <button class="btn btn-secondary editor-btn btn-wide" onclick="exportWizardBack()">Back</button>
-      <button class="btn btn-primary editor-btn btn-wide" onclick="exportWizardNext()">Next</button>
+      <button class="btn btn-secondary editor-btn btn-wide btn-lg" onclick="exportWizardBack()">Back</button>
+      <button class="btn btn-primary editor-btn btn-wide btn-lg" onclick="exportWizardNext()">Next</button>
     `;
   } else if (ew.step === "images2") {
     title.textContent = "Select Images";
@@ -234,8 +234,8 @@ function renderExportWizard() {
       }).join("")}
     `;
     footer.innerHTML = `
-      <button class="btn btn-secondary editor-btn btn-wide" onclick="exportWizardBack()">Back</button>
-      <button class="btn btn-primary editor-btn btn-wide" onclick="exportWizardNext()">Export</button>
+      <button class="btn btn-secondary editor-btn btn-wide btn-lg" onclick="exportWizardBack()">Back</button>
+      <button class="btn btn-primary editor-btn btn-wide btn-lg" onclick="exportWizardNext()">Export</button>
     `;
   } else if (ew.step === "summary") {
     const data = buildExportData();
@@ -308,8 +308,8 @@ function renderExportWizard() {
       ${data.dates.length === 0 && data.categories.length === 0 && data.images.length === 0 ? `<p class="text-secondary">Nothing selected for export.</p>` : ""}
     `;
     footer.innerHTML = `
-      <button class="btn btn-secondary editor-btn btn-wide" onclick="exportWizardBack()">Back</button>
-      <button class="btn btn-primary editor-btn btn-wide" onclick="finishExportWizard()">Export</button>
+      <button class="btn btn-secondary editor-btn btn-wide btn-lg" onclick="exportWizardBack()">Back</button>
+      <button class="btn btn-primary editor-btn btn-wide btn-lg" onclick="finishExportWizard()">Export</button>
     `;
   }
   if (focusInfo) {

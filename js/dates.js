@@ -81,7 +81,7 @@ function renderDatesEditor() {
                 </button>
                 <ul class="dropdown-menu">
                   <li><a class="dropdown-item" href="#" onclick="editBufferField('category', '')"><span style="display:inline-block;width:16px;height:16px;margin-right:6px"></span>No Category</a></li>
-                  ${categories.map(c => `
+                  ${categories.slice().sort((a, b) => a.name.localeCompare(b.name)).map(c => `
                     <li><a class="dropdown-item" href="#" onclick="editBufferField('category', '${escapeHtml(c.name)}')">
                       ${catImgMap[c.name] ? `<img src="${catImgMap[c.name]}" style="width:16px;height:16px;object-fit:contain;margin-right:6px">` : `<span style="display:inline-block;width:16px;height:16px;margin-right:6px"></span>`}
                       ${escapeHtml(c.name)}
@@ -98,7 +98,7 @@ function renderDatesEditor() {
                 </button>
                 <ul class="dropdown-menu">
                   <li><a class="dropdown-item" href="#" onclick="editBufferField('image', '');renderDatesEditor()"><span style="display:inline-block;width:16px;height:16px;margin-right:6px"></span>None</a></li>
-                  ${images.map(img => `
+                  ${images.slice().sort((a, b) => a.name.localeCompare(b.name)).map(img => `
                     <li><a class="dropdown-item" href="#" onclick="editBufferField('image', '${escapeHtml(img.name)}');renderDatesEditor()">
                       ${allImgMap[img.name] ? `<img src="${allImgMap[img.name]}" style="width:16px;height:16px;object-fit:contain;margin-right:6px">` : `<span style="display:inline-block;width:16px;height:16px;margin-right:6px"></span>`}
                       ${escapeHtml(img.name)}

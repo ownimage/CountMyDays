@@ -50,7 +50,7 @@ function renderCategoriesEditor() {
               </button>
               <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="#" onclick="editCategoryBufferField('image', '');renderCategoriesEditor()"><span style="display:inline-block;width:16px;height:16px;margin-right:6px"></span>None</a></li>
-                ${images.map(img => `
+                ${images.slice().sort((a, b) => a.name.localeCompare(b.name)).map(img => `
                   <li><a class="dropdown-item" href="#" onclick="editCategoryBufferField('image', '${escapeHtml(img.name)}');renderCategoriesEditor()">
                     <img src="${imgPreviewMap[img.name]}" style="width:16px;height:16px;object-fit:contain;margin-right:6px">
                     ${escapeHtml(img.name)}
