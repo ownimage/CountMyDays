@@ -78,7 +78,8 @@ function renderImagesEditor() {
             <button class="btn btn-primary btn-sm mt-2 w-100 text-nowrap" onclick="openImageUpload(${realIndex})">Upload</button>
           </div>
           <div class="col">
-            <input class="form-control" value="${escapeHtml(img.name)}" onchange="editImageField('name', this.value)">
+            <input class="form-control" value="${escapeHtml(img.name)}" onchange="editImageField('name', this.value); checkDuplicateName()" oninput="checkDuplicateName()">
+            <div id="imageNameError" class="text-danger mt-1" style="display:none">ERROR: There is already an image with this name.</div>
             <div class="d-flex gap-2 mt-2 align-items-center flex-wrap">
               <button class="btn btn-success editor-btn" onclick="doneImageEdit(${realIndex})">OK</button>
               <label class="form-label mb-0">Line:</label>
@@ -161,12 +162,13 @@ function startEditImage(index) {
   editingImageIndex = index;
   isNewImage = false;
   renderImagesEditor();
+  checkDuplicateName();
 }
 
 function editImageField(field, value) {
   const images = loadImages();
   if (editingImageIndex < 0 || editingImageIndex >= images.length) return;
-  images[editingImageIndex][field] = value;
+  images[editingImageIndex][field] = value.trim();
   saveImages(images);
 }
 
@@ -275,9 +277,24 @@ function addNewImage() {
   const cards = document.querySelectorAll("#imagesList .card");
   const lastCard = cards[cards.length - 1];
   if (lastCard) lastCard.scrollIntoView({ behavior: "smooth", block: "center" });
+  checkDuplicateName();
+}
+
+function checkDuplicateName() {
+  const images = loadImages();
+  const input = document.querySelector('#imagesList .card-edited input.form-control');
+  if (!input) return;
+  const trimmed = input.value.trim();
+  const hasDuplicate = images.some((img, i) => i !== editingImageIndex && img.name === trimmed);
+  const errorEl = document.getElementById("imageNameError");
+  const okBtn = document.querySelector('#imagesList .btn-success.editor-btn');
+  if (errorEl) errorEl.style.display = hasDuplicate ? "block" : "none";
+  if (okBtn) okBtn.disabled = hasDuplicate;
 }
 
 function doneImageEdit(index) {
+  const images = loadImages();
+  if (images.some((img, i) => i !== index && img.name === images[index].name)) return;
   editingImageIndex = -1;
   isNewImage = false;
   editImageBackup = null;
