@@ -165,10 +165,30 @@ function startEditImage(index) {
   checkDuplicateName();
 }
 
+function syncImageRename(oldName, newName) {
+  const categories = loadCategories();
+  categories.forEach(c => { if (c.image === oldName) c.image = newName; });
+  saveCategories(categories);
+  const dates = loadDates();
+  dates.forEach(d => { if (d.image === oldName) d.image = newName; });
+  saveDates(dates);
+}
+
 function editImageField(field, value) {
   const images = loadImages();
   if (editingImageIndex < 0 || editingImageIndex >= images.length) return;
-  images[editingImageIndex][field] = value.trim();
+  const trimmed = value.trim();
+  if (field === 'name') {
+    const oldName = images[editingImageIndex].name;
+    if (oldName !== trimmed) {
+      images[editingImageIndex].name = trimmed;
+      saveImages(images);
+      syncImageRename(oldName, trimmed);
+      renderImagesEditor();
+      return;
+    }
+  }
+  images[editingImageIndex][field] = trimmed;
   saveImages(images);
 }
 
@@ -320,16 +340,9 @@ function cancelImageEdit() {
 function renameImage(index, newName) {
   const images = loadImages();
   const oldName = images[index].name;
-
   images[index].name = newName;
   saveImages(images);
-
-  const categories = loadCategories();
-  categories.forEach(c => {
-    if (c.image === oldName) c.image = newName;
-  });
-  saveCategories(categories);
-
+  syncImageRename(oldName, newName);
   renderImagesEditor();
 }
 
