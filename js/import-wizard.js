@@ -112,19 +112,39 @@ function renderImageStage(body, footer, title) {
       </div>
       <div class="mb-2">
         <div class="form-check mb-2">
-          <input class="form-check-input" type="radio" name="imgConflictChoice" id="imgSkip" value="skip" checked onchange="toggleImageRenameInput()">
+          <input class="form-check-input" type="radio" name="imgConflictChoice" id="imgSkip" value="skip" checked onchange="toggleImageRenameInput();toggleImageUseExisting()">
           <label class="form-check-label" for="imgSkip">Skip - don't import this image</label>
         </div>
         <div class="form-check mb-2">
-          <input class="form-check-input" type="radio" name="imgConflictChoice" id="imgOverwrite" value="overwrite" onchange="toggleImageRenameInput()">
+          <input class="form-check-input" type="radio" name="imgConflictChoice" id="imgOverwrite" value="overwrite" onchange="toggleImageRenameInput();toggleImageUseExisting()">
           <label class="form-check-label" for="imgOverwrite">Replace - overwrite the existing image with the imported one</label>
         </div>
-        <div class="form-check">
-          <input class="form-check-input" type="radio" name="imgConflictChoice" id="imgKeepBoth" value="keepBoth" onchange="toggleImageRenameInput()">
-          <label class="form-check-label" for="imgKeepBoth">Keep Both - import with a different name:
-            <input type="text" id="imgNewName" class="form-control form-control-sm d-inline-block" style="width:auto;min-width:180px" value="${escapeHtml(importImg.name)}" disabled onclick="event.stopPropagation()" oninput="validateNewImageName(this)">
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="radio" name="imgConflictChoice" id="imgKeepBoth" value="keepBoth" onchange="toggleImageRenameInput();toggleImageUseExisting()">
+          <label class="form-check-label" for="imgKeepBoth">
+            <span style="display:inline-block;min-width:290px">Keep Both - import with a different name:</span>
+            <input type="text" id="imgNewName" class="form-control form-control-sm d-inline-block" style="width:auto;min-width:240px" value="${escapeHtml(importImg.name)}" disabled onclick="event.stopPropagation()" oninput="validateNewImageName(this)">
           </label>
-          <div id="imgNewNameError" class="text-danger small" style="display:none">ERROR: There is already an image with this name.</div>
+          <div class="text-danger small" style="display:none;margin-left:308px" id="imgNewNameError">ERROR: There is already an image with this name.</div>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="imgConflictChoice" id="imgUseExisting" value="useExisting" onchange="toggleImageRenameInput();toggleImageUseExisting()">
+          <label class="form-check-label" for="imgUseExisting">
+            <span style="display:inline-block;min-width:290px">Use Existing - map import to existing image:</span>
+            <span class="dropdown d-inline-block" id="imgExistingDropdown">
+              <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" disabled id="imgExistingBtn">
+                Select image
+              </button>
+              <ul class="dropdown-menu" id="imgExistingMenu">
+                ${existingImages.filter(e => e.name !== importImg.name).sort((a, b) => a.name.localeCompare(b.name)).map(e => `
+                  <li><a class="dropdown-item" href="#" data-name="${escapeHtml(e.name)}" onclick="selectExistingImage(this); return false;">
+                    ${e.data ? `<img src="${e.data}" style="width:20px;height:20px;object-fit:contain;margin-right:6px">` : `<span style="display:inline-block;width:20px;height:20px;margin-right:6px"></span>`}
+                    ${escapeHtml(e.name)}
+                  </a></li>
+                `).join("")}
+              </ul>
+            </span>
+          </label>
         </div>
       </div>
     `;
@@ -192,6 +212,23 @@ function toggleImageRenameInput() {
   }
 }
 
+function toggleImageUseExisting() {
+  const useExisting = document.getElementById("imgUseExisting");
+  const btn = document.getElementById("imgExistingBtn");
+  if (useExisting && btn) {
+    btn.disabled = !useExisting.checked;
+  }
+}
+
+function selectExistingImage(link) {
+  const name = link.getAttribute("data-name");
+  const btn = document.getElementById("imgExistingBtn");
+  if (btn) {
+    btn.innerHTML = link.innerHTML;
+    btn.setAttribute("data-selected", name);
+  }
+}
+
 function resolveImageConflict() {
   const state = importWizardState;
   const imgIdx = state.conflictImages[state.conflictIdx];
@@ -208,6 +245,11 @@ function resolveImageConflict() {
     if (!newName || (errorEl && errorEl.style.display !== "none")) return;
     state.imageDecisions[imgIdx] = { action: "keepBoth", renameTo: newName };
     state.renameMap[imgIdx] = newName;
+  } else if (choice.value === "useExisting") {
+    const btn = document.getElementById("imgExistingBtn");
+    const replaceWith = btn ? btn.getAttribute("data-selected") : "";
+    if (!replaceWith) return;
+    state.imageDecisions[imgIdx] = { action: "useExisting", replaceWith: replaceWith };
   }
 
   state.conflictIdx++;
@@ -243,6 +285,8 @@ function finishImageStage() {
       if (img.fillColor) renamed.fillColor = img.fillColor;
       existingImages.push(renamed);
       renameMap[img.name] = decision.renameTo;
+    } else if (decision.action === "useExisting") {
+      renameMap[img.name] = decision.replaceWith;
     }
   });
 
