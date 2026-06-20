@@ -20,8 +20,8 @@ function renderDatesEditor() {
 
   const filtered = allDates
     .map((d, index) => ({ d, index }))
-    .filter(({ d }) => {
-      if (editingIndex >= 0) return true;
+    .filter(({ d, index }) => {
+      if (editingIndex === index) return true;
       if (categoryFilter && d.category !== categoryFilter) return false;
       if (titleSearch && !d.name.toLowerCase().includes(titleSearch.toLowerCase())) return false;
       return true;
@@ -198,6 +198,7 @@ function renderEditorFilters(allDates) {
         ${cats.map(c => `<option value="${c}" ${categoryFilter === c ? 'selected' : ''}>${c}</option>`).join("")}
       </select>
       <input class="form-control" type="search" placeholder="Search titles..." value="${escapeHtml(titleSearch)}" oninput="setTitleSearch(this.value)">
+      <button class="btn btn-outline-secondary btn-sm" onclick="categoryFilter='';titleSearch='';renderDatesEditor()">Clear</button>
     </div>
   `;
 }

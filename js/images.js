@@ -52,8 +52,8 @@ function renderImagesEditor() {
 
   const images = loadImages();
 
-  const filtered = images.filter(img => {
-    if (editingImageIndex >= 0) return true;
+  const filtered = images.filter((img, index) => {
+    if (editingImageIndex === index) return true;
     if (imageNameSearch && !img.name.toLowerCase().includes(imageNameSearch.toLowerCase())) return false;
     return true;
   }).sort((a, b) => a.name.localeCompare(b.name));
@@ -140,6 +140,7 @@ function renderImagesEditor() {
     filterEl.innerHTML = `
       <div class="d-flex gap-2 align-items-center">
         <input class="form-control" type="search" placeholder="Search image names..." value="${escapeHtml(imageNameSearch)}" oninput="setImageNameSearch(this.value)">
+        <button class="btn btn-outline-secondary btn-sm" onclick="imageNameSearch='';renderImagesEditor()">Clear</button>
       </div>
     `;
   }
@@ -200,7 +201,11 @@ function editImageColor(index, attr, value) {
   img.lineColor = attr === 'stroke' ? value : img.lineColor;
   img.fillColor = attr === 'fill' ? value : img.fillColor;
   saveImages(images);
-  renderImagesEditor();
+  const editedCard = document.querySelector('#imagesList .card.card-edited');
+  if (editedCard) {
+    const imgEl = editedCard.querySelector('img.date-img');
+    if (imgEl) imgEl.src = img.data;
+  }
 }
 
 function editImageFillNone(index, checked) {
@@ -218,7 +223,11 @@ function editImageFillNone(index, checked) {
     img.fillColor = restore;
   }
   saveImages(images);
-  renderImagesEditor();
+  const editedCard = document.querySelector('#imagesList .card.card-edited');
+  if (editedCard) {
+    const imgEl = editedCard.querySelector('img.date-img');
+    if (imgEl) imgEl.src = img.data;
+  }
 }
 
 function editImageStrokeNone(index, checked) {
@@ -236,7 +245,11 @@ function editImageStrokeNone(index, checked) {
     img.lineColor = restore;
   }
   saveImages(images);
-  renderImagesEditor();
+  const editedCard = document.querySelector('#imagesList .card.card-edited');
+  if (editedCard) {
+    const imgEl = editedCard.querySelector('img.date-img');
+    if (imgEl) imgEl.src = img.data;
+  }
 }
 
 function normalizeSvgForEditing(svgText) {
