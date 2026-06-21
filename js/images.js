@@ -96,9 +96,9 @@ function renderImagesEditor() {
               </label>
             </div>
           </div>
-          <div class="col-auto d-flex align-items-center">
-            <button class="btn btn-secondary editor-btn" onclick="cancelImageEdit()">Cancel</button>
-          </div>
+            <div class="col-auto d-flex align-items-center">
+              <button class="btn btn-secondary editor-btn" onclick="cancelImageEdit()">Cancel</button>
+            </div>
         </div>
       `;
     } else {
@@ -114,10 +114,11 @@ function renderImagesEditor() {
               <button class="btn btn-primary editor-btn" onclick="startEditImage(${realIndex})" ${editingImageIndex >= 0 ? 'disabled' : ''}>Edit</button>
               ${colors.line ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.line === 'none' ? 'transparent' : colors.line}"></span>Line${colors.line === 'none' ? ': none' : ''}</span>` : ''}
               ${colors.fill ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.fill === 'none' ? 'transparent' : colors.fill}"></span>Fill${colors.fill === 'none' ? ': none' : ''}</span>` : ''}
+              <button class="btn btn-info editor-btn" onclick="duplicateImage(${realIndex})" ${editingImageIndex >= 0 ? 'disabled' : ''}>Duplicate</button>
             </div>
           </div>
           <div class="col-auto">
-            <button class="btn btn-danger editor-btn" onclick="deleteImage(${realIndex})" ${editingImageIndex >= 0 ? 'disabled' : ''}>Delete</button>
+            <button class="btn btn-danger editor-btn" onclick="confirmDeleteImage(${realIndex})" ${editingImageIndex >= 0 ? 'disabled' : ''}>Delete</button>
           </div>
         </div>
       `;
@@ -164,6 +165,27 @@ function startEditImage(index) {
   isNewImage = false;
   renderImagesEditor();
   checkDuplicateName();
+}
+
+function duplicateImage(index) {
+  const images = loadImages();
+  if (index < 0 || index >= images.length) return;
+  const src = images[index];
+  const baseName = src.name.replace(/\s*\(\d+\)\s*$/, "").trim();
+  let n = 1;
+  const existingNames = new Set(images.map(i => i.name));
+  while (existingNames.has(`${baseName} (${n})`)) n++;
+  const newName = `${baseName} (${n})`;
+
+  const copy = JSON.parse(JSON.stringify(src));
+  copy.name = newName;
+  images.push(copy);
+  saveImages(images);
+
+  editingImageIndex = images.length - 1;
+  isNewImage = false;
+  editImageBackup = JSON.parse(JSON.stringify(copy));
+  renderImagesEditor();
 }
 
 function syncImageRename(oldName, newName) {
@@ -357,6 +379,34 @@ function renameImage(index, newName) {
   saveImages(images);
   syncImageRename(oldName, newName);
   renderImagesEditor();
+}
+
+function confirmDeleteImage(index) {
+  const images = loadImages();
+  const name = images[index].name;
+  const categories = loadCategories();
+  const dates = loadDates();
+  const usedByCategories = categories.filter(c => c.image === name);
+  const usedByDates = dates.filter(d => d.image === name);
+
+  if (usedByCategories.length === 0 && usedByDates.length === 0) {
+    deleteImage(index);
+    return;
+  }
+
+  const parts = [];
+  if (usedByCategories.length) parts.push(`${usedByCategories.length} categor${usedByCategories.length === 1 ? 'y' : 'ies'}`);
+  if (usedByDates.length) parts.push(`${usedByDates.length} date${usedByDates.length === 1 ? '' : 's'}`);
+
+  const modalEl = document.getElementById("deleteConfirmModal");
+  document.getElementById("deleteConfirmMessage").innerHTML =
+    `Delete image "<strong>${escapeHtml(name)}</strong>"?<br><br>` +
+    `<span class="text-warning">This image is used by ${parts.join(" and ")}. The references will be cleared.</span>`;
+  document.getElementById("deleteConfirmBtn").onclick = function() {
+    bootstrap.Modal.getInstance(modalEl).hide();
+    deleteImage(index);
+  };
+  new bootstrap.Modal(modalEl).show();
 }
 
 function deleteImage(index) {
