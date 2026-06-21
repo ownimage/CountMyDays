@@ -2,14 +2,37 @@
 // settings.js - Theme, settings page, font size
 // -------------------------------
 
-const themeConfig = {
-  darkly: { css: "https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/darkly/bootstrap.min.css", bsTheme: "dark" },
-  flatly: { css: "https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/flatly/bootstrap.min.css", bsTheme: "light" },
-  zephyr: { css: "https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/zephyr/bootstrap.min.css", bsTheme: "light" },
-  superhero: { css: "https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/superhero/bootstrap.min.css", bsTheme: "dark" },
-  quartz: { css: "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css", bsTheme: "light" },
-  cyborg: { css: "https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/cyborg/bootstrap.min.css", bsTheme: "dark" }
-};
+const themeConfig = (() => {
+  const bw = "https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist";
+  return {
+    brite:     { css: `${bw}/brite/bootstrap.min.css`,     bsTheme: "light" },
+    cerulean:  { css: `${bw}/cerulean/bootstrap.min.css`,   bsTheme: "light" },
+    cosmo:     { css: `${bw}/cosmo/bootstrap.min.css`,      bsTheme: "light" },
+    cyborg:    { css: `${bw}/cyborg/bootstrap.min.css`,     bsTheme: "dark" },
+    darkly:    { css: `${bw}/darkly/bootstrap.min.css`,     bsTheme: "dark" },
+    flatly:    { css: `${bw}/flatly/bootstrap.min.css`,     bsTheme: "light" },
+    journal:   { css: `${bw}/journal/bootstrap.min.css`,    bsTheme: "light" },
+    litera:    { css: `${bw}/litera/bootstrap.min.css`,     bsTheme: "light" },
+    lumen:     { css: `${bw}/lumen/bootstrap.min.css`,      bsTheme: "light" },
+    lux:       { css: `${bw}/lux/bootstrap.min.css`,        bsTheme: "light" },
+    materia:   { css: `${bw}/materia/bootstrap.min.css`,    bsTheme: "light" },
+    minty:     { css: `${bw}/minty/bootstrap.min.css`,      bsTheme: "light" },
+    morph:     { css: `${bw}/morph/bootstrap.min.css`,      bsTheme: "light" },
+    pulse:     { css: `${bw}/pulse/bootstrap.min.css`,      bsTheme: "light" },
+    quartz:    { css: `${bw}/quartz/bootstrap.min.css`,     bsTheme: "light" },
+    sandstone: { css: `${bw}/sandstone/bootstrap.min.css`,  bsTheme: "light" },
+    simplex:   { css: `${bw}/simplex/bootstrap.min.css`,    bsTheme: "light" },
+    sketchy:   { css: `${bw}/sketchy/bootstrap.min.css`,    bsTheme: "light" },
+    slate:     { css: `${bw}/slate/bootstrap.min.css`,      bsTheme: "dark" },
+    solar:     { css: `${bw}/solar/bootstrap.min.css`,      bsTheme: "dark" },
+    spacelab:  { css: `${bw}/spacelab/bootstrap.min.css`,   bsTheme: "light" },
+    superhero: { css: `${bw}/superhero/bootstrap.min.css`,  bsTheme: "dark" },
+    united:    { css: `${bw}/united/bootstrap.min.css`,     bsTheme: "light" },
+    vapor:     { css: `${bw}/vapor/bootstrap.min.css`,      bsTheme: "dark" },
+    yeti:      { css: `${bw}/yeti/bootstrap.min.css`,       bsTheme: "light" },
+    zephyr:    { css: `${bw}/zephyr/bootstrap.min.css`,     bsTheme: "light" }
+  };
+})();
 
 function applyTheme(name) {
   const config = themeConfig[name] || themeConfig.darkly;
