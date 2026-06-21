@@ -155,6 +155,8 @@ function changeShowDanger(enabled) {
   if (row) row.classList.toggle("d-none", !enabled);
   const row2 = document.getElementById("reimportSamplesRow");
   if (row2) row2.classList.toggle("d-none", !enabled);
+  const row3 = document.getElementById("refreshAppRow");
+  if (row3) row3.classList.toggle("d-none", !enabled);
 }
 
 function confirmClearAllData() {

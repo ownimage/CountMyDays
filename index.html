@@ -14,7 +14,7 @@
   <link id="bootstrap-theme-css" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/darkly/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
   <link rel="stylesheet" href="css/styles.css">
-  <script>const BUILD_NUMBER = "202606211102";</script>
+  <script>const BUILD_NUMBER = "202606211108";</script>
 </head>
 
 <body>
@@ -202,6 +202,12 @@
         <div class="col-4 text-end"></div>
         <div class="col-8">
           <button class="btn btn-info editor-btn btn-wide w-100" onclick="reimportSampleImages()">Reload Sample Images</button>
+        </div>
+      </div>
+      <div id="refreshAppRow" class="mt-2 row align-items-center col-md-8 d-none">
+        <div class="col-4 text-end"></div>
+        <div class="col-8">
+          <button class="btn btn-warning editor-btn btn-wide w-100" onclick="location.reload()">Refresh App</button>
         </div>
       </div>
       <div class="mt-5 small build-number">Build <span id="buildNumber"></span></div>
