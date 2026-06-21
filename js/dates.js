@@ -25,6 +25,11 @@ function renderDatesEditor() {
       if (categoryFilter && d.category !== categoryFilter) return false;
       if (titleSearch && !d.name.toLowerCase().includes(titleSearch.toLowerCase())) return false;
       return true;
+    })
+    .sort((a, b) => {
+      const ta = targetDate(a.d);
+      const tb = targetDate(b.d);
+      return ta - tb;
     });
 
   filtered.forEach(({ d, index }) => {
