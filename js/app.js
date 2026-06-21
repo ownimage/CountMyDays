@@ -165,12 +165,13 @@ function renderCountdowns() {
     const weeks = Math.floor(d.days / 7);
     const remainDays = d.days % 7;
 
-    let displayText;
+    let displayLine1, displayLine2;
     if (format === "weeksAndDays") {
-      displayText = `${weeks} week${weeks !== 1 ? "s" : ""}`;
-      if (remainDays > 0) displayText += ` ${remainDays} day${remainDays !== 1 ? "s" : ""}`;
+      displayLine1 = `${weeks} week${weeks !== 1 ? "s" : ""}`;
+      displayLine2 = remainDays > 0 ? `${remainDays} day${remainDays !== 1 ? "s" : ""}` : "";
     } else {
-      displayText = `${d.days} day${d.days !== 1 ? "s" : ""}`;
+      displayLine1 = `${d.days}`;
+      displayLine2 = `day${d.days !== 1 ? "s" : ""}`;
     }
 
     card.innerHTML = `
@@ -190,8 +191,9 @@ function renderCountdowns() {
           <h4 class="mb-1">${escapeHtml(d.name)}</h4>
           <div>${formatDate(eventDate)}</div>
         </div>
-        <div class="col-auto text-end">
-          <div class="h4 mb-0">${displayText}</div>
+        <div class="col-auto text-center">
+          <div class="h4 mb-0">${displayLine1}</div>
+          ${displayLine2 ? `<div class="h4 mb-0">${displayLine2}</div>` : ""}
         </div>
       </div>
     `;

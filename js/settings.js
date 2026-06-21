@@ -73,6 +73,18 @@ function changeIconSize(value) {
 }
 
 // -------------------------------
+// TILE DENSITY
+// -------------------------------
+
+function changeDensity(value) {
+  localStorage.setItem("density", value);
+  document.body.classList.remove("compact", "density-normal");
+  if (value !== "normal") {
+    document.body.classList.add(value);
+  }
+}
+
+// -------------------------------
 // SETTINGS PAGE
 // -------------------------------
 
@@ -102,8 +114,10 @@ function openSettings() {
   const showDanger = localStorage.getItem("showDanger") === "true";
   const showDangerCb = document.getElementById("showDanger");
   if (showDangerCb) showDangerCb.checked = showDanger;
-  const dangerRow = document.getElementById("clearAllDataRow");
-  if (dangerRow) dangerRow.classList.toggle("d-none", !showDanger);
+  ["clearAllDataRow", "reimportSamplesRow", "refreshAppRow"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle("d-none", !showDanger);
+  });
 
   const savedMax = localStorage.getItem("maxCountdowns") || "10";
   const maxSel = document.getElementById("maxCountdownsSelector");
@@ -112,6 +126,10 @@ function openSettings() {
   const savedIconSize = localStorage.getItem("iconSize") || "large";
   const iconSel = document.getElementById("iconSizeSelector");
   if (iconSel) iconSel.value = savedIconSize;
+
+  const savedDensity = localStorage.getItem("density") || "normal";
+  const densitySel = document.getElementById("densitySelector");
+  if (densitySel) densitySel.value = savedDensity;
 }
 
 function changeFormat(value) {
@@ -206,6 +224,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const savedIconSize = localStorage.getItem("iconSize") || "large";
   document.body.classList.add("icon-size-" + savedIconSize);
+
+  const savedDensity = localStorage.getItem("density") || "normal";
+  if (savedDensity !== "normal") {
+    document.body.classList.add(savedDensity);
+  }
 
   const autoHide = localStorage.getItem("autoHideMenu") === "true";
   if (autoHide) {
