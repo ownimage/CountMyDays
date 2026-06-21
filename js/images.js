@@ -225,6 +225,7 @@ function editImageColor(index, attr, value) {
   saveImages(images);
   const editedCard = document.querySelector('#imagesList .card.card-edited');
   if (editedCard) {
+    editedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     const imgEl = editedCard.querySelector('img.date-img');
     if (imgEl) imgEl.src = img.data;
   }
@@ -247,6 +248,7 @@ function editImageFillNone(index, checked) {
   saveImages(images);
   const editedCard = document.querySelector('#imagesList .card.card-edited');
   if (editedCard) {
+    editedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     const imgEl = editedCard.querySelector('img.date-img');
     if (imgEl) imgEl.src = img.data;
   }
@@ -269,6 +271,7 @@ function editImageStrokeNone(index, checked) {
   saveImages(images);
   const editedCard = document.querySelector('#imagesList .card.card-edited');
   if (editedCard) {
+    editedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     const imgEl = editedCard.querySelector('img.date-img');
     if (imgEl) imgEl.src = img.data;
   }
