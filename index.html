@@ -2,6 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#3ddc84">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
   <title>Count My Days</title>
 
   <link id="bootstrap-theme-css" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/darkly/bootstrap.min.css" rel="stylesheet">
@@ -188,13 +195,13 @@
       <div id="clearAllDataRow" class="mt-4 row align-items-center col-md-8 d-none">
         <div class="col-4 text-end"></div>
         <div class="col-8">
-          <button class="btn btn-danger editor-btn btn-wide" onclick="confirmClearAllData()">Clear All Data</button>
+          <button class="btn btn-danger editor-btn btn-wide w-100" onclick="confirmClearAllData()">Clear All Data</button>
         </div>
       </div>
       <div id="reimportSamplesRow" class="mt-2 row align-items-center col-md-8 d-none">
         <div class="col-4 text-end"></div>
         <div class="col-8">
-          <button class="btn btn-info editor-btn btn-wide" onclick="reimportSampleImages()">Reload Sample Images</button>
+          <button class="btn btn-info editor-btn btn-wide w-100" onclick="reimportSampleImages()">Reload Sample Images</button>
         </div>
       </div>
       <div class="mt-5 small build-number">Build <span id="buildNumber"></span></div>
@@ -284,6 +291,12 @@
   document.write('<script src="js/images.js?v=' + BUILD_NUMBER + '"><\/script>');
   document.write('<script src="js/export.js?v=' + BUILD_NUMBER + '"><\/script>');
   document.write('<script src="js/import-wizard.js?v=' + BUILD_NUMBER + '"><\/script>');
+  </script>
+
+  <script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js");
+  }
   </script>
 
 </body>
