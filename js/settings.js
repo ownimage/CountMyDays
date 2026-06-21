@@ -153,6 +153,8 @@ function changeShowDanger(enabled) {
   localStorage.setItem("showDanger", enabled);
   const row = document.getElementById("clearAllDataRow");
   if (row) row.classList.toggle("d-none", !enabled);
+  const row2 = document.getElementById("reimportSamplesRow");
+  if (row2) row2.classList.toggle("d-none", !enabled);
 }
 
 function confirmClearAllData() {

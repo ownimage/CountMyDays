@@ -220,8 +220,109 @@ const defaultImages = [
       "%3Cpath d='M22 2l-7 20-4-11-9-4z'/%3E" +
       "%3C/svg%3E"
   },
+  {
+    name: "Square",
+    data:
+      "data:image/svg+xml," +
+      "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' " +
+      "stroke='%23e53935' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E" +
+      "%3Crect x='3' y='3' width='18' height='18'/%3E" +
+      "%3C/svg%3E"
+  },
+  {
+    name: "Circle",
+    data:
+      "data:image/svg+xml," +
+      "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' " +
+      "stroke='%2342a5f5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E" +
+      "%3Ccircle cx='12' cy='12' r='9'/%3E" +
+      "%3C/svg%3E"
+  },
+  {
+    name: "Rounded Square",
+    data:
+      "data:image/svg+xml," +
+      "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' " +
+      "stroke='%2366bb6a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E" +
+      "%3Crect x='3' y='3' width='18' height='18' rx='4'/%3E" +
+      "%3C/svg%3E"
+  },
+  {
+    name: "Diamond",
+    data:
+      "data:image/svg+xml," +
+      "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' " +
+      "stroke='%23ff7043' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E" +
+      "%3Cpolygon points='12,2 22,12 12,22 2,12'/%3E" +
+      "%3C/svg%3E"
+  },
+  {
+    name: "Heart",
+    data:
+      "data:image/svg+xml," +
+      "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' " +
+      "stroke='%23e91e63' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E" +
+      "%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E" +
+      "%3C/svg%3E"
+  },
+  {
+    name: "Thumbs Up",
+    data:
+      "data:image/svg+xml," +
+      "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' " +
+      "stroke='%23ffa726' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E" +
+      "%3Cpath d='M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z'/%3E" +
+      "%3Cpath d='M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3'/%3E" +
+      "%3C/svg%3E"
+  },
+  {
+    name: "Tick",
+    data:
+      "data:image/svg+xml," +
+      "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' " +
+      "stroke='%2343a047' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E" +
+      "%3Cpolyline points='4 12 9 17 20 6'/%3E" +
+      "%3C/svg%3E"
+  },
+  {
+    name: "Cross",
+    data:
+      "data:image/svg+xml," +
+      "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' " +
+      "stroke='%23e53935' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E" +
+      "%3Cline x1='4' y1='4' x2='20' y2='20'/%3E" +
+      "%3Cline x1='20' y1='4' x2='4' y2='20'/%3E" +
+      "%3C/svg%3E"
+  }
 ];
 
 if (!localStorage.getItem("images")) {
   localStorage.setItem("images", JSON.stringify(defaultImages));
+}
+
+function reimportSampleImages() {
+  const existing = JSON.parse(localStorage.getItem("images") || "[]");
+  const existingNames = new Set(existing.map(i => i.name));
+  let added = 0;
+  defaultImages.forEach(img => {
+    if (!existingNames.has(img.name)) {
+      existing.push(JSON.parse(JSON.stringify(img)));
+      added++;
+    }
+  });
+  localStorage.setItem("images", JSON.stringify(existing));
+  const msg = document.getElementById("deleteConfirmMessage");
+  if (added > 0) {
+    msg.innerHTML = `Added ${added} sample image${added === 1 ? '' : 's'}.`;
+  } else {
+    msg.innerHTML = "All sample images already exist.";
+  }
+  document.getElementById("deleteConfirmBtn").textContent = "OK";
+  document.getElementById("deleteConfirmBtn").className = "btn btn-primary editor-btn btn-wide";
+  document.getElementById("deleteConfirmBtn").onclick = function() {
+    bootstrap.Modal.getInstance(document.getElementById("deleteConfirmModal")).hide();
+    document.getElementById("deleteConfirmBtn").textContent = "Delete";
+    document.getElementById("deleteConfirmBtn").className = "btn btn-danger editor-btn btn-wide";
+  };
+  new bootstrap.Modal(document.getElementById("deleteConfirmModal")).show();
 }
