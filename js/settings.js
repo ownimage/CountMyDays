@@ -192,8 +192,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (autoHide) {
     document.body.classList.add("auto-hide-menu");
     resetAutoHideTimer();
-    ["pointerdown", "touchstart", "click"].forEach(evt => {
+    ["pointerdown", "pointerup", "touchstart", "click", "mousedown"].forEach(evt => {
       document.addEventListener(evt, resetAutoHideTimer, { passive: true });
+      document.body.addEventListener(evt, resetAutoHideTimer, { passive: true });
     });
     window.addEventListener("scroll", resetAutoHideTimer, { passive: true });
   }

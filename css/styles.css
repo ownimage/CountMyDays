@@ -1,9 +1,17 @@
 /* IMAGES */
+/* RESPONSIVE IMAGE SIZES */
 .countdown-img,
 .date-img {
   width: 100px;
   height: 100px;
   object-fit: contain;
+}
+@media (max-width: 480px) {
+  .countdown-img,
+  .date-img {
+    width: 64px;
+    height: 64px;
+  }
 }
 
 .countdown-card {
@@ -290,6 +298,17 @@ body.auto-hide-menu .container-fluid {
 }
 body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
   padding-top: 0.5rem;
+}
+
+/* PWA SAFE AREA */
+#mainNav {
+  padding-top: env(safe-area-inset-top, 0);
+}
+body.auto-hide-menu .container-fluid {
+  padding-top: calc(60px + env(safe-area-inset-top, 0));
+}
+body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
+  padding-top: calc(0.5rem + env(safe-area-inset-top, 0));
 }
 
 /* INACTIVE MENU DURING EDITING */
