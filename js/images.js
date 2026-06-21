@@ -165,6 +165,17 @@ function startEditImage(index) {
   isNewImage = false;
   renderImagesEditor();
   checkDuplicateName();
+  scrollAndLockEditor();
+}
+
+function scrollAndLockEditor() {
+  const editedCard = document.querySelector('#imagesList .card.card-edited');
+  if (editedCard) editedCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.body.style.overflow = 'hidden';
+}
+
+function unlockScroll() {
+  document.body.style.overflow = '';
 }
 
 function duplicateImage(index) {
@@ -225,7 +236,6 @@ function editImageColor(index, attr, value) {
   saveImages(images);
   const editedCard = document.querySelector('#imagesList .card.card-edited');
   if (editedCard) {
-    editedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     const imgEl = editedCard.querySelector('img.date-img');
     if (imgEl) imgEl.src = img.data;
   }
@@ -248,7 +258,6 @@ function editImageFillNone(index, checked) {
   saveImages(images);
   const editedCard = document.querySelector('#imagesList .card.card-edited');
   if (editedCard) {
-    editedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     const imgEl = editedCard.querySelector('img.date-img');
     if (imgEl) imgEl.src = img.data;
   }
@@ -271,7 +280,6 @@ function editImageStrokeNone(index, checked) {
   saveImages(images);
   const editedCard = document.querySelector('#imagesList .card.card-edited');
   if (editedCard) {
-    editedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     const imgEl = editedCard.querySelector('img.date-img');
     if (imgEl) imgEl.src = img.data;
   }
@@ -356,6 +364,7 @@ function doneImageEdit(index) {
   editingImageIndex = -1;
   isNewImage = false;
   editImageBackup = null;
+  unlockScroll();
   renderImagesEditor();
 }
 
@@ -372,6 +381,7 @@ function cancelImageEdit() {
   editingImageIndex = -1;
   isNewImage = false;
   editImageBackup = null;
+  unlockScroll();
   renderImagesEditor();
 }
 
