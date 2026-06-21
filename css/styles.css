@@ -14,6 +14,23 @@
   }
 }
 
+/* ICON SIZE */
+body.icon-size-small .countdown-img,
+body.icon-size-small .date-img {
+  width: 64px !important;
+  height: 64px !important;
+}
+body.icon-size-medium .countdown-img,
+body.icon-size-medium .date-img {
+  width: 80px !important;
+  height: 80px !important;
+}
+body.icon-size-large .countdown-img,
+body.icon-size-large .date-img {
+  width: 100px !important;
+  height: 100px !important;
+}
+
 .countdown-card {
   border-width: 1px;
   padding: 0.5rem 0.75rem;
@@ -163,6 +180,68 @@
 }
 
 /* FONT SIZE */
+body.font-size-xsmall,
+body.font-size-xsmall .navbar .btn,
+body.font-size-xsmall .navbar .dropdown-item,
+body.font-size-xsmall #settingsPage,
+body.font-size-xsmall #settingsPage .btn,
+body.font-size-xsmall #settingsPage .form-label,
+body.font-size-xsmall #settingsPage .form-control,
+body.font-size-xsmall #settingsPage .form-select,
+body.font-size-xsmall #datesEditor,
+body.font-size-xsmall #datesEditor .btn,
+body.font-size-xsmall #datesEditor .form-label,
+body.font-size-xsmall #datesEditor .form-control,
+body.font-size-xsmall #datesEditor .form-select,
+body.font-size-xsmall #categoriesEditor,
+body.font-size-xsmall #categoriesEditor .btn,
+body.font-size-xsmall #categoriesEditor .form-label,
+body.font-size-xsmall #categoriesEditor .form-control,
+body.font-size-xsmall #categoriesEditor .form-select,
+body.font-size-xsmall #imagesEditor,
+body.font-size-xsmall #imagesEditor .btn,
+body.font-size-xsmall #imagesEditor .form-label,
+body.font-size-xsmall #imagesEditor .form-control,
+body.font-size-xsmall #imagesEditor .form-select,
+body.font-size-xsmall #deleteConfirmModal,
+body.font-size-xsmall #deleteConfirmModal .btn,
+body.font-size-xsmall #exportWizardModal,
+body.font-size-xsmall #exportWizardModal .btn,
+body.font-size-xsmall #qrExportModal,
+body.font-size-xsmall #qrExportModal .btn {
+  font-size: 0.8rem;
+}
+body.font-size-small,
+body.font-size-small .navbar .btn,
+body.font-size-small .navbar .dropdown-item,
+body.font-size-small #settingsPage,
+body.font-size-small #settingsPage .btn,
+body.font-size-small #settingsPage .form-label,
+body.font-size-small #settingsPage .form-control,
+body.font-size-small #settingsPage .form-select,
+body.font-size-small #datesEditor,
+body.font-size-small #datesEditor .btn,
+body.font-size-small #datesEditor .form-label,
+body.font-size-small #datesEditor .form-control,
+body.font-size-small #datesEditor .form-select,
+body.font-size-small #categoriesEditor,
+body.font-size-small #categoriesEditor .btn,
+body.font-size-small #categoriesEditor .form-label,
+body.font-size-small #categoriesEditor .form-control,
+body.font-size-small #categoriesEditor .form-select,
+body.font-size-small #imagesEditor,
+body.font-size-small #imagesEditor .btn,
+body.font-size-small #imagesEditor .form-label,
+body.font-size-small #imagesEditor .form-control,
+body.font-size-small #imagesEditor .form-select,
+body.font-size-small #deleteConfirmModal,
+body.font-size-small #deleteConfirmModal .btn,
+body.font-size-small #exportWizardModal,
+body.font-size-small #exportWizardModal .btn,
+body.font-size-small #qrExportModal,
+body.font-size-small #qrExportModal .btn {
+  font-size: 0.925rem;
+}
 body.font-size-large,
 body.font-size-large .navbar .btn,
 body.font-size-large .navbar .dropdown-item,

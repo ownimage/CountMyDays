@@ -56,10 +56,20 @@ function getAvailableThemes() {
 
 function changeFontSize(value) {
   localStorage.setItem("fontSize", value);
-  document.body.classList.remove("font-size-normal", "font-size-large", "font-size-xlarge", "font-size-jumbo");
+  document.body.classList.remove("font-size-xsmall", "font-size-small", "font-size-normal", "font-size-large", "font-size-xlarge", "font-size-jumbo");
   if (value !== "normal") {
     document.body.classList.add("font-size-" + value);
   }
+}
+
+// -------------------------------
+// ICON SIZE
+// -------------------------------
+
+function changeIconSize(value) {
+  localStorage.setItem("iconSize", value);
+  document.body.classList.remove("icon-size-small", "icon-size-medium", "icon-size-large");
+  document.body.classList.add("icon-size-" + value);
 }
 
 // -------------------------------
@@ -98,6 +108,10 @@ function openSettings() {
   const savedMax = localStorage.getItem("maxCountdowns") || "10";
   const maxSel = document.getElementById("maxCountdownsSelector");
   if (maxSel) maxSel.value = savedMax;
+
+  const savedIconSize = localStorage.getItem("iconSize") || "large";
+  const iconSel = document.getElementById("iconSizeSelector");
+  if (iconSel) iconSel.value = savedIconSize;
 }
 
 function changeFormat(value) {
@@ -189,6 +203,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (savedFontSize !== "normal") {
     document.body.classList.add("font-size-" + savedFontSize);
   }
+
+  const savedIconSize = localStorage.getItem("iconSize") || "large";
+  document.body.classList.add("icon-size-" + savedIconSize);
 
   const autoHide = localStorage.getItem("autoHideMenu") === "true";
   if (autoHide) {
