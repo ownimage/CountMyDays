@@ -214,7 +214,10 @@ function renderCountdowns() {
 
     const heading = document.createElement("h2");
     heading.className = "mb-3";
-    heading.textContent = "Counting the days to:";
+    const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const now = new Date();
+    heading.textContent = `From ${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} :`;
     container.appendChild(heading);
     visible.forEach(renderCard);
 

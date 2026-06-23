@@ -8,9 +8,15 @@ let deletePendingIndex = -1;
 function renderDatesEditor() {
   const list = document.getElementById("editorList");
   const addTile = document.getElementById("addDateTile");
+  const topTile = document.getElementById("addDateTileTop");
+  const filterEl = document.getElementById("editorFilters");
+  const singleEditor = document.getElementById("singleDateEditor");
 
   list.innerHTML = "";
   addTile.innerHTML = "";
+  topTile.innerHTML = "";
+  filterEl.innerHTML = "";
+  singleEditor.innerHTML = "";
 
   const allDates = loadDates();
   const categories = loadCategories();
@@ -18,22 +24,15 @@ function renderDatesEditor() {
   const now = new Date();
   const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-  const filtered = allDates
-    .map((d, index) => ({ d, index }))
-    .filter(({ d, index }) => {
-      if (editingIndex === index) return true;
-      if (categoryFilter && d.category !== categoryFilter) return false;
-      if (titleSearch && !d.name.toLowerCase().includes(titleSearch.toLowerCase())) return false;
-      return true;
-    })
-    .sort((a, b) => {
-      const ta = targetDate(a.d);
-      const tb = targetDate(b.d);
-      return ta - tb;
-    });
+  if (editingIndex >= 0) {
+    list.classList.add("d-none");
+    addTile.classList.add("d-none");
+    topTile.classList.add("d-none");
+    filterEl.classList.add("d-none");
+    singleEditor.classList.remove("d-none");
 
-  filtered.forEach(({ d, index }) => {
-    const dateData = (editingIndex === index && editBuffer) ? editBuffer : d;
+    const d = allDates[editingIndex];
+    const dateData = editBuffer || d;
 
     const category = dateData.category ? categories.find(c => c.name === dateData.category) : null;
     const imgSrc = (() => {
@@ -44,38 +43,40 @@ function renderDatesEditor() {
     })();
     const dateImgSrc = dateData.image ? (images.find(i => i.name === dateData.image)?.data || "") : "";
 
-    const card = document.createElement("div");
-    card.className = "card p-3 mb-3" + (index === editingIndex ? " card-edited" : "");
+    const showYear = dateData.type === "once";
+    const day = dateData.day || 1;
+    const month = dateData.month || 1;
+    const year = dateData.year || now.getFullYear();
 
-    if (editingIndex === index) {
-      const showYear = dateData.type === "once";
-      const day = dateData.day || 1;
-      const month = dateData.month || 1;
-      const year = dateData.year || now.getFullYear();
+    let dateHtml;
+    if (showYear) {
+      dateHtml = `<input type="text" class="form-control flatpickr-date" data-index="${editingIndex}" data-showyear="true" placeholder="dd/mm/yyyy">`;
+    } else {
+      dateHtml = `
+        <select class="form-select date-day-select" onchange="editBufferField('day', parseInt(this.value))">
+          ${Array.from({length: 31}, (_, i) => `<option value="${i+1}" ${i+1 === day ? "selected" : ""}>${i+1}</option>`).join("")}
+        </select>
+        <select class="form-select date-month-select" onchange="editBufferField('month', parseInt(this.value))">
+          ${months.map((m, i) => `<option value="${i+1}" ${i+1 === month ? "selected" : ""}>${m}</option>`).join("")}
+        </select>`;
+    }
 
-      let dateHtml;
-      if (showYear) {
-        dateHtml = `<input type="text" class="form-control flatpickr-date" data-index="${index}" data-showyear="true" placeholder="dd/mm/yyyy">`;
-      } else {
-        dateHtml = `
-          <select class="form-select date-day-select" onchange="editBufferField('day', parseInt(this.value))">
-            ${Array.from({length: 31}, (_, i) => `<option value="${i+1}" ${i+1 === day ? "selected" : ""}>${i+1}</option>`).join("")}
-          </select>
-          <select class="form-select date-month-select" onchange="editBufferField('month', parseInt(this.value))">
-            ${months.map((m, i) => `<option value="${i+1}" ${i+1 === month ? "selected" : ""}>${m}</option>`).join("")}
-          </select>`;
-      }
+    const catImgMap = {};
+    categories.forEach(c => {
+      const imageName = c.image || c.name;
+      const img = images.find(i => i.name === imageName);
+      catImgMap[c.name] = img ? img.data : "";
+    });
+    const allImgMap = {};
+    images.forEach(img => { allImgMap[img.name] = img.data; });
 
-      const catImgMap = {};
-      categories.forEach(c => {
-        const imageName = c.image || c.name;
-        const img = images.find(i => i.name === imageName);
-        catImgMap[c.name] = img ? img.data : "";
-      });
-      const allImgMap = {};
-      images.forEach(img => { allImgMap[img.name] = img.data; });
-
-      card.innerHTML = `
+    const heading = isNewDate ? "Add Date" : "Edit Date";
+    singleEditor.innerHTML = `
+      <div class="d-flex align-items-center mb-3">
+        <h3 class="mb-0">${heading}</h3>
+        <button class="btn btn-outline-secondary ms-auto" onclick="cancelEditing()">Back</button>
+      </div>
+      <div class="card p-3 card-edited">
         <div class="d-flex gap-1">
           <div class="flex-shrink-0 text-center me-3 d-flex gap-2">
             <div>
@@ -130,60 +131,87 @@ function renderDatesEditor() {
             </div>
           </div>
         </div>
-      `;
+      </div>
+    `;
 
-      list.appendChild(card);
-    } else {
-      const showYear = dateData.type === "once";
-      const day = dateData.day || 1;
-      const month = dateData.month || 1;
-      const year = dateData.year || now.getFullYear();
-      const dateStr = showYear ? `${day} ${months[month-1]} ${year}` : `${day} ${months[month-1]}`;
+    initSingleFlatpickr(editingIndex);
+    updateNavState();
+    return;
+  }
 
-      card.innerHTML = `
-        <div class="d-flex gap-1">
-          <div class="flex-shrink-0 text-center me-3 d-flex gap-2">
-            <div>
-              ${imgSrc ? `<img src="${imgSrc}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
-              ${dateData.category ? `<div class="mt-1">${escapeHtml(dateData.category)}</div>` : ""}
-            </div>
-            <div>
-              ${dateImgSrc ? `<img src="${dateImgSrc}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
-            </div>
+  list.classList.remove("d-none");
+  addTile.classList.remove("d-none");
+  topTile.classList.remove("d-none");
+  filterEl.classList.remove("d-none");
+  singleEditor.classList.add("d-none");
+
+  const filtered = allDates
+    .map((d, index) => ({ d, index }))
+    .filter(({ d, index }) => {
+      if (categoryFilter && d.category !== categoryFilter) return false;
+      if (titleSearch && !d.name.toLowerCase().includes(titleSearch.toLowerCase())) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      const ta = targetDate(a.d);
+      const tb = targetDate(b.d);
+      return ta - tb;
+    });
+
+  filtered.forEach(({ d, index }) => {
+    const category = d.category ? categories.find(c => c.name === d.category) : null;
+    const imgSrc = (() => {
+      if (!category) return "";
+      const imageName = category.image || category.name;
+      const image = images.find(i => i.name === imageName);
+      return image ? image.data : "";
+    })();
+    const dateImgSrc = d.image ? (images.find(i => i.name === d.image)?.data || "") : "";
+
+    const showYear = d.type === "once";
+    const day = d.day || 1;
+    const month = d.month || 1;
+    const year = d.year || now.getFullYear();
+    const dateStr = showYear ? `${day} ${months[month-1]} ${year}` : `${day} ${months[month-1]}`;
+
+    const card = document.createElement("div");
+    card.className = "card p-3 mb-3";
+    card.innerHTML = `
+      <div class="d-flex gap-1">
+        <div class="flex-shrink-0 text-center me-3 d-flex gap-2">
+          <div>
+            ${imgSrc ? `<img src="${imgSrc}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
+            ${d.category ? `<div class="mt-1">${escapeHtml(d.category)}</div>` : ""}
           </div>
-          <div class="flex-fill" style="min-width:0">
-            <div class="fw-bold editor-title mb-2">${escapeHtml(dateData.name)}</div>
-            <div class="d-flex mb-1">
-              <span>${dateStr}</span>
-              <span class="ms-3">${dateData.type === "annual" ? "Annual" : "Once"}</span>
-            </div>
-            <div class="d-flex gap-2">
-              <button class="btn btn-primary editor-btn" onclick="editDate(${index})" ${editingIndex >= 0 ? 'disabled' : ''}>Edit</button>
-              <button class="btn btn-danger editor-btn ms-auto" onclick="confirmDeleteDate(${index})" ${editingIndex >= 0 ? 'disabled' : ''}>Delete</button>
-            </div>
+          <div>
+            ${dateImgSrc ? `<img src="${dateImgSrc}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
           </div>
         </div>
-      `;
-
-      list.appendChild(card);
-    }
+        <div class="flex-fill" style="min-width:0">
+          <div class="fw-bold editor-title mb-2">${escapeHtml(d.name)}</div>
+          <div class="d-flex mb-1">
+            <span>${dateStr}</span>
+            <span class="ms-3">${d.type === "annual" ? "Annual" : "Once"}</span>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary editor-btn" onclick="editDate(${index})">Edit</button>
+            <button class="btn btn-danger editor-btn ms-auto" onclick="confirmDeleteDate(${index})">Delete</button>
+          </div>
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
   });
 
   renderEditorFilters(allDates);
 
-  const topTile = document.getElementById("addDateTileTop");
   topTile.innerHTML = `
     <div class="d-flex gap-2">
-      <button class="btn btn-primary editor-btn btn-wide" onclick="addNewDate()" ${editingIndex >= 0 ? 'disabled' : ''}>Add Date</button>
-      <button class="btn btn-success editor-btn btn-wide ms-auto" onclick="closeDatesEditor()" ${editingIndex >= 0 ? 'disabled' : ''}>Done</button>
+      <button class="btn btn-primary editor-btn btn-wide" onclick="addNewDate()">Add Date</button>
+      <button class="btn btn-success editor-btn btn-wide ms-auto" onclick="closeDatesEditor()">Done</button>
     </div>
   `;
 
-  addTile.innerHTML = "";
-
-  if (editingIndex >= 0) {
-    initSingleFlatpickr(editingIndex);
-  }
   updateNavState();
 }
 
@@ -356,7 +384,6 @@ function addNewDate() {
   editingIndex = dates.length - 1;
   isNewDate = true;
   renderDatesEditor();
-  const cards = document.querySelectorAll("#editorList .card");
-  const lastCard = cards[cards.length - 1];
-  if (lastCard) lastCard.scrollIntoView({ behavior: "smooth", block: "center" });
+  const editorEl = document.getElementById("datesEditor");
+  if (editorEl) editorEl.scrollIntoView({ behavior: "smooth", block: "start" });
 }
