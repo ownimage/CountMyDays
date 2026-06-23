@@ -14,7 +14,7 @@
   <link id="bootstrap-theme-css" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/darkly/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
   <link rel="stylesheet" href="css/styles.css">
-  <script>const BUILD_NUMBER = "202606211150";</script>
+  <script>const BUILD_NUMBER = "202606230704";</script>
 </head>
 
 <body>
@@ -287,6 +287,24 @@
   </div>
 
   <!-- DELETE CONFIRM MODAL -->
+  <div id="reimportConfirmModal" class="modal fade" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body text-center pb-0">
+          <p class="mb-3 fs-5" id="reimportConfirmMessage">Reload sample images?</p>
+          <div class="form-check mb-2 d-inline-block text-start">
+            <input class="form-check-input" type="checkbox" id="reimportOverwriteCheck">
+            <label class="form-check-label" for="reimportOverwriteCheck">Overwrite existing images with matching names</label>
+          </div>
+        </div>
+        <div class="modal-footer justify-content-center border-0 pt-2">
+          <button class="btn btn-secondary editor-btn btn-wide" data-bs-dismiss="modal" id="reimportCancelBtn">Cancel</button>
+          <button class="btn btn-info editor-btn btn-wide" id="reimportConfirmBtn">Reload</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="deleteConfirmModal" class="modal fade" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">

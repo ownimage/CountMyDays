@@ -13,16 +13,18 @@ function saveImages(images) {
 
 function getImageColors(dataUrl) {
   if (!dataUrl || !dataUrl.startsWith("data:image/svg+xml,")) {
-    return { line: "", fill: "" };
+    return { line: "", fill: "", strokeWidth: "" };
   }
   const svgPart = dataUrl.substring("data:image/svg+xml,".length);
   const decoded = decodeURIComponent(svgPart);
   const decodeVal = v => v && v.startsWith("%23") ? "#" + v.substring(3) : v;
   const lineMatch = decoded.match(/\bstroke\s*=\s*["']([^"']+)["']/i);
   const fillMatch = decoded.match(/\bfill\s*=\s*["']([^"']+)["']/i);
+  const swMatch = decoded.match(/\bstroke-width\s*=\s*["']([^"']+)["']/i);
   return {
     line: lineMatch ? decodeVal(lineMatch[1]) : "",
-    fill: fillMatch ? decodeVal(fillMatch[1]) : ""
+    fill: fillMatch ? decodeVal(fillMatch[1]) : "",
+    strokeWidth: swMatch ? swMatch[1] : ""
   };
 }
 
@@ -94,6 +96,8 @@ function renderImagesEditor() {
                 <input type="checkbox" ${colors.fill === 'none' || !colors.fill ? 'checked' : ''} onchange="editImageFillNone(${realIndex}, this.checked)">
                 none
               </label>
+              <label class="form-label mb-0">Width:</label>
+              <input type="number" min="0.5" max="10" step="0.5" value="${colors.strokeWidth || '2'}" style="width:60px" class="form-control form-control-sm d-inline-block" oninput="editImageStrokeWidth(${realIndex}, this.value)">
             </div>
           </div>
             <div class="col-auto d-flex align-items-center">
@@ -112,13 +116,9 @@ function renderImagesEditor() {
             <div class="mb-1">${escapeHtml(img.name)}</div>
             <div class="d-flex gap-2 align-items-center flex-wrap">
               <button class="btn btn-primary editor-btn" onclick="startEditImage(${realIndex})" ${editingImageIndex >= 0 ? 'disabled' : ''}>Edit</button>
-              ${colors.line ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.line === 'none' ? 'transparent' : colors.line}"></span>Line${colors.line === 'none' ? ': none' : ''}</span>` : ''}
-              ${colors.fill ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.fill === 'none' ? 'transparent' : colors.fill}"></span>Fill${colors.fill === 'none' ? ': none' : ''}</span>` : ''}
-              <button class="btn btn-info editor-btn" onclick="duplicateImage(${realIndex})" ${editingImageIndex >= 0 ? 'disabled' : ''}>Duplicate</button>
+              <button class="btn btn-info editor-btn mx-auto" onclick="duplicateImage(${realIndex})" ${editingImageIndex >= 0 ? 'disabled' : ''}>Duplicate</button>
+              <button class="btn btn-danger editor-btn" onclick="confirmDeleteImage(${realIndex})" ${editingImageIndex >= 0 ? 'disabled' : ''}>Delete</button>
             </div>
-          </div>
-          <div class="col-auto">
-            <button class="btn btn-danger editor-btn" onclick="confirmDeleteImage(${realIndex})" ${editingImageIndex >= 0 ? 'disabled' : ''}>Delete</button>
           </div>
         </div>
       `;
@@ -277,6 +277,28 @@ function editImageStrokeNone(index, checked) {
     img.data = updateSvgColor(img.data, "stroke", restore);
     img.lineColor = restore;
   }
+  saveImages(images);
+  const editedCard = document.querySelector('#imagesList .card.card-edited');
+  if (editedCard) {
+    const imgEl = editedCard.querySelector('img.date-img');
+    if (imgEl) imgEl.src = img.data;
+  }
+}
+
+function editImageStrokeWidth(index, value) {
+  const images = loadImages();
+  if (index < 0 || index >= images.length) return;
+  const img = images[index];
+  if (!img.data || !img.data.startsWith("data:image/svg+xml,")) return;
+  const svgPart = img.data.substring("data:image/svg+xml,".length);
+  const decoded = decodeURIComponent(svgPart);
+  if (/\bstroke-width\s*=/i.test(decoded)) {
+    img.data = updateSvgColor(img.data, "stroke-width", value || "2");
+  } else {
+    const updated = decoded.replace(/^<svg/i, `<svg stroke-width="${value || "2"}"`);
+    img.data = "data:image/svg+xml," + encodeURIComponent(updated);
+  }
+  img.strokeWidth = value;
   saveImages(images);
   const editedCard = document.querySelector('#imagesList .card.card-edited');
   if (editedCard) {
