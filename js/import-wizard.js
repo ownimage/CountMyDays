@@ -5,12 +5,59 @@ function startImportWizard(data) {
   (data.categories || []).forEach(c => { c.name = (c.name || "").trim(); });
   (data.dates || []).forEach(d => { d.name = (d.name || "").trim(); });
 
+  importWizardState = {
+    data: data,
+    step: "sectionPrompt",
+    sectionPrompt: null,
+    imageStatus: [],
+    imageDecisions: [],
+    conflictImages: [],
+    conflictIdx: 0,
+    renameMap: {},
+    catStatus: [],
+    catDecisions: [],
+    catConflicts: [],
+    catConflictIdx: 0,
+    catRenameMap: {},
+    catRenameMapGlobal: {},
+    dateStatus: [],
+    dateDecisions: [],
+    dateConflicts: [],
+    dateConflictIdx: 0,
+    dateRenameMap: {}
+  };
+
+  document.getElementById("importWizardModal").classList.remove("d-none");
+  showNextSectionPrompt();
+}
+
+function showNextSectionPrompt(afterSection) {
+  const state = importWizardState;
+  const sections = ["images", "categories", "dates"];
+  const startIdx = afterSection ? sections.indexOf(afterSection) + 1 : 0;
+
+  for (let i = startIdx; i < sections.length; i++) {
+    const sec = sections[i];
+    if ((state.data[sec] || []).length > 0) {
+      state.sectionPrompt = sec;
+      state.step = "sectionPrompt";
+      renderImportWizard();
+      return;
+    }
+  }
+
+  state.step = "complete";
+  renderImportWizard();
+}
+
+function preprocessImages() {
+  const state = importWizardState;
   const existingImages = loadImages();
   const imageStatus = [];
   const imageDecisions = [];
   const conflictImages = [];
 
-  (data.images || []).forEach((img, idx) => {
+  (state.data.images || []).forEach((img, idx) => {
     const existing = existingImages.find(e => e.name === img.name);
     if (!existing) {
       imageStatus[idx] = "autoImport";
@@ -25,18 +72,53 @@ function startImportWizard(data) {
     }
   });
 
-  importWizardState = {
-    data: data,
-    step: "images",
-    backStack: [],
-    imageStatus: imageStatus,
-    imageDecisions: imageDecisions,
-    conflictImages: conflictImages,
-    conflictIdx: 0,
-    renameMap: {}
-  };
+  state.imageStatus = imageStatus;
+  state.imageDecisions = imageDecisions;
+  state.conflictImages = conflictImages;
+  state.conflictIdx = 0;
+  state.renameMap = {};
+}
 
-  document.getElementById("importWizardModal").classList.remove("d-none");
+function answerSectionPrompt(importIt) {
+  const state = importWizardState;
+  const section = state.sectionPrompt;
+
+  if (importIt) {
+    if (section === "images") {
+      preprocessImages();
+      state.step = "images";
+      state.sectionPrompt = null;
+    } else if (section === "categories") {
+      preprocessCategories();
+      state.step = "categories";
+      state.sectionPrompt = null;
+    } else if (section === "dates") {
+      preprocessDates();
+      state.step = "dates";
+      state.sectionPrompt = null;
+    }
+  } else {
+    if (section === "images") {
+      state.imageDecisions = (state.data.images || []).map(() => ({ action: "discard" }));
+      state.imageStatus = (state.data.images || []).map(() => "autoDiscard");
+      state.conflictImages = [];
+      state.conflictIdx = 0;
+      finishImageStage();
+    } else if (section === "categories") {
+      state.catDecisions = (state.data.categories || []).map(() => ({ action: "discard" }));
+      state.catStatus = (state.data.categories || []).map(() => "autoDiscard");
+      state.catConflicts = [];
+      state.catConflictIdx = 0;
+      finishCategoryStage();
+    } else if (section === "dates") {
+      state.dateDecisions = (state.data.dates || []).map(() => ({ action: "discard" }));
+      state.dateStatus = (state.data.dates || []).map(() => "autoDiscard");
+      state.dateConflicts = [];
+      state.dateConflictIdx = 0;
+      finishDateStage();
+    }
+  }
+
   renderImportWizard();
 }
 
@@ -63,7 +145,9 @@ function renderImportWizard() {
   const state = importWizardState;
   if (!state) return;
 
-  if (state.step === "images") {
+  if (state.step === "sectionPrompt") {
+    renderSectionPrompt(body, footer, title);
+  } else if (state.step === "images") {
     renderImageStage(body, footer, title);
   } else if (state.step === "categories") {
     renderCategoryStage(body, footer, title);
@@ -72,6 +156,20 @@ function renderImportWizard() {
   } else if (state.step === "complete") {
     renderComplete(body, footer, title);
   }
+}
+
+function renderSectionPrompt(body, footer, title) {
+  const state = importWizardState;
+  const section = state.sectionPrompt;
+  const count = (state.data[section] || []).length;
+  const sectionLabel = section.charAt(0).toUpperCase() + section.slice(1);
+  title.textContent = sectionLabel;
+  body.innerHTML = `<p>Do you want to import the <strong>${count} ${section}</strong> included in this data?</p>`;
+  footer.innerHTML = `
+    <button class="btn btn-secondary editor-btn btn-wide btn-lg" onclick="cancelImportWizard()">Cancel</button>
+    <button class="btn btn-danger editor-btn btn-wide btn-lg" onclick="answerSectionPrompt(false)">Skip</button>
+    <button class="btn btn-primary editor-btn btn-wide btn-lg" onclick="answerSectionPrompt(true)">Import</button>
+  `;
 }
 
 function getImageColorDisplay(dataUrl) {
@@ -316,9 +414,7 @@ function finishImageStage() {
     if (d.image && renameMap[d.image]) d.image = renameMap[d.image];
   });
 
-  preprocessCategories();
-  state.step = "categories";
-  renderImportWizard();
+  showNextSectionPrompt("images");
 }
 
 function preprocessCategories() {
@@ -556,9 +652,7 @@ function finishCategoryStage() {
     if (d.category && catRenameMap[d.category]) d.category = catRenameMap[d.category];
   });
 
-  preprocessDates();
-  state.step = "dates";
-  renderImportWizard();
+  showNextSectionPrompt("categories");
 }
 
 function datesEqual(a, b) {
