@@ -69,6 +69,47 @@ function importData() {
   input.click();
 }
 
+function importSampleData() {
+  const cacheBuster = typeof BUILD_NUMBER !== "undefined" ? BUILD_NUMBER : Date.now();
+
+  showSpinner();
+  fetch("js/sampleData.json?v=" + cacheBuster)
+    .then(res => {
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.json();
+    })
+    .then(json => {
+      hideSpinner();
+      if (!json.dates || !json.categories || !json.images) {
+        alert("Sample data file is missing required fields.");
+        return;
+      }
+      startImportWizard(json);
+    })
+    .catch(err => {
+      hideSpinner();
+      alert("Failed to load sample data: " + err.message);
+    });
+}
+
+function showSpinner() {
+  let el = document.getElementById("spinnerOverlay");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "spinnerOverlay";
+    el.className = "d-none";
+    el.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:99999;";
+    el.innerHTML = '<div class="spinner-border text-light" style="width:3rem;height:3rem" role="status"><span class="visually-hidden">Loading…</span></div>';
+    document.body.appendChild(el);
+  }
+  el.classList.remove("d-none");
+}
+
+function hideSpinner() {
+  const el = document.getElementById("spinnerOverlay");
+  if (el) el.classList.add("d-none");
+}
+
 // -------------------------------
 // UI UTILITIES
 // -------------------------------

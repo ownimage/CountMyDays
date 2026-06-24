@@ -114,7 +114,7 @@ function openSettings() {
   const showDanger = localStorage.getItem("showDanger") === "true";
   const showDangerCb = document.getElementById("showDanger");
   if (showDangerCb) showDangerCb.checked = showDanger;
-  ["clearAllDataRow", "reimportSamplesRow", "refreshAppRow"].forEach(id => {
+  ["clearAllDataRow", "refreshAppRow"].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.toggle("d-none", !showDanger);
   });
@@ -185,8 +185,6 @@ function changeShowDanger(enabled) {
   localStorage.setItem("showDanger", enabled);
   const row = document.getElementById("clearAllDataRow");
   if (row) row.classList.toggle("d-none", !enabled);
-  const row2 = document.getElementById("reimportSamplesRow");
-  if (row2) row2.classList.toggle("d-none", !enabled);
   const row3 = document.getElementById("refreshAppRow");
   if (row3) row3.classList.toggle("d-none", !enabled);
 }
