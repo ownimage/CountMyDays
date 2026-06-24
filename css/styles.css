@@ -511,9 +511,15 @@ body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
 /* BUTTON SIZING */
 .editor-btn {
   min-width: 100px;
+  padding: 0.5rem 1rem;
+  touch-action: manipulation;
 }
 .btn-wide {
   min-width: 220px;
+  touch-action: manipulation;
+}
+body.compact .editor-btn {
+  padding: 0.25rem 0.5rem;
 }
 
 /* BUILD NUMBER */

@@ -155,12 +155,12 @@ function editCategory(index) {
 
 function checkDuplicateCategoryName() {
   const categories = loadCategories();
-  const input = document.querySelector('#categoriesList .card-edited input.form-control');
+  const input = document.querySelector('#singleCategoryEditor .card-edited input.form-control');
   if (!input) return;
   const trimmed = input.value.trim();
   const hasDuplicate = categories.some((c, i) => i !== editingCategoryIndex && c.name === trimmed);
   const errorEl = document.getElementById("categoryNameError");
-  const okBtn = document.querySelector('#categoriesList .btn-success.editor-btn');
+  const okBtn = document.querySelector('#singleCategoryEditor .btn-success.editor-btn');
   if (errorEl) errorEl.style.display = hasDuplicate ? "block" : "none";
   if (okBtn) okBtn.disabled = hasDuplicate;
 }

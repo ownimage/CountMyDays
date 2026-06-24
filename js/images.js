@@ -2,6 +2,9 @@ let editingImageIndex = -1;
 let isNewImage = false;
 let editImageBackup = null;
 let imageNameSearch = "";
+let imagesPage = 0;
+let imagesTotalPages = 1;
+const IMAGES_PAGE_SIZE = 30;
 
 function loadImages() {
   return JSON.parse(localStorage.getItem("images") || "[]");
@@ -125,7 +128,12 @@ function renderImagesEditor() {
     return true;
   }).sort((a, b) => a.name.localeCompare(b.name));
 
-  filtered.forEach((img) => {
+  imagesTotalPages = Math.ceil(filtered.length / IMAGES_PAGE_SIZE) || 1;
+  if (imagesPage >= imagesTotalPages) imagesPage = imagesTotalPages - 1;
+  const start = imagesPage * IMAGES_PAGE_SIZE;
+  const pageItems = filtered.slice(start, start + IMAGES_PAGE_SIZE);
+
+  pageItems.forEach((img) => {
     const card = document.createElement("div");
     card.className = "card p-3 mb-3";
     const colors = getImageColors(img.data);
@@ -147,6 +155,17 @@ function renderImagesEditor() {
     list.appendChild(card);
   });
 
+  if (imagesTotalPages > 1) {
+    const nav = document.createElement("div");
+    nav.className = "d-flex justify-content-center align-items-center gap-3 mt-3 mb-2";
+    nav.innerHTML = `
+      <button class="btn btn-outline-secondary btn-sm" onclick="imagesPage=Math.max(0,imagesPage-1);renderImagesEditor()" ${imagesPage === 0 ? 'disabled' : ''}>Previous</button>
+      <span class="text-nowrap">Page ${imagesPage + 1} of ${imagesTotalPages}</span>
+      <button class="btn btn-outline-secondary btn-sm" onclick="imagesPage=Math.min(imagesTotalPages-1,imagesPage+1);renderImagesEditor()" ${imagesPage >= imagesTotalPages - 1 ? 'disabled' : ''}>Next</button>
+    `;
+    list.appendChild(nav);
+  }
+
   topTile.innerHTML = `
     <div class="d-flex gap-2">
       <button class="btn btn-primary editor-btn btn-wide" onclick="addNewImage()">Add Image</button>
@@ -158,7 +177,7 @@ function renderImagesEditor() {
   filterEl.innerHTML = `
     <div class="d-flex gap-2 align-items-center">
       <input class="form-control" type="search" placeholder="Search image names..." value="${escapeHtml(imageNameSearch)}" oninput="setImageNameSearch(this.value)">
-      <button class="btn btn-outline-secondary btn-sm" onclick="imageNameSearch='';renderImagesEditor()">Clear</button>
+      <button class="btn btn-outline-secondary btn-sm" onclick="imageNameSearch='';imagesPage=0;renderImagesEditor()">Clear</button>
     </div>
   `;
   updateNavState();
@@ -166,6 +185,7 @@ function renderImagesEditor() {
 
 function setImageNameSearch(val) {
   imageNameSearch = val;
+  imagesPage = 0;
   renderImagesEditor();
   const input = document.querySelector('#imageFilters input[type="search"]');
   if (input) {
@@ -187,11 +207,24 @@ function duplicateImage(index) {
   const images = loadImages();
   if (index < 0 || index >= images.length) return;
   const src = images[index];
-  const baseName = src.name.replace(/\s*\(\d+\)\s*$/, "").trim();
-  let n = 1;
+
+  // Strip old parenthetical suffix like " (1)" then check for trailing number
+  let baseName = src.name.replace(/\s*\(\d+\)\s*$/, "").trim();
+  const trailingNum = baseName.match(/^(.*?)\s+(\d+)$/);
+
   const existingNames = new Set(images.map(i => i.name));
-  while (existingNames.has(`${baseName} (${n})`)) n++;
-  const newName = `${baseName} (${n})`;
+  let newName;
+
+  if (trailingNum) {
+    const namePart = trailingNum[1];
+    let num = parseInt(trailingNum[2], 10);
+    while (existingNames.has(`${namePart} ${num + 1}`)) num++;
+    newName = `${namePart} ${num + 1}`;
+  } else {
+    let n = 2;
+    while (existingNames.has(`${baseName} ${n}`)) n++;
+    newName = `${baseName} ${n}`;
+  }
 
   const copy = JSON.parse(JSON.stringify(src));
   copy.name = newName;
@@ -374,12 +407,12 @@ function addNewImage() {
 
 function checkDuplicateName() {
   const images = loadImages();
-  const input = document.querySelector('#imagesList .card-edited input.form-control');
+  const input = document.querySelector('#singleImageEditor .card-edited input.form-control');
   if (!input) return;
   const trimmed = input.value.trim();
   const hasDuplicate = images.some((img, i) => i !== editingImageIndex && img.name === trimmed);
   const errorEl = document.getElementById("imageNameError");
-  const okBtn = document.querySelector('#imagesList .btn-success.editor-btn');
+  const okBtn = document.querySelector('#singleImageEditor .btn-success.editor-btn');
   if (errorEl) errorEl.style.display = hasDuplicate ? "block" : "none";
   if (okBtn) okBtn.disabled = hasDuplicate;
 }

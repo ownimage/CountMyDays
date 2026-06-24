@@ -318,6 +318,7 @@ function openImagesEditor() {
   document.getElementById("categoriesEditor").classList.add("d-none");
   document.getElementById("imagesEditor").classList.remove("d-none");
   document.getElementById("settingsPage").classList.add("d-none");
+  imagesPage = 0;
   renderImagesEditor();
 }
 
