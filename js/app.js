@@ -69,6 +69,47 @@ function importData() {
   input.click();
 }
 
+function importSampleData() {
+  const cacheBuster = typeof BUILD_NUMBER !== "undefined" ? BUILD_NUMBER : Date.now();
+
+  showSpinner();
+  fetch("js/sampleData.json?v=" + cacheBuster)
+    .then(res => {
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.json();
+    })
+    .then(json => {
+      hideSpinner();
+      if (!json.dates || !json.categories || !json.images) {
+        alert("Sample data file is missing required fields.");
+        return;
+      }
+      startImportWizard(json);
+    })
+    .catch(err => {
+      hideSpinner();
+      alert("Failed to load sample data: " + err.message);
+    });
+}
+
+function showSpinner() {
+  let el = document.getElementById("spinnerOverlay");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "spinnerOverlay";
+    el.className = "d-none";
+    el.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:99999;";
+    el.innerHTML = '<div class="spinner-border text-light" style="width:3rem;height:3rem" role="status"><span class="visually-hidden">Loading…</span></div>';
+    document.body.appendChild(el);
+  }
+  el.classList.remove("d-none");
+}
+
+function hideSpinner() {
+  const el = document.getElementById("spinnerOverlay");
+  if (el) el.classList.add("d-none");
+}
+
 // -------------------------------
 // UI UTILITIES
 // -------------------------------
@@ -165,12 +206,13 @@ function renderCountdowns() {
     const weeks = Math.floor(d.days / 7);
     const remainDays = d.days % 7;
 
-    let displayText;
+    let displayLine1, displayLine2;
     if (format === "weeksAndDays") {
-      displayText = `${weeks} week${weeks !== 1 ? "s" : ""}`;
-      if (remainDays > 0) displayText += ` ${remainDays} day${remainDays !== 1 ? "s" : ""}`;
+      displayLine1 = `${weeks} week${weeks !== 1 ? "s" : ""}`;
+      displayLine2 = remainDays > 0 ? `${remainDays} day${remainDays !== 1 ? "s" : ""}` : "";
     } else {
-      displayText = `${d.days} day${d.days !== 1 ? "s" : ""}`;
+      displayLine1 = `${d.days}`;
+      displayLine2 = `day${d.days !== 1 ? "s" : ""}`;
     }
 
     card.innerHTML = `
@@ -190,8 +232,9 @@ function renderCountdowns() {
           <h4 class="mb-1">${escapeHtml(d.name)}</h4>
           <div>${formatDate(eventDate)}</div>
         </div>
-        <div class="col-auto text-end">
-          <div class="h4 mb-0">${displayText}</div>
+        <div class="col-auto text-center">
+          <div class="h4 mb-0">${displayLine1}</div>
+          ${displayLine2 ? `<div class="h4 mb-0">${displayLine2}</div>` : ""}
         </div>
       </div>
     `;
@@ -212,7 +255,10 @@ function renderCountdowns() {
 
     const heading = document.createElement("h2");
     heading.className = "mb-3";
-    heading.textContent = "Counting the days to:";
+    const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const now = new Date();
+    heading.textContent = `From ${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} :`;
     container.appendChild(heading);
     visible.forEach(renderCard);
 
@@ -272,6 +318,7 @@ function openImagesEditor() {
   document.getElementById("categoriesEditor").classList.add("d-none");
   document.getElementById("imagesEditor").classList.remove("d-none");
   document.getElementById("settingsPage").classList.add("d-none");
+  imagesPage = 0;
   renderImagesEditor();
 }
 
@@ -625,3 +672,75 @@ document.addEventListener("DOMContentLoaded", () => {
   applyTheme(savedTheme);
   renderCountdowns();
 });
+
+// -------------------------------
+// PWA PULL-TO-REFRESH
+// -------------------------------
+
+(function() {
+  if (!("serviceWorker" in navigator)) return;
+
+  const THRESHOLD = 80;
+  let startY = 0;
+  let pulling = false;
+  let pullDist = 0;
+
+  const indicator = document.createElement("div");
+  indicator.id = "pwa-pull-indicator";
+  indicator.style.cssText =
+    "position:fixed;top:0;left:0;right:0;z-index:9999;display:flex;" +
+    "align-items:center;justify-content:center;height:0;overflow:hidden;" +
+    "background:var(--bs-body-bg);transition:height 0.1s;color:var(--bs-body-color)";
+  indicator.textContent = "\u21E9 Pull to refresh";
+  document.body.appendChild(indicator);
+
+  const spinner = document.createElement("div");
+  spinner.id = "pwa-pull-spinner";
+  spinner.style.cssText =
+    "position:fixed;top:30%;left:50%;transform:translate(-50%,-50%);z-index:10000;" +
+    "display:none;width:40px;height:40px;border:4px solid var(--bs-border-color);" +
+    "border-top-color:var(--bs-primary);border-radius:50%;animation:pwa-spin 0.6s linear infinite";
+  document.body.appendChild(spinner);
+
+  const style = document.createElement("style");
+  style.textContent =
+    "@keyframes pwa-spin{to{transform:translate(-50%,-50%) rotate(360deg)}}";
+  document.head.appendChild(style);
+
+  function adjustIcon(dist) {
+    const angle = Math.min(dist, THRESHOLD) / THRESHOLD;
+    const deg = Math.round(angle * 180);
+    indicator.innerHTML = dist >= THRESHOLD
+      ? "\u21E9 Release to refresh"
+      : "\u21E9 Pull to refresh";
+    indicator.style.height = Math.min(dist, 50) + "px";
+  }
+
+  document.addEventListener("touchstart", e => {
+    if (window.scrollY !== 0) return;
+    const t = e.touches[0];
+    startY = t.clientY;
+    pulling = true;
+    pullDist = 0;
+  }, { passive: true });
+
+  document.addEventListener("touchmove", e => {
+    if (!pulling) return;
+    const t = e.touches[0];
+    const dy = t.clientY - startY;
+    if (dy <= 0) { pullDist = 0; return; }
+    pullDist = dy;
+    adjustIcon(dy);
+  }, { passive: true });
+
+  document.addEventListener("touchend", () => {
+    if (!pulling) return;
+    pulling = false;
+    indicator.style.height = "0";
+    if (pullDist >= THRESHOLD) {
+      spinner.style.display = "block";
+      setTimeout(() => { location.reload(); }, 400);
+    }
+    pullDist = 0;
+  }, { passive: true });
+})();

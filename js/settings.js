@@ -56,9 +56,31 @@ function getAvailableThemes() {
 
 function changeFontSize(value) {
   localStorage.setItem("fontSize", value);
-  document.body.classList.remove("font-size-normal", "font-size-large", "font-size-xlarge", "font-size-jumbo");
+  document.body.classList.remove("font-size-xsmall", "font-size-small", "font-size-normal", "font-size-large", "font-size-xlarge", "font-size-jumbo");
   if (value !== "normal") {
     document.body.classList.add("font-size-" + value);
+  }
+}
+
+// -------------------------------
+// ICON SIZE
+// -------------------------------
+
+function changeIconSize(value) {
+  localStorage.setItem("iconSize", value);
+  document.body.classList.remove("icon-size-small", "icon-size-medium", "icon-size-large");
+  document.body.classList.add("icon-size-" + value);
+}
+
+// -------------------------------
+// TILE DENSITY
+// -------------------------------
+
+function changeDensity(value) {
+  localStorage.setItem("density", value);
+  document.body.classList.remove("compact", "density-normal");
+  if (value !== "normal") {
+    document.body.classList.add(value);
   }
 }
 
@@ -92,12 +114,22 @@ function openSettings() {
   const showDanger = localStorage.getItem("showDanger") === "true";
   const showDangerCb = document.getElementById("showDanger");
   if (showDangerCb) showDangerCb.checked = showDanger;
-  const dangerRow = document.getElementById("clearAllDataRow");
-  if (dangerRow) dangerRow.classList.toggle("d-none", !showDanger);
+  ["clearAllDataRow", "refreshAppRow"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle("d-none", !showDanger);
+  });
 
   const savedMax = localStorage.getItem("maxCountdowns") || "10";
   const maxSel = document.getElementById("maxCountdownsSelector");
   if (maxSel) maxSel.value = savedMax;
+
+  const savedIconSize = localStorage.getItem("iconSize") || "large";
+  const iconSel = document.getElementById("iconSizeSelector");
+  if (iconSel) iconSel.value = savedIconSize;
+
+  const savedDensity = localStorage.getItem("density") || "normal";
+  const densitySel = document.getElementById("densitySelector");
+  if (densitySel) densitySel.value = savedDensity;
 }
 
 function changeFormat(value) {
@@ -153,8 +185,8 @@ function changeShowDanger(enabled) {
   localStorage.setItem("showDanger", enabled);
   const row = document.getElementById("clearAllDataRow");
   if (row) row.classList.toggle("d-none", !enabled);
-  const row2 = document.getElementById("reimportSamplesRow");
-  if (row2) row2.classList.toggle("d-none", !enabled);
+  const row3 = document.getElementById("refreshAppRow");
+  if (row3) row3.classList.toggle("d-none", !enabled);
 }
 
 function confirmClearAllData() {
@@ -188,12 +220,21 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.classList.add("font-size-" + savedFontSize);
   }
 
+  const savedIconSize = localStorage.getItem("iconSize") || "large";
+  document.body.classList.add("icon-size-" + savedIconSize);
+
+  const savedDensity = localStorage.getItem("density") || "normal";
+  if (savedDensity !== "normal") {
+    document.body.classList.add(savedDensity);
+  }
+
   const autoHide = localStorage.getItem("autoHideMenu") === "true";
   if (autoHide) {
     document.body.classList.add("auto-hide-menu");
     resetAutoHideTimer();
-    ["pointerdown", "touchstart", "click"].forEach(evt => {
+    ["pointerdown", "pointerup", "touchstart", "click", "mousedown"].forEach(evt => {
       document.addEventListener(evt, resetAutoHideTimer, { passive: true });
+      document.body.addEventListener(evt, resetAutoHideTimer, { passive: true });
     });
     window.addEventListener("scroll", resetAutoHideTimer, { passive: true });
   }

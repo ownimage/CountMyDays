@@ -1,9 +1,78 @@
 /* IMAGES */
+/* RESPONSIVE IMAGE SIZES */
 .countdown-img,
 .date-img {
   width: 100px;
   height: 100px;
   object-fit: contain;
+}
+@media (max-width: 480px) {
+  .countdown-img,
+  .date-img {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+/* ICON SIZE */
+body.icon-size-small .countdown-img,
+body.icon-size-small .date-img {
+  width: 64px !important;
+  height: 64px !important;
+}
+body.icon-size-medium .countdown-img,
+body.icon-size-medium .date-img {
+  width: 80px !important;
+  height: 80px !important;
+}
+body.icon-size-large .countdown-img,
+body.icon-size-large .date-img {
+  width: 100px !important;
+  height: 100px !important;
+}
+
+/* TILE DENSITY */
+body.compact .countdown-card {
+  padding: 0.25rem 0.5rem;
+}
+body.compact .countdown-card .countdown-img,
+body.compact .countdown-card .date-img {
+  width: 48px !important;
+  height: 48px !important;
+}
+body.compact .card {
+  margin-bottom: 0.25rem !important;
+}
+body.compact #countdownContainer .mb-3 {
+  margin-bottom: 0.25rem !important;
+}
+body.compact .countdown-card h4 {
+  font-size: 1rem !important;
+}
+body.compact .countdown-card .h4 {
+  font-size: 1rem !important;
+}
+body.compact .countdown-card .row > div {
+  padding-top: 0.1rem;
+  padding-bottom: 0.1rem;
+}
+body.compact .countdown-card .mt-1 {
+  margin-top: 0 !important;
+}
+body.compact .countdown-card .mb-1 {
+  margin-bottom: 0 !important;
+}
+body.compact .countdown-card .gap-1 {
+  gap: 0.15rem !important;
+}
+body.compact .card.p-3 {
+  padding: 0.4rem 0.5rem !important;
+}
+body.compact .editor-btn {
+  min-width: 70px;
+}
+body.compact .btn-wide {
+  min-width: 160px;
 }
 
 .countdown-card {
@@ -155,6 +224,68 @@
 }
 
 /* FONT SIZE */
+body.font-size-xsmall,
+body.font-size-xsmall .navbar .btn,
+body.font-size-xsmall .navbar .dropdown-item,
+body.font-size-xsmall #settingsPage,
+body.font-size-xsmall #settingsPage .btn,
+body.font-size-xsmall #settingsPage .form-label,
+body.font-size-xsmall #settingsPage .form-control,
+body.font-size-xsmall #settingsPage .form-select,
+body.font-size-xsmall #datesEditor,
+body.font-size-xsmall #datesEditor .btn,
+body.font-size-xsmall #datesEditor .form-label,
+body.font-size-xsmall #datesEditor .form-control,
+body.font-size-xsmall #datesEditor .form-select,
+body.font-size-xsmall #categoriesEditor,
+body.font-size-xsmall #categoriesEditor .btn,
+body.font-size-xsmall #categoriesEditor .form-label,
+body.font-size-xsmall #categoriesEditor .form-control,
+body.font-size-xsmall #categoriesEditor .form-select,
+body.font-size-xsmall #imagesEditor,
+body.font-size-xsmall #imagesEditor .btn,
+body.font-size-xsmall #imagesEditor .form-label,
+body.font-size-xsmall #imagesEditor .form-control,
+body.font-size-xsmall #imagesEditor .form-select,
+body.font-size-xsmall #deleteConfirmModal,
+body.font-size-xsmall #deleteConfirmModal .btn,
+body.font-size-xsmall #exportWizardModal,
+body.font-size-xsmall #exportWizardModal .btn,
+body.font-size-xsmall #qrExportModal,
+body.font-size-xsmall #qrExportModal .btn {
+  font-size: 0.8rem;
+}
+body.font-size-small,
+body.font-size-small .navbar .btn,
+body.font-size-small .navbar .dropdown-item,
+body.font-size-small #settingsPage,
+body.font-size-small #settingsPage .btn,
+body.font-size-small #settingsPage .form-label,
+body.font-size-small #settingsPage .form-control,
+body.font-size-small #settingsPage .form-select,
+body.font-size-small #datesEditor,
+body.font-size-small #datesEditor .btn,
+body.font-size-small #datesEditor .form-label,
+body.font-size-small #datesEditor .form-control,
+body.font-size-small #datesEditor .form-select,
+body.font-size-small #categoriesEditor,
+body.font-size-small #categoriesEditor .btn,
+body.font-size-small #categoriesEditor .form-label,
+body.font-size-small #categoriesEditor .form-control,
+body.font-size-small #categoriesEditor .form-select,
+body.font-size-small #imagesEditor,
+body.font-size-small #imagesEditor .btn,
+body.font-size-small #imagesEditor .form-label,
+body.font-size-small #imagesEditor .form-control,
+body.font-size-small #imagesEditor .form-select,
+body.font-size-small #deleteConfirmModal,
+body.font-size-small #deleteConfirmModal .btn,
+body.font-size-small #exportWizardModal,
+body.font-size-small #exportWizardModal .btn,
+body.font-size-small #qrExportModal,
+body.font-size-small #qrExportModal .btn {
+  font-size: 0.925rem;
+}
 body.font-size-large,
 body.font-size-large .navbar .btn,
 body.font-size-large .navbar .dropdown-item,
@@ -292,6 +423,17 @@ body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
   padding-top: 0.5rem;
 }
 
+/* PWA SAFE AREA */
+#mainNav {
+  padding-top: env(safe-area-inset-top, 0);
+}
+body.auto-hide-menu .container-fluid {
+  padding-top: calc(60px + env(safe-area-inset-top, 0));
+}
+body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
+  padding-top: calc(0.5rem + env(safe-area-inset-top, 0));
+}
+
 /* INACTIVE MENU DURING EDITING */
 #mainNav.nav-inactive {
   pointer-events: none;
@@ -369,9 +511,15 @@ body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
 /* BUTTON SIZING */
 .editor-btn {
   min-width: 100px;
+  padding: 0.5rem 1rem;
+  touch-action: manipulation;
 }
 .btn-wide {
   min-width: 220px;
+  touch-action: manipulation;
+}
+body.compact .editor-btn {
+  padding: 0.25rem 0.5rem;
 }
 
 /* BUILD NUMBER */

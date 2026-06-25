@@ -2,6 +2,9 @@ let editingImageIndex = -1;
 let isNewImage = false;
 let editImageBackup = null;
 let imageNameSearch = "";
+let imagesPage = 0;
+let imagesTotalPages = 1;
+const IMAGES_PAGE_SIZE = 30;
 
 function loadImages() {
   return JSON.parse(localStorage.getItem("images") || "[]");
@@ -13,16 +16,18 @@ function saveImages(images) {
 
 function getImageColors(dataUrl) {
   if (!dataUrl || !dataUrl.startsWith("data:image/svg+xml,")) {
-    return { line: "", fill: "" };
+    return { line: "", fill: "", strokeWidth: "" };
   }
   const svgPart = dataUrl.substring("data:image/svg+xml,".length);
   const decoded = decodeURIComponent(svgPart);
   const decodeVal = v => v && v.startsWith("%23") ? "#" + v.substring(3) : v;
   const lineMatch = decoded.match(/\bstroke\s*=\s*["']([^"']+)["']/i);
   const fillMatch = decoded.match(/\bfill\s*=\s*["']([^"']+)["']/i);
+  const swMatch = decoded.match(/\bstroke-width\s*=\s*["']([^"']+)["']/i);
   return {
     line: lineMatch ? decodeVal(lineMatch[1]) : "",
-    fill: fillMatch ? decodeVal(fillMatch[1]) : ""
+    fill: fillMatch ? decodeVal(fillMatch[1]) : "",
+    strokeWidth: swMatch ? swMatch[1] : ""
   };
 }
 
@@ -30,7 +35,7 @@ function updateSvgColor(dataUrl, attr, newColor) {
   if (!dataUrl || !dataUrl.startsWith("data:image/svg+xml,")) return dataUrl;
   const svgPart = dataUrl.substring("data:image/svg+xml,".length);
   const decoded = decodeURIComponent(svgPart);
-  const regex = new RegExp(`\\b${attr}\\s*=\\s*["'][^"']*["']`);
+  const regex = new RegExp(`\\b${attr}\\s*=\\s*["'][^"']*["']`, 'g');
   const encoded = newColor && newColor.startsWith("#")
     ? newColor
     : newColor || "none";
@@ -45,111 +50,142 @@ function renderImagesEditor() {
   const list = document.getElementById("imagesList");
   const topTile = document.getElementById("addImageTileTop");
   const filterEl = document.getElementById("imageFilters");
+  const singleEditor = document.getElementById("singleImageEditor");
 
   list.innerHTML = "";
   topTile.innerHTML = "";
   filterEl.innerHTML = "";
+  singleEditor.innerHTML = "";
 
   const images = loadImages();
 
-  const filtered = images.filter((img, index) => {
-    if (editingImageIndex === index) return true;
-    if (imageNameSearch && !img.name.toLowerCase().includes(imageNameSearch.toLowerCase())) return false;
-    return true;
-  }).sort((a, b) => a.name.localeCompare(b.name));
+  if (editingImageIndex >= 0) {
+    list.classList.add("d-none");
+    topTile.classList.add("d-none");
+    filterEl.classList.add("d-none");
+    singleEditor.classList.remove("d-none");
 
-  filtered.forEach((img, index) => {
-    const realIndex = images.indexOf(img);
-    const card = document.createElement("div");
-    card.className = "card p-3 mb-3" + (realIndex === editingImageIndex ? " card-edited" : "");
+    const img = images[editingImageIndex];
+    const hasData = img.data && img.data.length > 0;
+    const colors = getImageColors(img.data);
+    const lineVal = colors.line !== "none" ? colors.line : (img._prevStroke || "#000000");
+    const fillVal = colors.fill !== "none" ? colors.fill : (img._prevFill || "#ffffff");
 
-    if (editingImageIndex === realIndex) {
-      const hasData = img.data && img.data.length > 0;
-      const colors = getImageColors(img.data);
-      const lineVal = colors.line !== "none" ? colors.line : (img._prevStroke || "#000000");
-      const fillVal = colors.fill !== "none" ? colors.fill : (img._prevFill || "#ffffff");
-      card.innerHTML = `
+    const heading = isNewImage ? "Add Image" : "Edit Image";
+    singleEditor.innerHTML = `
+      <div class="d-flex align-items-center mb-3">
+        <h3 class="mb-0">${heading}</h3>
+        <button class="btn btn-outline-secondary ms-auto" onclick="cancelImageEdit()">Back</button>
+      </div>
+      <div class="card p-3 card-edited">
         <div class="row align-items-center">
           <div class="col-auto" style="width:130px;flex:0 0 auto">
             ${hasData
               ? `<img src="${img.data}" class="date-img">`
               : `<div class="date-img d-flex align-items-center justify-content-center text-secondary border rounded">No image</div>`
             }
-            <button class="btn btn-primary btn-sm mt-2 w-100 text-nowrap" onclick="openImageUpload(${realIndex})">Upload</button>
+            <button class="btn btn-primary btn-sm mt-2 w-100 text-nowrap" onclick="openImageUpload(${editingImageIndex})">Upload</button>
           </div>
           <div class="col">
             <input class="form-control" value="${escapeHtml(img.name)}" onchange="editImageField('name', this.value); checkDuplicateName()" oninput="checkDuplicateName()">
             <div id="imageNameError" class="text-danger mt-1" style="display:none">ERROR: There is already an image with this name.</div>
             <div class="d-flex gap-2 mt-2 align-items-center flex-wrap">
-              <button class="btn btn-success editor-btn" onclick="doneImageEdit(${realIndex})">OK</button>
+              <button class="btn btn-success editor-btn" onclick="doneImageEdit(${editingImageIndex})">OK</button>
               <label class="form-label mb-0">Line:</label>
-              <input type="color" value="${lineVal}" oninput="editImageColor(${realIndex}, 'stroke', this.value)">
+              <input type="color" value="${lineVal}" oninput="editImageColor(${editingImageIndex}, 'stroke', this.value)">
               <label class="form-check-label mb-0">
-                <input type="checkbox" ${colors.line === 'none' || !colors.line ? 'checked' : ''} onchange="editImageStrokeNone(${realIndex}, this.checked)">
+                <input type="checkbox" ${colors.line === 'none' || !colors.line ? 'checked' : ''} onchange="editImageStrokeNone(${editingImageIndex}, this.checked)">
                 none
               </label>
               <label class="form-label mb-0">Fill:</label>
-              <input type="color" value="${fillVal}" oninput="editImageColor(${realIndex}, 'fill', this.value)">
+              <input type="color" value="${fillVal}" oninput="editImageColor(${editingImageIndex}, 'fill', this.value)">
               <label class="form-check-label mb-0">
-                <input type="checkbox" ${colors.fill === 'none' || !colors.fill ? 'checked' : ''} onchange="editImageFillNone(${realIndex}, this.checked)">
+                <input type="checkbox" ${colors.fill === 'none' || !colors.fill ? 'checked' : ''} onchange="editImageFillNone(${editingImageIndex}, this.checked)">
                 none
               </label>
+              <label class="form-label mb-0">Width:</label>
+              <input type="number" min="0.5" max="10" step="0.5" value="${colors.strokeWidth || '2'}" style="width:60px" class="form-control form-control-sm d-inline-block" oninput="editImageStrokeWidth(${editingImageIndex}, this.value)">
             </div>
           </div>
             <div class="col-auto d-flex align-items-center">
               <button class="btn btn-secondary editor-btn" onclick="cancelImageEdit()">Cancel</button>
             </div>
         </div>
-      `;
-    } else {
-      const colors = getImageColors(img.data);
-      card.innerHTML = `
-        <div class="row align-items-center">
-          <div class="col-auto" style="width:130px;flex:0 0 auto">
-            <img src="${img.data}" class="date-img">
-          </div>
-          <div class="col">
-            <div class="mb-1">${escapeHtml(img.name)}</div>
-            <div class="d-flex gap-2 align-items-center flex-wrap">
-              <button class="btn btn-primary editor-btn" onclick="startEditImage(${realIndex})" ${editingImageIndex >= 0 ? 'disabled' : ''}>Edit</button>
-              ${colors.line ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.line === 'none' ? 'transparent' : colors.line}"></span>Line${colors.line === 'none' ? ': none' : ''}</span>` : ''}
-              ${colors.fill ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.fill === 'none' ? 'transparent' : colors.fill}"></span>Fill${colors.fill === 'none' ? ': none' : ''}</span>` : ''}
-              <button class="btn btn-info editor-btn" onclick="duplicateImage(${realIndex})" ${editingImageIndex >= 0 ? 'disabled' : ''}>Duplicate</button>
-            </div>
-          </div>
-          <div class="col-auto">
-            <button class="btn btn-danger editor-btn" onclick="confirmDeleteImage(${realIndex})" ${editingImageIndex >= 0 ? 'disabled' : ''}>Delete</button>
+      </div>
+    `;
+
+    updateNavState();
+    return;
+  }
+
+  list.classList.remove("d-none");
+  topTile.classList.remove("d-none");
+  filterEl.classList.remove("d-none");
+  singleEditor.classList.add("d-none");
+
+  const filtered = images.filter((img, index) => {
+    if (imageNameSearch && !img.name.toLowerCase().includes(imageNameSearch.toLowerCase())) return false;
+    return true;
+  }).sort((a, b) => a.name.localeCompare(b.name));
+
+  imagesTotalPages = Math.ceil(filtered.length / IMAGES_PAGE_SIZE) || 1;
+  if (imagesPage >= imagesTotalPages) imagesPage = imagesTotalPages - 1;
+  const start = imagesPage * IMAGES_PAGE_SIZE;
+  const pageItems = filtered.slice(start, start + IMAGES_PAGE_SIZE);
+
+  pageItems.forEach((img) => {
+    const card = document.createElement("div");
+    card.className = "card p-3 mb-3";
+    const colors = getImageColors(img.data);
+    card.innerHTML = `
+      <div class="row align-items-center">
+        <div class="col-auto" style="width:130px;flex:0 0 auto">
+          <img src="${img.data}" class="date-img">
+        </div>
+        <div class="col">
+          <div class="mb-1">${escapeHtml(img.name)}</div>
+          <div class="d-flex gap-2 align-items-center flex-wrap">
+            <button class="btn btn-primary editor-btn" onclick="startEditImage(${images.indexOf(img)})">Edit</button>
+            <button class="btn btn-info editor-btn mx-auto" onclick="duplicateImage(${images.indexOf(img)})">Duplicate</button>
+            <button class="btn btn-danger editor-btn" onclick="confirmDeleteImage(${images.indexOf(img)})">Delete</button>
           </div>
         </div>
-      `;
-    }
-
+      </div>
+    `;
     list.appendChild(card);
   });
 
+  if (imagesTotalPages > 1) {
+    const nav = document.createElement("div");
+    nav.className = "d-flex justify-content-center align-items-center gap-3 mt-3 mb-2";
+    nav.innerHTML = `
+      <button class="btn btn-outline-secondary btn-sm" onclick="imagesPage=Math.max(0,imagesPage-1);renderImagesEditor()" ${imagesPage === 0 ? 'disabled' : ''}>Previous</button>
+      <span class="text-nowrap">Page ${imagesPage + 1} of ${imagesTotalPages}</span>
+      <button class="btn btn-outline-secondary btn-sm" onclick="imagesPage=Math.min(imagesTotalPages-1,imagesPage+1);renderImagesEditor()" ${imagesPage >= imagesTotalPages - 1 ? 'disabled' : ''}>Next</button>
+    `;
+    list.appendChild(nav);
+  }
+
   topTile.innerHTML = `
     <div class="d-flex gap-2">
-      <button class="btn btn-primary editor-btn btn-wide" onclick="addNewImage()" ${editingImageIndex >= 0 ? 'disabled' : ''}>Add Image</button>
-      <button class="btn btn-success editor-btn btn-wide ms-auto" onclick="closeImagesEditor()" ${editingImageIndex >= 0 ? 'disabled' : ''}>Done</button>
+      <button class="btn btn-primary editor-btn btn-wide" onclick="addNewImage()">Add Image</button>
+      <button class="btn btn-success editor-btn btn-wide ms-auto" onclick="closeImagesEditor()">Done</button>
     </div>
   `;
 
-  if (editingImageIndex >= 0) {
-    filterEl.classList.add("d-none");
-  } else {
-    filterEl.classList.remove("d-none");
-    filterEl.innerHTML = `
-      <div class="d-flex gap-2 align-items-center">
-        <input class="form-control" type="search" placeholder="Search image names..." value="${escapeHtml(imageNameSearch)}" oninput="setImageNameSearch(this.value)">
-        <button class="btn btn-outline-secondary btn-sm" onclick="imageNameSearch='';renderImagesEditor()">Clear</button>
-      </div>
-    `;
-  }
+  filterEl.classList.remove("d-none");
+  filterEl.innerHTML = `
+    <div class="d-flex gap-2 align-items-center">
+      <input class="form-control" type="search" placeholder="Search image names..." value="${escapeHtml(imageNameSearch)}" oninput="setImageNameSearch(this.value)">
+      <button class="btn btn-outline-secondary btn-sm" onclick="imageNameSearch='';imagesPage=0;renderImagesEditor()">Clear</button>
+    </div>
+  `;
   updateNavState();
 }
 
 function setImageNameSearch(val) {
   imageNameSearch = val;
+  imagesPage = 0;
   renderImagesEditor();
   const input = document.querySelector('#imageFilters input[type="search"]');
   if (input) {
@@ -171,11 +207,24 @@ function duplicateImage(index) {
   const images = loadImages();
   if (index < 0 || index >= images.length) return;
   const src = images[index];
-  const baseName = src.name.replace(/\s*\(\d+\)\s*$/, "").trim();
-  let n = 1;
+
+  // Strip old parenthetical suffix like " (1)" then check for trailing number
+  let baseName = src.name.replace(/\s*\(\d+\)\s*$/, "").trim();
+  const trailingNum = baseName.match(/^(.*?)\s+(\d+)$/);
+
   const existingNames = new Set(images.map(i => i.name));
-  while (existingNames.has(`${baseName} (${n})`)) n++;
-  const newName = `${baseName} (${n})`;
+  let newName;
+
+  if (trailingNum) {
+    const namePart = trailingNum[1];
+    let num = parseInt(trailingNum[2], 10);
+    while (existingNames.has(`${namePart} ${num + 1}`)) num++;
+    newName = `${namePart} ${num + 1}`;
+  } else {
+    let n = 2;
+    while (existingNames.has(`${baseName} ${n}`)) n++;
+    newName = `${baseName} ${n}`;
+  }
 
   const copy = JSON.parse(JSON.stringify(src));
   copy.name = newName;
@@ -223,7 +272,7 @@ function editImageColor(index, attr, value) {
   img.lineColor = attr === 'stroke' ? value : img.lineColor;
   img.fillColor = attr === 'fill' ? value : img.fillColor;
   saveImages(images);
-  const editedCard = document.querySelector('#imagesList .card.card-edited');
+  const editedCard = document.querySelector('#singleImageEditor .card.card-edited');
   if (editedCard) {
     const imgEl = editedCard.querySelector('img.date-img');
     if (imgEl) imgEl.src = img.data;
@@ -245,7 +294,7 @@ function editImageFillNone(index, checked) {
     img.fillColor = restore;
   }
   saveImages(images);
-  const editedCard = document.querySelector('#imagesList .card.card-edited');
+  const editedCard = document.querySelector('#singleImageEditor .card.card-edited');
   if (editedCard) {
     const imgEl = editedCard.querySelector('img.date-img');
     if (imgEl) imgEl.src = img.data;
@@ -267,7 +316,29 @@ function editImageStrokeNone(index, checked) {
     img.lineColor = restore;
   }
   saveImages(images);
-  const editedCard = document.querySelector('#imagesList .card.card-edited');
+  const editedCard = document.querySelector('#singleImageEditor .card.card-edited');
+  if (editedCard) {
+    const imgEl = editedCard.querySelector('img.date-img');
+    if (imgEl) imgEl.src = img.data;
+  }
+}
+
+function editImageStrokeWidth(index, value) {
+  const images = loadImages();
+  if (index < 0 || index >= images.length) return;
+  const img = images[index];
+  if (!img.data || !img.data.startsWith("data:image/svg+xml,")) return;
+  const svgPart = img.data.substring("data:image/svg+xml,".length);
+  const decoded = decodeURIComponent(svgPart);
+  if (/\bstroke-width\s*=/i.test(decoded)) {
+    img.data = updateSvgColor(img.data, "stroke-width", value || "2");
+  } else {
+    const updated = decoded.replace(/^<svg/i, `<svg stroke-width="${value || "2"}"`);
+    img.data = "data:image/svg+xml," + encodeURIComponent(updated);
+  }
+  img.strokeWidth = value;
+  saveImages(images);
+  const editedCard = document.querySelector('#singleImageEditor .card.card-edited');
   if (editedCard) {
     const imgEl = editedCard.querySelector('img.date-img');
     if (imgEl) imgEl.src = img.data;
@@ -329,20 +400,19 @@ function addNewImage() {
   editingImageIndex = images.length - 1;
   isNewImage = true;
   renderImagesEditor();
-  const cards = document.querySelectorAll("#imagesList .card");
-  const lastCard = cards[cards.length - 1];
-  if (lastCard) lastCard.scrollIntoView({ behavior: "smooth", block: "center" });
+  const editorEl = document.getElementById("imagesEditor");
+  if (editorEl) editorEl.scrollIntoView({ behavior: "smooth", block: "start" });
   checkDuplicateName();
 }
 
 function checkDuplicateName() {
   const images = loadImages();
-  const input = document.querySelector('#imagesList .card-edited input.form-control');
+  const input = document.querySelector('#singleImageEditor .card-edited input.form-control');
   if (!input) return;
   const trimmed = input.value.trim();
   const hasDuplicate = images.some((img, i) => i !== editingImageIndex && img.name === trimmed);
   const errorEl = document.getElementById("imageNameError");
-  const okBtn = document.querySelector('#imagesList .btn-success.editor-btn');
+  const okBtn = document.querySelector('#singleImageEditor .btn-success.editor-btn');
   if (errorEl) errorEl.style.display = hasDuplicate ? "block" : "none";
   if (okBtn) okBtn.disabled = hasDuplicate;
 }

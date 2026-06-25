@@ -8,27 +8,25 @@ function renderCategoriesEditor() {
   const addTile = document.getElementById("addCategoryTile");
   const topTile = document.getElementById("addCategoryTileTop");
   const filterEl = document.getElementById("categoryFilters");
+  const singleEditor = document.getElementById("singleCategoryEditor");
 
   list.innerHTML = "";
   addTile.innerHTML = "";
   topTile.innerHTML = "";
   filterEl.innerHTML = "";
+  singleEditor.innerHTML = "";
 
   const categories = loadCategories();
   const images = loadImages();
 
-  const filtered = categories.filter((c, index) => {
-    if (editingCategoryIndex === index) return true;
-    if (categoryNameSearch && !c.name.toLowerCase().includes(categoryNameSearch.toLowerCase())) return false;
-    return true;
-  }).sort((a, b) => a.name.localeCompare(b.name));
+  if (editingCategoryIndex >= 0) {
+    list.classList.add("d-none");
+    addTile.classList.add("d-none");
+    topTile.classList.add("d-none");
+    filterEl.classList.add("d-none");
+    singleEditor.classList.remove("d-none");
 
-  filtered.forEach((c, index) => {
-    const realIndex = categories.indexOf(c);
-    const catData = (editingCategoryIndex === realIndex && editCategoryBuffer) ? editCategoryBuffer : c;
-
-    const card = document.createElement("div");
-    card.className = "card p-3 mb-3" + (realIndex === editingCategoryIndex ? " card-edited" : "");
+    const catData = editCategoryBuffer || categories[editingCategoryIndex];
 
     let imageData = "";
     if (catData.image) {
@@ -36,11 +34,16 @@ function renderCategoriesEditor() {
       if (found) imageData = found.data;
     }
 
-    if (editingCategoryIndex === realIndex) {
-      const imgPreviewMap = {};
-      images.forEach(img => { imgPreviewMap[img.name] = img.data; });
+    const imgPreviewMap = {};
+    images.forEach(img => { imgPreviewMap[img.name] = img.data; });
 
-      card.innerHTML = `
+    const heading = isNewCategory ? "Add Category" : "Edit Category";
+    singleEditor.innerHTML = `
+      <div class="d-flex align-items-center mb-3">
+        <h3 class="mb-0">${heading}</h3>
+        <button class="btn btn-outline-secondary ms-auto" onclick="cancelCategoryEditing()">Back</button>
+      </div>
+      <div class="card p-3 card-edited">
         <div class="d-flex gap-1">
           <div class="flex-shrink-0 text-center me-3">
             ${imageData ? `<img src="${imageData}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
@@ -70,45 +73,64 @@ function renderCategoriesEditor() {
             </div>
           </div>
         </div>
-      `;
-    } else {
-      card.innerHTML = `
-        <div class="d-flex gap-1">
-          <div class="flex-shrink-0 text-center me-3">
-            ${imageData ? `<img src="${imageData}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
-          </div>
-          <div class="flex-fill" style="min-width:0">
-            <div class="fw-bold editor-title mb-2">${escapeHtml(catData.name)}</div>
-            <div class="d-flex gap-2">
-              <button class="btn btn-primary editor-btn" onclick="editCategory(${realIndex})" ${editingCategoryIndex >= 0 ? 'disabled' : ''}>Edit</button>
-              <button class="btn btn-danger editor-btn ms-auto" onclick="deleteCategory(${realIndex})" ${editingCategoryIndex >= 0 ? 'disabled' : ''}>Delete</button>
-            </div>
-          </div>
-        </div>
-      `;
+      </div>
+    `;
+
+    updateNavState();
+    return;
+  }
+
+  list.classList.remove("d-none");
+  addTile.classList.remove("d-none");
+  topTile.classList.remove("d-none");
+  filterEl.classList.remove("d-none");
+  singleEditor.classList.add("d-none");
+
+  const filtered = categories.filter((c, index) => {
+    if (categoryNameSearch && !c.name.toLowerCase().includes(categoryNameSearch.toLowerCase())) return false;
+    return true;
+  }).sort((a, b) => a.name.localeCompare(b.name));
+
+  filtered.forEach((c) => {
+    let imageData = "";
+    if (c.image) {
+      const found = images.find(img => img.name === c.image);
+      if (found) imageData = found.data;
     }
 
+    const card = document.createElement("div");
+    card.className = "card p-3 mb-3";
+    card.innerHTML = `
+      <div class="d-flex gap-1">
+        <div class="flex-shrink-0 text-center me-3">
+          ${imageData ? `<img src="${imageData}" class="date-img">` : `<div class="text-secondary date-img d-flex align-items-center justify-content-center">No image</div>`}
+        </div>
+        <div class="flex-fill" style="min-width:0">
+          <div class="fw-bold editor-title mb-2">${escapeHtml(c.name)}</div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary editor-btn" onclick="editCategory(${categories.indexOf(c)})">Edit</button>
+            <button class="btn btn-danger editor-btn ms-auto" onclick="deleteCategory(${categories.indexOf(c)})">Delete</button>
+          </div>
+        </div>
+      </div>
+    `;
     list.appendChild(card);
   });
 
   topTile.innerHTML = `
     <div class="d-flex gap-2">
-      <button class="btn btn-primary editor-btn btn-wide" onclick="addNewCategory()" ${editingCategoryIndex >= 0 ? 'disabled' : ''}>Add Category</button>
-      <button class="btn btn-success editor-btn btn-wide ms-auto" onclick="closeCategoriesEditor()" ${editingCategoryIndex >= 0 ? 'disabled' : ''}>Done</button>
+      <button class="btn btn-primary editor-btn btn-wide" onclick="addNewCategory()">Add Category</button>
+      <button class="btn btn-success editor-btn btn-wide ms-auto" onclick="closeCategoriesEditor()">Done</button>
     </div>
   `;
 
-  if (editingCategoryIndex >= 0) {
-    filterEl.classList.add("d-none");
-  } else {
-    filterEl.classList.remove("d-none");
-    filterEl.innerHTML = `
-      <div class="d-flex gap-2 align-items-center">
-        <input class="form-control" type="search" placeholder="Search category names..." value="${escapeHtml(categoryNameSearch)}" oninput="setCategoryNameSearch(this.value)">
-        <button class="btn btn-outline-secondary btn-sm" onclick="categoryNameSearch='';renderCategoriesEditor()">Clear</button>
-      </div>
-    `;
-  }
+  filterEl.classList.remove("d-none");
+  filterEl.innerHTML = `
+    <div class="d-flex gap-2 align-items-center">
+      <input class="form-control" type="search" placeholder="Search category names..." value="${escapeHtml(categoryNameSearch)}" oninput="setCategoryNameSearch(this.value)">
+      <button class="btn btn-outline-secondary btn-sm" onclick="categoryNameSearch='';renderCategoriesEditor()">Clear</button>
+    </div>
+  `;
   updateNavState();
 }
 
@@ -133,12 +155,12 @@ function editCategory(index) {
 
 function checkDuplicateCategoryName() {
   const categories = loadCategories();
-  const input = document.querySelector('#categoriesList .card-edited input.form-control');
+  const input = document.querySelector('#singleCategoryEditor .card-edited input.form-control');
   if (!input) return;
   const trimmed = input.value.trim();
   const hasDuplicate = categories.some((c, i) => i !== editingCategoryIndex && c.name === trimmed);
   const errorEl = document.getElementById("categoryNameError");
-  const okBtn = document.querySelector('#categoriesList .btn-success.editor-btn');
+  const okBtn = document.querySelector('#singleCategoryEditor .btn-success.editor-btn');
   if (errorEl) errorEl.style.display = hasDuplicate ? "block" : "none";
   if (okBtn) okBtn.disabled = hasDuplicate;
 }
@@ -206,8 +228,7 @@ function addNewCategory() {
   editingCategoryIndex = categories.length - 1;
   isNewCategory = true;
   renderCategoriesEditor();
-  const cards = document.querySelectorAll("#categoriesList .card");
-  const lastCard = cards[cards.length - 1];
-  if (lastCard) lastCard.scrollIntoView({ behavior: "smooth", block: "center" });
+  const editorEl = document.getElementById("categoriesEditor");
+  if (editorEl) editorEl.scrollIntoView({ behavior: "smooth", block: "start" });
   checkDuplicateCategoryName();
 }
