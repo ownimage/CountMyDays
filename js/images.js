@@ -111,21 +111,43 @@ function renderImagesEditor() {
               <button class="btn btn-secondary editor-btn" onclick="cancelImageEdit()">Cancel</button>
             </div>
         </div>
-      `;
-    } else {
-      const colors = getImageColors(img.data);
-      card.innerHTML = `
-        <div class="row align-items-center">
-          <div class="col-auto" style="width:130px;flex:0 0 auto">
-            <img src="${img.data}" class="date-img">
-          </div>
-          <div class="col">
-            <div class="mb-1">${escapeHtml(img.name)}</div>
-            <div class="d-flex gap-2 align-items-center flex-wrap">
-              <button class="btn btn-primary editor-btn" onclick="startEditImage(${realIndex})" ${editingImageIndex >= 0 ? 'disabled' : ''}>Edit</button>
-              ${colors.line ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.line === 'none' ? 'transparent' : colors.line}"></span>Line${colors.line === 'none' ? ': none' : ''}</span>` : ''}
-              ${colors.fill ? `<span class="d-flex align-items-center gap-1"><span class="color-swatch" style="background:${colors.fill === 'none' ? 'transparent' : colors.fill}"></span>Fill${colors.fill === 'none' ? ': none' : ''}</span>` : ''}
-            </div>
+      </div>
+    `;
+
+    updateNavState();
+    return;
+  }
+
+  list.classList.remove("d-none");
+  topTile.classList.remove("d-none");
+  filterEl.classList.remove("d-none");
+  singleEditor.classList.add("d-none");
+
+  const filtered = images.filter((img, index) => {
+    if (imageNameSearch && !img.name.toLowerCase().includes(imageNameSearch.toLowerCase())) return false;
+    return true;
+  }).sort((a, b) => a.name.localeCompare(b.name));
+
+  imagesTotalPages = Math.ceil(filtered.length / IMAGES_PAGE_SIZE) || 1;
+  if (imagesPage >= imagesTotalPages) imagesPage = imagesTotalPages - 1;
+  const start = imagesPage * IMAGES_PAGE_SIZE;
+  const pageItems = filtered.slice(start, start + IMAGES_PAGE_SIZE);
+
+  pageItems.forEach((img) => {
+    const card = document.createElement("div");
+    card.className = "card p-3 mb-3";
+    const colors = getImageColors(img.data);
+    card.innerHTML = `
+      <div class="row align-items-center">
+        <div class="col-auto" style="width:130px;flex:0 0 auto">
+          <img src="${img.data}" class="date-img">
+        </div>
+        <div class="col">
+          <div class="mb-1">${escapeHtml(img.name)}</div>
+          <div class="d-flex gap-2 align-items-center flex-wrap">
+            <button class="btn btn-primary editor-btn" onclick="startEditImage(${images.indexOf(img)})">Edit</button>
+            <button class="btn btn-info editor-btn mx-auto" onclick="duplicateImage(${images.indexOf(img)})">Duplicate</button>
+            <button class="btn btn-danger editor-btn" onclick="confirmDeleteImage(${images.indexOf(img)})">Delete</button>
           </div>
         </div>
       </div>
