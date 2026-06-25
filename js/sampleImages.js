@@ -1,4 +1,4 @@
-﻿let defaultImages = [];
+let defaultImages = [];
 
 function loadSampleImages() {
   const xhr = new XMLHttpRequest();
