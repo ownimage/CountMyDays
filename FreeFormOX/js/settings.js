@@ -33,7 +33,12 @@ const themeConfig = (() => {
 function applyTheme(name) {
   const config = themeConfig[name] || themeConfig.solar;
   const link = document.getElementById("bootstrap-theme-css");
-  if (link) link.href = config.css;
+  if (link) {
+    link.onerror = () => {
+      if (name !== "solar") applyTheme("solar");
+    };
+    link.href = config.css;
+  }
   document.documentElement.setAttribute("data-bs-theme", config.bsTheme);
   localStorage.setItem("ffox_theme", name);
 }
@@ -92,16 +97,18 @@ function openSettings() {
   const autoHideCb = document.getElementById("autoHideMenu");
   if (autoHideCb) autoHideCb.checked = autoHide;
 
-  const qrContainer = document.getElementById("shareQrCode");
-  if (qrContainer) {
-    qrContainer.innerHTML = "";
-    new QRCode(qrContainer, {
-      text: "https://ownimage.github.io/FreeFormOX",
-      width: 120,
-      height: 120,
-      margin: 8
-    });
-  }
+  try {
+    const qrContainer = document.getElementById("shareQrCode");
+    if (qrContainer && typeof QRCode !== "undefined") {
+      qrContainer.innerHTML = "";
+      new QRCode(qrContainer, {
+        text: "https://ownimage.github.io/FreeFormOX",
+        width: 120,
+        height: 120,
+        margin: 8
+      });
+    }
+  } catch (_) {}
 }
 
 function closeSettings() {

@@ -41,3 +41,61 @@ body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
   min-width: 220px;
   touch-action: manipulation;
 }
+
+#mainContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 56px);
+  box-sizing: border-box;
+}
+#turnIndicator {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+body.auto-hide-menu #mainContent {
+  min-height: calc(100vh - 64px);
+}
+body.auto-hide-menu #turnIndicator {
+  margin-top: 0.5rem;
+}
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  padding: 6px;
+  width: min(calc(100vw - 3rem), calc(100dvh - 90px));
+  aspect-ratio: 1;
+  box-sizing: border-box;
+}
+.grid-container button {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  touch-action: manipulation;
+  padding: 0;
+  border: 2px solid;
+}
+.cell-available {
+  background: var(--bs-body-bg);
+  border-color: var(--bs-primary);
+  color: var(--bs-primary);
+}
+.cell-available:active {
+  background: var(--bs-primary);
+  color: var(--bs-primary-text);
+}
+.cell-placed {
+  background: rgba(var(--bs-info-rgb), 0.25);
+  border-color: var(--bs-info);
+  color: var(--bs-info);
+}
+.cell-oob {
+  background: rgba(var(--bs-secondary-rgb), 0.15);
+  border-color: var(--bs-secondary);
+  color: var(--bs-secondary);
+  cursor: not-allowed;
+}
