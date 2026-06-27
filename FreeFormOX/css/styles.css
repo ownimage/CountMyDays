@@ -1,0 +1,43 @@
+body.auto-hide-menu #mainNav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030;
+  background: var(--bs-body-bg);
+  transition: transform 0.3s ease;
+}
+body.auto-hide-menu #mainNav.nav-hidden {
+  transform: translateY(-100%);
+}
+body.auto-hide-menu .container-fluid {
+  padding-top: 60px;
+  transition: padding-top 0.3s ease;
+}
+body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
+  padding-top: 0.5rem;
+}
+#mainNav {
+  padding-top: env(safe-area-inset-top, 0);
+}
+body.auto-hide-menu .container-fluid {
+  padding-top: calc(60px + env(safe-area-inset-top, 0));
+}
+body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
+  padding-top: calc(0.5rem + env(safe-area-inset-top, 0));
+}
+.build-number {
+  opacity: 0.6;
+}
+#settingsPage {
+  padding-top: 20px;
+}
+.editor-btn {
+  min-width: 100px;
+  padding: 0.5rem 1rem;
+  touch-action: manipulation;
+}
+.btn-wide {
+  min-width: 220px;
+  touch-action: manipulation;
+}
