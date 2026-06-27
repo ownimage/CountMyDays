@@ -80,9 +80,13 @@ function checkDraw() {
   return true;
 }
 
+function playerIcon(symbol) {
+  return '<span style="display:inline-flex;align-items:center;justify-content:center;width:1.6rem;height:1.6rem">' + SVG[symbol] + '</span>';
+}
+
 function endGame(msg, line) {
   gameOver = true;
-  document.getElementById("turnIndicator").textContent = msg;
+  document.getElementById("turnIndicator").innerHTML = msg;
   document.getElementById("newGameBtn").classList.remove("d-none");
   if (line) {
     const cells = document.getElementById("buttonGrid").children;
@@ -109,7 +113,7 @@ function resetGame() {
       btn.onclick = () => handleClick(btn);
     }
   }
-  document.getElementById("turnIndicator").textContent = getPlayerName("X") + " to go";
+  document.getElementById("turnIndicator").innerHTML = playerIcon("X") + " " + getPlayerName("X") + " to go";
   document.getElementById("newGameBtn").classList.add("d-none");
   currentPlayer = "X";
   gameOver = false;
@@ -142,11 +146,11 @@ function handleClick(btn) {
   btn.disabled = true;
   btn.className = "cell-placed";
   currentPlayer = currentPlayer === "X" ? "O" : "X";
-  document.getElementById("turnIndicator").textContent = getPlayerName(currentPlayer) + " to go";
+  document.getElementById("turnIndicator").innerHTML = playerIcon(currentPlayer) + " " + getPlayerName(currentPlayer) + " to go";
   updateAvailability();
   const winning = checkWin(player);
   if (winning) {
-    endGame(getPlayerName(player) + " wins!", winning);
+    endGame(playerIcon(player) + " " + getPlayerName(player) + " wins!", winning);
   } else if (checkDraw()) {
     endGame("Draw!");
   }
@@ -154,7 +158,7 @@ function handleClick(btn) {
 
 document.addEventListener("DOMContentLoaded", () => {
   buildGrid();
-  document.getElementById("turnIndicator").textContent = getPlayerName("X") + " to go";
+  document.getElementById("turnIndicator").innerHTML = playerIcon("X") + " " + getPlayerName("X") + " to go";
   if (screen.orientation && typeof screen.orientation.lock === "function") {
     screen.orientation.lock("portrait").catch(() => {});
   }
