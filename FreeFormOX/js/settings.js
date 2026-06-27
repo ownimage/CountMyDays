@@ -97,6 +97,11 @@ function openSettings() {
   const autoHideCb = document.getElementById("autoHideMenu");
   if (autoHideCb) autoHideCb.checked = autoHide;
 
+  ["x", "o"].forEach(s => {
+    const el = document.getElementById(s + "Name");
+    if (el) el.value = localStorage.getItem("ffox_" + s + "Name") || "";
+  });
+
   try {
     const qrContainer = document.getElementById("shareQrCode");
     if (qrContainer && typeof QRCode !== "undefined") {
@@ -109,6 +114,10 @@ function openSettings() {
       });
     }
   } catch (_) {}
+}
+
+function saveName(symbol, value) {
+  localStorage.setItem("ffox_" + symbol + "Name", value);
 }
 
 function closeSettings() {

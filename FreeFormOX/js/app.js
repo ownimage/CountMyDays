@@ -1,8 +1,17 @@
 let currentPlayer = "X";
 let gameOver = false;
 
+const SVG = {
+  X: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="17" y1="20" x2="83" y2="80" stroke="#d63031" stroke-width="15" stroke-linecap="round"/><line x1="83" y1="20" x2="17" y2="80" stroke="#d63031" stroke-width="15" stroke-linecap="round"/></svg>',
+  O: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="37" ry="35" fill="none" stroke="#0984e3" stroke-width="12"/><circle cx="33" cy="42" r="4.5" fill="#0984e3"/><circle cx="67" cy="42" r="4.5" fill="#0984e3"/><path d="M 36 58 Q 50 72 64 58" fill="none" stroke="#0984e3" stroke-width="3.5" stroke-linecap="round"/></svg>'
+};
+
 function rc(i) {
   return { row: Math.floor((i - 1) / 5), col: (i - 1) % 5 };
+}
+
+function getPlayerName(symbol) {
+  return localStorage.getItem("ffox_" + symbol.toLowerCase() + "Name") || symbol;
 }
 
 function getPlaced() {
@@ -31,7 +40,7 @@ function updateAvailability() {
     if (btn.disabled) continue;
     if (!fits3x3([...placed, +btn.dataset.index])) {
       btn.disabled = true;
-      btn.textContent = "";
+      btn.innerHTML = "";
       btn.className = "cell-unavailable";
     }
   }
@@ -39,26 +48,18 @@ function updateAvailability() {
 
 function buildLines() {
   const lines = [];
-  for (let r = 0; r < 5; r++) {
-    for (let c = 0; c <= 2; c++) {
+  for (let r = 0; r < 5; r++)
+    for (let c = 0; c <= 2; c++)
       lines.push([r * 5 + c + 1, r * 5 + c + 2, r * 5 + c + 3]);
-    }
-  }
-  for (let c = 0; c < 5; c++) {
-    for (let r = 0; r <= 2; r++) {
+  for (let c = 0; c < 5; c++)
+    for (let r = 0; r <= 2; r++)
       lines.push([r * 5 + c + 1, (r + 1) * 5 + c + 1, (r + 2) * 5 + c + 1]);
-    }
-  }
-  for (let r = 0; r <= 2; r++) {
-    for (let c = 0; c <= 2; c++) {
+  for (let r = 0; r <= 2; r++)
+    for (let c = 0; c <= 2; c++)
       lines.push([r * 5 + c + 1, (r + 1) * 5 + c + 2, (r + 2) * 5 + c + 3]);
-    }
-  }
-  for (let r = 0; r <= 2; r++) {
-    for (let c = 2; c < 5; c++) {
+  for (let r = 0; r <= 2; r++)
+    for (let c = 2; c < 5; c++)
       lines.push([r * 5 + c + 1, (r + 1) * 5 + c, (r + 2) * 5 + c - 1]);
-    }
-  }
   return lines;
 }
 const winLines = buildLines();
@@ -66,9 +67,7 @@ const winLines = buildLines();
 function checkWin(player) {
   const cells = document.getElementById("buttonGrid").children;
   for (const line of winLines) {
-    if (line.every(i => cells[i - 1].textContent === player)) {
-      return line;
-    }
+    if (line.every(i => cells[i - 1].dataset.player === player)) return line;
   }
   return null;
 }
@@ -87,9 +86,7 @@ function endGame(msg, line) {
   document.getElementById("newGameBtn").classList.remove("d-none");
   if (line) {
     const cells = document.getElementById("buttonGrid").children;
-    for (const i of line) {
-      cells[i - 1].classList.add("cell-winner");
-    }
+    for (const i of line) cells[i - 1].classList.add("cell-winner");
   }
 }
 
@@ -100,17 +97,19 @@ function resetGame() {
     const idx = i + 1;
     btn.classList.remove("cell-winner");
     if (idx === 13) {
-      btn.textContent = "O";
+      btn.innerHTML = SVG.O;
+      btn.dataset.player = "O";
       btn.disabled = true;
       btn.className = "cell-oob";
     } else {
-      btn.textContent = "";
+      btn.innerHTML = "";
+      delete btn.dataset.player;
       btn.disabled = false;
       btn.className = "cell-available";
       btn.onclick = () => handleClick(btn);
     }
   }
-  document.getElementById("turnIndicator").textContent = "X to go";
+  document.getElementById("turnIndicator").textContent = getPlayerName("X") + " to go";
   document.getElementById("newGameBtn").classList.add("d-none");
   currentPlayer = "X";
   gameOver = false;
@@ -122,11 +121,12 @@ function buildGrid() {
     const btn = document.createElement("button");
     btn.dataset.index = i;
     if (i === 13) {
-      btn.textContent = "O";
+      btn.innerHTML = SVG.O;
+      btn.dataset.player = "O";
       btn.disabled = true;
       btn.className = "cell-oob";
     } else {
-      btn.textContent = "";
+      btn.innerHTML = "";
       btn.className = "cell-available";
       btn.onclick = () => handleClick(btn);
     }
@@ -137,15 +137,16 @@ function buildGrid() {
 function handleClick(btn) {
   if (gameOver) return;
   const player = currentPlayer;
-  btn.textContent = player;
+  btn.innerHTML = SVG[player];
+  btn.dataset.player = player;
   btn.disabled = true;
   btn.className = "cell-placed";
   currentPlayer = currentPlayer === "X" ? "O" : "X";
-  document.getElementById("turnIndicator").textContent = currentPlayer + " to go";
+  document.getElementById("turnIndicator").textContent = getPlayerName(currentPlayer) + " to go";
   updateAvailability();
   const winning = checkWin(player);
   if (winning) {
-    endGame(player + " wins!", winning);
+    endGame(getPlayerName(player) + " wins!", winning);
   } else if (checkDraw()) {
     endGame("Draw!");
   }
@@ -153,6 +154,7 @@ function handleClick(btn) {
 
 document.addEventListener("DOMContentLoaded", () => {
   buildGrid();
+  document.getElementById("turnIndicator").textContent = getPlayerName("X") + " to go";
   if (screen.orientation && typeof screen.orientation.lock === "function") {
     screen.orientation.lock("portrait").catch(() => {});
   }

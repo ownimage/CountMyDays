@@ -74,11 +74,18 @@ body.auto-hide-menu #turnIndicator {
 .grid-container button {
   aspect-ratio: 1;
   border-radius: 8px;
-  font-size: 1.2rem;
-  font-weight: 600;
   touch-action: manipulation;
   padding: 0;
   border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cell-svg {
+  width: 60%;
+  height: 60%;
+  display: block;
+  pointer-events: none;
 }
 .cell-available {
   background: var(--bs-body-bg);
@@ -111,5 +118,4 @@ body.auto-hide-menu #turnIndicator {
 .cell-winner {
   background: rgba(var(--bs-warning-rgb), 0.4) !important;
   border-color: var(--bs-warning) !important;
-  color: var(--bs-warning) !important;
 }
