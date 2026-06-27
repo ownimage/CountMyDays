@@ -1,30 +1,5 @@
-body.auto-hide-menu #mainNav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1030;
-  background: var(--bs-body-bg);
-  transition: transform 0.3s ease;
-}
-body.auto-hide-menu #mainNav.nav-hidden {
-  transform: translateY(-100%);
-}
-body.auto-hide-menu .container-fluid {
-  padding-top: 60px;
-  transition: padding-top 0.3s ease;
-}
-body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
-  padding-top: 0.5rem;
-}
 #mainNav {
   padding-top: env(safe-area-inset-top, 0);
-}
-body.auto-hide-menu .container-fluid {
-  padding-top: calc(60px + env(safe-area-inset-top, 0));
-}
-body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
-  padding-top: calc(0.5rem + env(safe-area-inset-top, 0));
 }
 .build-number {
   opacity: 0.6;
@@ -56,12 +31,6 @@ body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
   margin-bottom: 0.5rem;
   user-select: none;
 }
-body.auto-hide-menu #mainContent {
-  min-height: calc(100vh - 64px);
-}
-body.auto-hide-menu #turnIndicator {
-  margin-top: 0.5rem;
-}
 .grid-container {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -70,9 +39,6 @@ body.auto-hide-menu #turnIndicator {
   width: min(calc(100vw - 3rem), calc(100dvh - 200px));
   aspect-ratio: 1;
   box-sizing: border-box;
-}
-body.auto-hide-menu .grid-container {
-  width: min(calc(100vw - 3rem), calc(100dvh - 260px));
 }
 .grid-container button {
   aspect-ratio: 1;

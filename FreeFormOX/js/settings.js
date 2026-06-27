@@ -47,44 +47,6 @@ function changeTheme(name) {
   applyTheme(name);
 }
 
-function changeAutoHideMenu(enabled) {
-  localStorage.setItem("ffox_autoHideMenu", enabled);
-  document.body.classList.toggle("auto-hide-menu", enabled);
-  if (enabled) {
-    resetAutoHideTimer();
-  } else {
-    clearTimeout(autoHideTimer);
-    document.getElementById("mainNav").classList.remove("nav-hidden");
-  }
-}
-
-let autoHideTimer = null;
-let autoHideCooldown = false;
-
-function showNav() {
-  const nav = document.getElementById("mainNav");
-  if (nav) nav.classList.remove("nav-hidden");
-}
-
-function hideNav() {
-  const nav = document.getElementById("mainNav");
-  if (!nav) return;
-  if (document.getElementById("settingsPage").classList.contains("d-none")) {
-    nav.classList.add("nav-hidden");
-    autoHideCooldown = true;
-    setTimeout(() => { autoHideCooldown = false; }, 600);
-  }
-}
-
-function resetAutoHideTimer() {
-  if (autoHideCooldown) return;
-  const enabled = localStorage.getItem("ffox_autoHideMenu") === "true";
-  if (!enabled) return;
-  showNav();
-  clearTimeout(autoHideTimer);
-  autoHideTimer = setTimeout(hideNav, 4000);
-}
-
 function openSettings() {
   document.getElementById("mainContent").classList.add("d-none");
   document.getElementById("settingsPage").classList.remove("d-none");
@@ -92,10 +54,6 @@ function openSettings() {
   const savedTheme = localStorage.getItem("ffox_theme") || "solar";
   const themeSel = document.getElementById("themeSelector");
   if (themeSel) themeSel.value = savedTheme;
-
-  const autoHide = localStorage.getItem("ffox_autoHideMenu") === "true";
-  const autoHideCb = document.getElementById("autoHideMenu");
-  if (autoHideCb) autoHideCb.checked = autoHide;
 
   ["x", "o"].forEach(s => {
     const el = document.getElementById(s + "Name");
@@ -131,14 +89,4 @@ document.addEventListener("DOMContentLoaded", () => {
   const savedTheme = localStorage.getItem("ffox_theme") || "solar";
   applyTheme(savedTheme);
 
-  const autoHide = localStorage.getItem("ffox_autoHideMenu") === "true";
-  if (autoHide) {
-    document.body.classList.add("auto-hide-menu");
-    resetAutoHideTimer();
-    ["pointerdown", "pointerup", "touchstart", "click", "mousedown"].forEach(evt => {
-      document.addEventListener(evt, resetAutoHideTimer, { passive: true });
-      document.body.addEventListener(evt, resetAutoHideTimer, { passive: true });
-    });
-    window.addEventListener("scroll", resetAutoHideTimer, { passive: true });
-  }
 });
