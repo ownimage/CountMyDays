@@ -1,4 +1,5 @@
 let currentPlayer = "X";
+let gameOver = false;
 
 function rc(i) {
   return { row: Math.floor((i - 1) / 5), col: (i - 1) % 5 };
@@ -72,14 +73,24 @@ function checkWin(player) {
   return null;
 }
 
-function showWinner(player) {
-  document.getElementById("winnerMessage").textContent = player + " wins!";
-  new bootstrap.Modal(document.getElementById("winnerModal")).show();
+function checkDraw() {
+  const cells = document.getElementById("buttonGrid").children;
+  for (const btn of cells) {
+    if (btn.className === "cell-available") return false;
+  }
+  return true;
 }
 
-function closeWinner() {
-  bootstrap.Modal.getInstance(document.getElementById("winnerModal")).hide();
-  resetGame();
+function endGame(msg, line) {
+  gameOver = true;
+  document.getElementById("turnIndicator").textContent = msg;
+  document.getElementById("newGameBtn").classList.remove("d-none");
+  if (line) {
+    const cells = document.getElementById("buttonGrid").children;
+    for (const i of line) {
+      cells[i - 1].classList.add("cell-winner");
+    }
+  }
 }
 
 function resetGame() {
@@ -87,19 +98,22 @@ function resetGame() {
   for (let i = 0; i < cells.length; i++) {
     const btn = cells[i];
     const idx = i + 1;
+    btn.classList.remove("cell-winner");
     if (idx === 13) {
       btn.textContent = "O";
       btn.disabled = true;
       btn.className = "cell-oob";
     } else {
-      btn.textContent = idx;
+      btn.textContent = "";
       btn.disabled = false;
       btn.className = "cell-available";
       btn.onclick = () => handleClick(btn);
     }
   }
-  currentPlayer = "X";
   document.getElementById("turnIndicator").textContent = "X to go";
+  document.getElementById("newGameBtn").classList.add("d-none");
+  currentPlayer = "X";
+  gameOver = false;
 }
 
 function buildGrid() {
@@ -112,7 +126,7 @@ function buildGrid() {
       btn.disabled = true;
       btn.className = "cell-oob";
     } else {
-      btn.textContent = i;
+      btn.textContent = "";
       btn.className = "cell-available";
       btn.onclick = () => handleClick(btn);
     }
@@ -121,6 +135,7 @@ function buildGrid() {
 }
 
 function handleClick(btn) {
+  if (gameOver) return;
   const player = currentPlayer;
   btn.textContent = player;
   btn.disabled = true;
@@ -128,8 +143,11 @@ function handleClick(btn) {
   currentPlayer = currentPlayer === "X" ? "O" : "X";
   document.getElementById("turnIndicator").textContent = currentPlayer + " to go";
   updateAvailability();
-  if (checkWin(player)) {
-    showWinner(player);
+  const winning = checkWin(player);
+  if (winning) {
+    endGame(player + " wins!", winning);
+  } else if (checkDraw()) {
+    endGame("Draw!");
   }
 }
 

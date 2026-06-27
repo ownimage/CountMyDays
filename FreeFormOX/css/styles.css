@@ -54,6 +54,7 @@ body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
   font-size: 1.8rem;
   font-weight: 800;
   margin-bottom: 0.5rem;
+  user-select: none;
 }
 body.auto-hide-menu #mainContent {
   min-height: calc(100vh - 64px);
@@ -94,14 +95,21 @@ body.auto-hide-menu #turnIndicator {
   color: var(--bs-info);
 }
 .cell-oob {
-  background: rgba(var(--bs-secondary-rgb), 0.15);
-  border-color: var(--bs-secondary);
-  color: var(--bs-secondary);
+  background: rgba(var(--bs-info-rgb), 0.25);
+  border-color: var(--bs-info);
+  color: var(--bs-info);
   cursor: not-allowed;
+  font-size: 1.5rem;
+  font-weight: 800;
 }
 .cell-unavailable {
   background: rgba(var(--bs-danger-rgb), 0.15);
   border-color: var(--bs-danger);
   color: var(--bs-danger);
   cursor: not-allowed;
+}
+.cell-winner {
+  background: rgba(var(--bs-warning-rgb), 0.4) !important;
+  border-color: var(--bs-warning) !important;
+  color: var(--bs-warning) !important;
 }
