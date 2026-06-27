@@ -118,13 +118,21 @@ function refreshPieces() {
   }
   if (!gameOver) {
     document.getElementById("turnIndicator").innerHTML = playerIcon(currentPlayer) + " " + getPlayerName(currentPlayer) + " to go";
+  } else {
+    for (const p of ["X", "O"]) {
+      const w = checkWin(p);
+      if (w) {
+        document.getElementById("turnIndicator").innerHTML = playerIcon(p) + " " + getPlayerName(p) + " wins!";
+        break;
+      }
+    }
   }
 }
 
 function endGame(msg, line) {
   gameOver = true;
   document.getElementById("turnIndicator").innerHTML = msg;
-  document.getElementById("newGameBtn").classList.remove("d-none");
+  document.getElementById("gameBtns").classList.remove("d-none");
   if (line) {
     const cells = document.getElementById("buttonGrid").children;
     for (const i of line) cells[i - 1].classList.add("cell-winner");
@@ -151,7 +159,7 @@ function resetGame() {
     }
   }
   document.getElementById("turnIndicator").innerHTML = playerIcon("X") + " " + getPlayerName("X") + " to go";
-  document.getElementById("newGameBtn").classList.add("d-none");
+  document.getElementById("gameBtns").classList.add("d-none");
   currentPlayer = "X";
   gameOver = false;
 }

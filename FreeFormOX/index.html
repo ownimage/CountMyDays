@@ -24,7 +24,10 @@
     <div id="mainContent">
       <div id="turnIndicator">X to go</div>
       <div id="buttonGrid" class="grid-container"></div>
-      <button id="newGameBtn" class="btn btn-primary editor-btn btn-wide mt-3 d-none" onclick="resetGame()">New Game</button>
+      <div id="gameBtns" class="d-flex gap-2 mt-3 w-100 d-none" style="max-width:min(calc(100vw - 3rem), calc(100dvh - 200px))">
+        <button class="btn btn-primary flex-fill" onclick="resetGame()">Replay</button>
+        <button class="btn btn-outline-secondary flex-fill" onclick="swapPlayers(); resetGame()">Swap Players</button>
+      </div>
     </div>
 
     <div id="settingsPage" class="d-none">
