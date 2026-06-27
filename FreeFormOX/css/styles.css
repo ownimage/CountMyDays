@@ -67,9 +67,12 @@ body.auto-hide-menu #turnIndicator {
   grid-template-columns: repeat(5, 1fr);
   gap: 6px;
   padding: 6px;
-  width: min(calc(100vw - 3rem), calc(100dvh - 90px));
+  width: min(calc(100vw - 3rem), calc(100dvh - 200px));
   aspect-ratio: 1;
   box-sizing: border-box;
+}
+body.auto-hide-menu .grid-container {
+  width: min(calc(100vw - 3rem), calc(100dvh - 260px));
 }
 .grid-container button {
   aspect-ratio: 1;
