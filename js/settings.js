@@ -130,6 +130,17 @@ function openSettings() {
   const savedDensity = localStorage.getItem("density") || "normal";
   const densitySel = document.getElementById("densitySelector");
   if (densitySel) densitySel.value = savedDensity;
+
+  const qrContainer = document.getElementById("shareQrCode");
+  if (qrContainer) {
+    qrContainer.innerHTML = "";
+    new QRCode(qrContainer, {
+      text: "https://ownimage.github.io/CountMyDays",
+      width: 120,
+      height: 120,
+      margin: 8
+    });
+  }
 }
 
 function changeFormat(value) {
