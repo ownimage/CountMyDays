@@ -10,6 +10,25 @@ function rc(i) {
   return { row: Math.floor((i - 1) / 5), col: (i - 1) % 5 };
 }
 
+function getPieceStyle(symbol) {
+  return localStorage.getItem("ffox_" + symbol.toLowerCase() + "PieceStyle") || "classic";
+}
+
+function getPieceImg(symbol, style) {
+  const map = {
+    dino: { X: "dino-cross.png", O: "dino-nought.png" },
+    unicorn: { X: "unicorn-cross.png", O: "unicorn-nought.png" }
+  };
+  const file = map[style][symbol];
+  return '<img class="cell-dino" src="img/' + file + '" alt="' + symbol + '">';
+}
+
+function getPieceHtml(symbol) {
+  const style = getPieceStyle(symbol);
+  if (style === "classic") return SVG[symbol];
+  return getPieceImg(symbol, style);
+}
+
 function getPlayerName(symbol) {
   return localStorage.getItem("ffox_" + symbol.toLowerCase() + "Name") || (symbol === "X" ? "Xander" : "Oliver");
 }
@@ -81,7 +100,25 @@ function checkDraw() {
 }
 
 function playerIcon(symbol) {
-  return '<span style="display:inline-flex;align-items:center;justify-content:center;width:1.6rem;height:1.6rem">' + SVG[symbol] + '</span>';
+  const style = getPieceStyle(symbol);
+  if (style === "classic") {
+    return '<span style="display:inline-flex;align-items:center;justify-content:center;width:1.6rem;height:1.6rem">' + SVG[symbol] + '</span>';
+  }
+  const map = { dino: "dino", unicorn: "unicorn" };
+  const file = map[style] + "-" + (symbol === "X" ? "cross" : "nought") + ".png";
+  return '<span style="display:inline-flex;align-items:center;justify-content:center;width:3rem;height:3rem"><img src="img/' + file + '" alt="' + symbol + '" style="width:100%;height:100%;object-fit:contain"></span>';
+}
+
+function refreshPieces() {
+  const cells = document.getElementById("buttonGrid").children;
+  for (const btn of cells) {
+    if (btn.dataset.player) {
+      btn.innerHTML = getPieceHtml(btn.dataset.player);
+    }
+  }
+  if (!gameOver) {
+    document.getElementById("turnIndicator").innerHTML = playerIcon(currentPlayer) + " " + getPlayerName(currentPlayer) + " to go";
+  }
 }
 
 function endGame(msg, line) {
@@ -101,7 +138,7 @@ function resetGame() {
     const idx = i + 1;
     btn.classList.remove("cell-winner");
     if (idx === 13) {
-      btn.innerHTML = SVG.O;
+      btn.innerHTML = getPieceHtml("O");
       btn.dataset.player = "O";
       btn.disabled = true;
       btn.className = "cell-oob";
@@ -125,7 +162,7 @@ function buildGrid() {
     const btn = document.createElement("button");
     btn.dataset.index = i;
     if (i === 13) {
-      btn.innerHTML = SVG.O;
+      btn.innerHTML = getPieceHtml("O");
       btn.dataset.player = "O";
       btn.disabled = true;
       btn.className = "cell-oob";
@@ -141,7 +178,7 @@ function buildGrid() {
 function handleClick(btn) {
   if (gameOver) return;
   const player = currentPlayer;
-  btn.innerHTML = SVG[player];
+  btn.innerHTML = getPieceHtml(player);
   btn.dataset.player = player;
   btn.disabled = true;
   btn.className = "cell-placed";

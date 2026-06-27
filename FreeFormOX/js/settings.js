@@ -47,6 +47,11 @@ function changeTheme(name) {
   applyTheme(name);
 }
 
+function changePieceStyle(symbol, style) {
+  localStorage.setItem("ffox_" + symbol + "PieceStyle", style);
+  refreshPieces();
+}
+
 function openSettings() {
   document.getElementById("mainContent").classList.add("d-none");
   document.getElementById("settingsPage").classList.remove("d-none");
@@ -58,6 +63,8 @@ function openSettings() {
   ["x", "o"].forEach(s => {
     const el = document.getElementById(s + "Name");
     if (el) el.value = localStorage.getItem("ffox_" + s + "Name") || (s === "x" ? "Xander" : "Oliver");
+    const styleSel = document.getElementById(s + "PieceStyle");
+    if (styleSel) styleSel.value = localStorage.getItem("ffox_" + s + "PieceStyle") || "classic";
   });
 
   try {
