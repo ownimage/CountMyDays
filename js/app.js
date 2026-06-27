@@ -208,7 +208,7 @@ function renderCountdowns() {
 
     let displayLine1, displayLine2;
     if (format === "weeksAndDays") {
-      displayLine1 = `${weeks} week${weeks !== 1 ? "s" : ""}`;
+      displayLine1 = weeks > 0 ? `${weeks} week${weeks !== 1 ? "s" : ""}` : "";
       displayLine2 = remainDays > 0 ? `${remainDays} day${remainDays !== 1 ? "s" : ""}` : "";
     } else {
       displayLine1 = `${d.days}`;
