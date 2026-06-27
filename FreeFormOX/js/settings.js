@@ -81,6 +81,32 @@ function openSettings() {
   } catch (_) {}
 }
 
+function swapPlayers() {
+  const xInput = document.getElementById("xName");
+  const oInput = document.getElementById("oName");
+
+  const xName = xInput ? xInput.value : "";
+  const oName = oInput ? oInput.value : "";
+
+  localStorage.setItem("ffox_xName", oName);
+  localStorage.setItem("ffox_oName", xName);
+
+  if (xInput) xInput.value = oName || "Xander";
+  if (oInput) oInput.value = xName || "Oliver";
+
+  const xStyle = localStorage.getItem("ffox_xPieceStyle") || "classic";
+  const oStyle = localStorage.getItem("ffox_oPieceStyle") || "classic";
+  localStorage.setItem("ffox_xPieceStyle", oStyle);
+  localStorage.setItem("ffox_oPieceStyle", xStyle);
+
+  const xStyleSel = document.getElementById("xPieceStyle");
+  const oStyleSel = document.getElementById("oPieceStyle");
+  if (xStyleSel) xStyleSel.value = oStyle;
+  if (oStyleSel) oStyleSel.value = xStyle;
+
+  refreshPieces();
+}
+
 function saveName(symbol, value) {
   localStorage.setItem("ffox_" + symbol + "Name", value);
 }
