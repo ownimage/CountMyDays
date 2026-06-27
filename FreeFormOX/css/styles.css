@@ -99,3 +99,9 @@ body.auto-hide-menu #turnIndicator {
   color: var(--bs-secondary);
   cursor: not-allowed;
 }
+.cell-unavailable {
+  background: rgba(var(--bs-danger-rgb), 0.15);
+  border-color: var(--bs-danger);
+  color: var(--bs-danger);
+  cursor: not-allowed;
+}
