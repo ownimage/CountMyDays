@@ -57,7 +57,7 @@ function openSettings() {
 
   ["x", "o"].forEach(s => {
     const el = document.getElementById(s + "Name");
-    if (el) el.value = localStorage.getItem("ffox_" + s + "Name") || "";
+    if (el) el.value = localStorage.getItem("ffox_" + s + "Name") || (s === "x" ? "Xander" : "Oliver");
   });
 
   try {

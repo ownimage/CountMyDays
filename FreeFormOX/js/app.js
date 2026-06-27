@@ -11,7 +11,7 @@ function rc(i) {
 }
 
 function getPlayerName(symbol) {
-  return localStorage.getItem("ffox_" + symbol.toLowerCase() + "Name") || symbol;
+  return localStorage.getItem("ffox_" + symbol.toLowerCase() + "Name") || (symbol === "X" ? "Xander" : "Oliver");
 }
 
 function getPlaced() {
