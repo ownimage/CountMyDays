@@ -56,6 +56,13 @@
       </ul>
     </div>
 
+    <div class="dropdown">
+      <button class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown">Google</button>
+      <ul class="dropdown-menu">
+        <li><a class="dropdown-item" onclick="refreshGoogleCalendar()">Refresh</a></li>
+      </ul>
+    </div>
+
   </nav>
 
   <!-- MAIN CONTENT -->
@@ -107,106 +114,180 @@
         <button class="btn btn-success editor-btn btn-wide ms-auto" onclick="closeSettings()">Done</button>
       </div>
 
-      <div class="row mb-3 align-items-center col-md-8">
-        <div class="col-4 text-end"><label class="form-label mb-0">Theme</label></div>
-        <div class="col-8">
-          <select id="themeSelector" class="form-select" onchange="changeTheme(this.value)">
-            <option value="brite">Brite (light)</option>
-            <option value="cerulean">Cerulean (light)</option>
-            <option value="cosmo">Cosmo (light)</option>
-            <option value="cyborg">Cyborg (dark)</option>
-            <option value="darkly" selected>Darkly (dark)</option>
-            <option value="flatly">Flatly (light)</option>
-            <option value="journal">Journal (light)</option>
-            <option value="litera">Litera (light)</option>
-            <option value="lumen">Lumen (light)</option>
-            <option value="lux">Lux (light)</option>
-            <option value="materia">Materia (light)</option>
-            <option value="minty">Minty (light)</option>
-            <option value="morph">Morph (light)</option>
-            <option value="pulse">Pulse (light)</option>
-            <option value="quartz">Quartz (light)</option>
-            <option value="sandstone">Sandstone (light)</option>
-            <option value="simplex">Simplex (light)</option>
-            <option value="sketchy">Sketchy (light)</option>
-            <option value="slate">Slate (dark)</option>
-            <option value="solar">Solar (dark)</option>
-            <option value="spacelab">Spacelab (light)</option>
-            <option value="superhero">Superhero (dark)</option>
-            <option value="united">United (light)</option>
-            <option value="vapor">Vapor (dark)</option>
-            <option value="yeti">Yeti (light)</option>
-            <option value="zephyr">Zephyr (light)</option>
-          </select>
-        </div>
-      </div>
+      <ul class="nav nav-tabs mb-3" id="settingsTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="settings-general-tab" data-bs-toggle="tab" data-bs-target="#settingsTabGeneral" type="button" role="tab">General</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="settings-gcal-tab" data-bs-toggle="tab" data-bs-target="#settingsTabGCal" type="button" role="tab">G Cal</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="settings-danger-tab" data-bs-toggle="tab" data-bs-target="#settingsTabDanger" type="button" role="tab">Danger</button>
+        </li>
+      </ul>
 
-      <div class="row mb-3 align-items-center col-md-8">
-        <div class="col-4 text-end"><label class="form-label mb-0">Countdown display</label></div>
-        <div class="col-8">
-          <select id="formatSelector" class="form-select" onchange="changeFormat(this.value)">
-            <option value="days">Days</option>
-            <option value="weeksAndDays">Weeks and days</option>
-          </select>
-        </div>
-      </div>
+      <div class="tab-content">
 
-      <div class="row mb-4 align-items-center col-md-8">
-        <div class="col-4 text-end"><label class="form-label mb-0">Font size</label></div>
-        <div class="col-8">
-          <select id="fontSizeSelector" class="form-select" onchange="changeFontSize(this.value)">
-            <option value="xsmall">Extra small</option>
-            <option value="small">Small</option>
-            <option value="normal">Normal</option>
-            <option value="large">Large</option>
-            <option value="xlarge">Extra large</option>
-            <option value="jumbo">Jumbo</option>
-          </select>
-        </div>
-      </div>
+        <!-- GENERAL TAB -->
+        <div class="tab-pane fade show active" id="settingsTabGeneral" role="tabpanel">
+          <div class="row mb-3 align-items-center col-md-8">
+            <div class="col-4 text-end"><label class="form-label mb-0">Theme</label></div>
+            <div class="col-8">
+              <select id="themeSelector" class="form-select" onchange="changeTheme(this.value)">
+                <option value="brite">Brite (light)</option>
+                <option value="cerulean">Cerulean (light)</option>
+                <option value="cosmo">Cosmo (light)</option>
+                <option value="cyborg">Cyborg (dark)</option>
+                <option value="darkly" selected>Darkly (dark)</option>
+                <option value="flatly">Flatly (light)</option>
+                <option value="journal">Journal (light)</option>
+                <option value="litera">Litera (light)</option>
+                <option value="lumen">Lumen (light)</option>
+                <option value="lux">Lux (light)</option>
+                <option value="materia">Materia (light)</option>
+                <option value="minty">Minty (light)</option>
+                <option value="morph">Morph (light)</option>
+                <option value="pulse">Pulse (light)</option>
+                <option value="quartz">Quartz (light)</option>
+                <option value="sandstone">Sandstone (light)</option>
+                <option value="simplex">Simplex (light)</option>
+                <option value="sketchy">Sketchy (light)</option>
+                <option value="slate">Slate (dark)</option>
+                <option value="solar">Solar (dark)</option>
+                <option value="spacelab">Spacelab (light)</option>
+                <option value="superhero">Superhero (dark)</option>
+                <option value="united">United (light)</option>
+                <option value="vapor">Vapor (dark)</option>
+                <option value="yeti">Yeti (light)</option>
+                <option value="zephyr">Zephyr (light)</option>
+              </select>
+            </div>
+          </div>
 
-      <div class="row mb-4 align-items-center col-md-8">
-        <div class="col-4 text-end"><label class="form-label mb-0">Icon size</label></div>
-        <div class="col-8">
-          <select id="iconSizeSelector" class="form-select" onchange="changeIconSize(this.value)">
-            <option value="small">Small (64x64)</option>
-            <option value="medium">Medium (80x80)</option>
-            <option value="large">Large (100x100)</option>
-          </select>
-        </div>
-      </div>
+          <div class="row mb-3 align-items-center col-md-8">
+            <div class="col-4 text-end"><label class="form-label mb-0">Countdown display</label></div>
+            <div class="col-8">
+              <select id="formatSelector" class="form-select" onchange="changeFormat(this.value)">
+                <option value="days">Days</option>
+                <option value="weeksAndDays">Weeks and days</option>
+              </select>
+            </div>
+          </div>
 
-      <div class="row mb-4 align-items-center col-md-8">
-        <div class="col-4 text-end"><label class="form-label mb-0">Tile density</label></div>
-        <div class="col-8">
-          <select id="densitySelector" class="form-select" onchange="changeDensity(this.value)">
-            <option value="normal">Normal</option>
-            <option value="compact">Compact</option>
-          </select>
-        </div>
-      </div>
+          <div class="row mb-4 align-items-center col-md-8">
+            <div class="col-4 text-end"><label class="form-label mb-0">Font size</label></div>
+            <div class="col-8">
+              <select id="fontSizeSelector" class="form-select" onchange="changeFontSize(this.value)">
+                <option value="xsmall">Extra small</option>
+                <option value="small">Small</option>
+                <option value="normal">Normal</option>
+                <option value="large">Large</option>
+                <option value="xlarge">Extra large</option>
+                <option value="jumbo">Jumbo</option>
+              </select>
+            </div>
+          </div>
 
-      <div class="row mb-3 align-items-center col-md-8">
-        <div class="col-4 text-end"><label class="form-label mb-0">Max countdowns</label></div>
-        <div class="col-8">
-          <select id="maxCountdownsSelector" class="form-select" onchange="changeMaxCountdowns(this.value)">
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="20">20</option>
-            <option value="0">All</option>
-          </select>
-        </div>
-      </div>
+          <div class="row mb-4 align-items-center col-md-8">
+            <div class="col-4 text-end"><label class="form-label mb-0">Icon size</label></div>
+            <div class="col-8">
+              <select id="iconSizeSelector" class="form-select" onchange="changeIconSize(this.value)">
+                <option value="small">Small (64x64)</option>
+                <option value="medium">Medium (80x80)</option>
+                <option value="large">Large (100x100)</option>
+              </select>
+            </div>
+          </div>
 
-      <div class="row mb-4 align-items-center col-md-8">
-        <div class="col-4 text-end"><label class="form-label mb-0">Auto-hide menu</label></div>
-        <div class="col-8">
-          <div class="form-check form-switch mt-1">
-            <input id="autoHideMenu" class="form-check-input" type="checkbox" onchange="changeAutoHideMenu(this.checked)">
+          <div class="row mb-4 align-items-center col-md-8">
+            <div class="col-4 text-end"><label class="form-label mb-0">Tile density</label></div>
+            <div class="col-8">
+              <select id="densitySelector" class="form-select" onchange="changeDensity(this.value)">
+                <option value="normal">Normal</option>
+                <option value="compact">Compact</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row mb-3 align-items-center col-md-8">
+            <div class="col-4 text-end"><label class="form-label mb-0">Max countdowns</label></div>
+            <div class="col-8">
+              <select id="maxCountdownsSelector" class="form-select" onchange="changeMaxCountdowns(this.value)">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="0">All</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row mb-4 align-items-center col-md-8">
+            <div class="col-4 text-end"><label class="form-label mb-0">Auto-hide menu</label></div>
+            <div class="col-8">
+              <div class="form-check form-switch mt-1">
+                <input id="autoHideMenu" class="form-check-input" type="checkbox" onchange="changeAutoHideMenu(this.checked)">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- G CAL TAB -->
+        <div class="tab-pane fade" id="settingsTabGCal" role="tabpanel">
+          <div class="row mb-3 align-items-center col-md-8">
+            <div class="col-4 text-end"><label class="form-label mb-0">Google OAuth Client ID</label></div>
+            <div class="col-8">
+              <input id="gcalClientId" class="form-control" type="text" placeholder="xxxx.apps.googleusercontent.com" onchange="saveGCalSettings()">
+            </div>
+          </div>
+
+          <div class="row mb-3 align-items-center col-md-8">
+            <div class="col-4 text-end"><label class="form-label mb-0">Calendar ID</label></div>
+            <div class="col-8">
+              <input id="gcalCalendarId" class="form-control" type="text" placeholder="primary" onchange="saveGCalSettings()">
+            </div>
+          </div>
+
+          <div class="row mb-4 col-md-8">
+            <div class="col-8 offset-4">
+              <div class="small text-secondary mb-3">Uses the <code>calendar.readonly</code> scope. The fetched feed is cached under <code>cmd_google_cal</code>. Refresh it from the Google menu.</div>
+            </div>
+          </div>
+
+          <div class="row mb-4 col-md-8">
+            <div class="col-8 offset-4 d-flex gap-2">
+              <button class="btn btn-primary" onclick="refreshGoogleCalendar()">Refresh</button>
+              <button class="btn btn-outline-secondary" onclick="clearGoogleCalCache()">Clear cache</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- DANGER TAB -->
+        <div class="tab-pane fade" id="settingsTabDanger" role="tabpanel">
+          <div class="row mb-3 align-items-center col-md-8">
+            <div class="col-4 text-end"><label class="form-label mb-0">Show danger</label></div>
+            <div class="col-8">
+              <div class="form-check form-switch mt-1">
+                <input id="showDanger" class="form-check-input" type="checkbox" onchange="changeShowDanger(this.checked)">
+              </div>
+            </div>
+          </div>
+
+          <div id="clearAllDataRow" class="row align-items-center col-md-8 d-none">
+            <div class="col-4 text-end"></div>
+            <div class="col-8">
+              <button class="btn btn-danger editor-btn btn-wide w-100" onclick="confirmClearAllData()">Clear All Data</button>
+            </div>
+          </div>
+          <div id="refreshAppRow" class="mt-2 row align-items-center col-md-8 d-none">
+            <div class="col-4 text-end"></div>
+            <div class="col-8">
+              <button class="btn btn-warning editor-btn btn-wide w-100" onclick="location.reload()">Refresh App</button>
+            </div>
           </div>
         </div>
       </div>
 
+      <!-- BELOW TABS -->
       <div class="mt-4 row align-items-center col-md-8">
         <div class="col-4 text-end"></div>
         <div class="col-8">
@@ -223,27 +304,6 @@
         </div>
       </div>
 
-      <div class="row mb-4 align-items-center col-md-8">
-        <div class="col-4 text-end"><label class="form-label mb-0">Show danger</label></div>
-        <div class="col-8">
-          <div class="form-check form-switch mt-1">
-            <input id="showDanger" class="form-check-input" type="checkbox" onchange="changeShowDanger(this.checked)">
-          </div>
-        </div>
-      </div>
-
-      <div id="clearAllDataRow" class="mt-4 row align-items-center col-md-8 d-none">
-        <div class="col-4 text-end"></div>
-        <div class="col-8">
-          <button class="btn btn-danger editor-btn btn-wide w-100" onclick="confirmClearAllData()">Clear All Data</button>
-        </div>
-      </div>
-      <div id="refreshAppRow" class="mt-2 row align-items-center col-md-8 d-none">
-        <div class="col-4 text-end"></div>
-        <div class="col-8">
-          <button class="btn btn-warning editor-btn btn-wide w-100" onclick="location.reload()">Refresh App</button>
-        </div>
-      </div>
       <div class="mt-5 small build-number">Build <span id="buildNumber"></span></div>
     </div>
     <script>document.getElementById("buildNumber").textContent = BUILD_NUMBER;</script>
@@ -330,6 +390,7 @@
   document.write('<script src="js/images.js?v=' + BUILD_NUMBER + '"><\/script>');
   document.write('<script src="js/export.js?v=' + BUILD_NUMBER + '"><\/script>');
   document.write('<script src="js/import-wizard.js?v=' + BUILD_NUMBER + '"><\/script>');
+  document.write('<script src="sharedComponents/js/googleCalendar/googleCalendar.js?v=' + BUILD_NUMBER + '"><\/script>');
   </script>
 
   <script>

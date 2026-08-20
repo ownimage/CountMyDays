@@ -32,6 +32,14 @@ function saveImages(images) {
   localStorage.setItem("images", JSON.stringify(images));
 }
 
+function loadGoogleCalFeed() {
+  return JSON.parse(localStorage.getItem("cmd_google_cal") || "null");
+}
+
+function storeGoogleCalFeed(feed) {
+  localStorage.setItem("cmd_google_cal", JSON.stringify(feed));
+}
+
 // -------------------------------
 // JSON IMPORT
 // -------------------------------

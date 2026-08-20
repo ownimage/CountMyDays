@@ -131,6 +131,12 @@ function openSettings() {
   const densitySel = document.getElementById("densitySelector");
   if (densitySel) densitySel.value = savedDensity;
 
+  const gcalClientId = document.getElementById("gcalClientId");
+  if (gcalClientId) gcalClientId.value = localStorage.getItem("cmd_gcal_client_id") || "";
+
+  const gcalCalId = document.getElementById("gcalCalendarId");
+  if (gcalCalId) gcalCalId.value = localStorage.getItem("cmd_gcal_calendar_id") || "primary";
+
   const qrContainer = document.getElementById("shareQrCode");
   if (qrContainer) {
     qrContainer.innerHTML = "";
@@ -145,6 +151,17 @@ function openSettings() {
 
 function changeFormat(value) {
   localStorage.setItem("countdownFormat", value);
+}
+
+// -------------------------------
+// GOOGLE CALENDAR SETTINGS
+// -------------------------------
+
+function saveGCalSettings() {
+  const clientIdInput = document.getElementById("gcalClientId");
+  const calIdInput = document.getElementById("gcalCalendarId");
+  if (clientIdInput) localStorage.setItem("cmd_gcal_client_id", clientIdInput.value.trim());
+  if (calIdInput) localStorage.setItem("cmd_gcal_calendar_id", calIdInput.value.trim() || "primary");
 }
 
 function closeSettings() {
