@@ -40,6 +40,10 @@ function loadGoogleIdentityScript() {
 // -------------------------------
 
 function fetchEvents() {
+  if (localStorage.getItem("cmd_gcal_enabled") !== "true") {
+    return Promise.reject(new Error("Google Calendar is not enabled. Turn it on in Settings -> G Cal."));
+  }
+
   const clientId = getGCalClientId();
   const calendarId = getGCalCalendarId();
 
@@ -103,4 +107,32 @@ function refreshGoogleCalendar() {
 function clearGoogleCalCache() {
   localStorage.removeItem(GOOGLE_CAL_CACHE_KEY);
   alert("Cached Google Calendar feed cleared.");
+}
+
+// -------------------------------
+// Load sample data from test/google_calendar.json
+// -------------------------------
+
+function loadGCalSampleData() {
+  const cacheBuster = typeof BUILD_NUMBER !== "undefined" ? BUILD_NUMBER : Date.now();
+
+  showSpinner();
+  fetch("test/google_calendar.json?v=" + cacheBuster)
+    .then(res => {
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.json();
+    })
+    .then(json => {
+      hideSpinner();
+      if (!json.items) {
+        alert("Sample Google Calendar data is invalid.");
+        return;
+      }
+      storeGoogleCalFeed(json);
+      alert("Sample Google Calendar data loaded: " + json.items.length + " events cached under cmd_google_cal.");
+    })
+    .catch(err => {
+      hideSpinner();
+      alert("Failed to load sample Google Calendar data: " + err.message);
+    });
 }

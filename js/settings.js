@@ -137,6 +137,11 @@ function openSettings() {
   const gcalCalId = document.getElementById("gcalCalendarId");
   if (gcalCalId) gcalCalId.value = localStorage.getItem("cmd_gcal_calendar_id") || "primary";
 
+  const gcalEnabled = localStorage.getItem("cmd_gcal_enabled") === "true";
+  const gcalEnabledCb = document.getElementById("gcalEnabled");
+  if (gcalEnabledCb) gcalEnabledCb.checked = gcalEnabled;
+  setGCalVisible(gcalEnabled);
+
   const qrContainer = document.getElementById("shareQrCode");
   if (qrContainer) {
     qrContainer.innerHTML = "";
@@ -162,6 +167,18 @@ function saveGCalSettings() {
   const calIdInput = document.getElementById("gcalCalendarId");
   if (clientIdInput) localStorage.setItem("cmd_gcal_client_id", clientIdInput.value.trim());
   if (calIdInput) localStorage.setItem("cmd_gcal_calendar_id", calIdInput.value.trim() || "primary");
+}
+
+function setGCalVisible(enabled) {
+  const options = document.getElementById("gcalOptions");
+  if (options) options.classList.toggle("d-none", !enabled);
+  const menu = document.getElementById("googleMenu");
+  if (menu) menu.classList.toggle("d-none", !enabled);
+}
+
+function changeGCalEnabled(enabled) {
+  localStorage.setItem("cmd_gcal_enabled", enabled);
+  setGCalVisible(enabled);
 }
 
 function closeSettings() {
@@ -243,6 +260,9 @@ function changeAutoHideMenu(enabled) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  const gcalEnabled = localStorage.getItem("cmd_gcal_enabled") === "true";
+  setGCalVisible(gcalEnabled);
+
   const savedFontSize = localStorage.getItem("fontSize") || "xlarge";
   if (savedFontSize !== "normal") {
     document.body.classList.add("font-size-" + savedFontSize);

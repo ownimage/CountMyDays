@@ -56,7 +56,7 @@
       </ul>
     </div>
 
-    <div class="dropdown">
+    <div class="dropdown" id="googleMenu">
       <button class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown">Google</button>
       <ul class="dropdown-menu">
         <li><a class="dropdown-item" onclick="refreshGoogleCalendar()">Refresh</a></li>
@@ -233,30 +233,42 @@
 
         <!-- G CAL TAB -->
         <div class="tab-pane fade" id="settingsTabGCal" role="tabpanel">
-          <div class="row mb-3 align-items-center col-md-8">
-            <div class="col-4 text-end"><label class="form-label mb-0">Google OAuth Client ID</label></div>
+          <div class="row mb-4 align-items-center col-md-8">
+            <div class="col-4 text-end"><label class="form-label mb-0">Enable Google Calendar</label></div>
             <div class="col-8">
-              <input id="gcalClientId" class="form-control" type="text" placeholder="xxxx.apps.googleusercontent.com" onchange="saveGCalSettings()">
+              <div class="form-check form-switch mt-1">
+                <input id="gcalEnabled" class="form-check-input" type="checkbox" onchange="changeGCalEnabled(this.checked)">
+              </div>
             </div>
           </div>
 
-          <div class="row mb-3 align-items-center col-md-8">
-            <div class="col-4 text-end"><label class="form-label mb-0">Calendar ID</label></div>
-            <div class="col-8">
-              <input id="gcalCalendarId" class="form-control" type="text" placeholder="primary" onchange="saveGCalSettings()">
+          <div id="gcalOptions">
+            <div class="row mb-3 align-items-center col-md-8">
+              <div class="col-4 text-end"><label class="form-label mb-0">Google OAuth Client ID</label></div>
+              <div class="col-8">
+                <input id="gcalClientId" class="form-control" type="text" placeholder="xxxx.apps.googleusercontent.com" onchange="saveGCalSettings()">
+              </div>
             </div>
-          </div>
 
-          <div class="row mb-4 col-md-8">
-            <div class="col-8 offset-4">
-              <div class="small text-secondary mb-3">Uses the <code>calendar.readonly</code> scope. The fetched feed is cached under <code>cmd_google_cal</code>. Refresh it from the Google menu.</div>
+            <div class="row mb-3 align-items-center col-md-8">
+              <div class="col-4 text-end"><label class="form-label mb-0">Calendar ID</label></div>
+              <div class="col-8">
+                <input id="gcalCalendarId" class="form-control" type="text" placeholder="primary" onchange="saveGCalSettings()">
+              </div>
             </div>
-          </div>
 
-          <div class="row mb-4 col-md-8">
-            <div class="col-8 offset-4 d-flex gap-2">
-              <button class="btn btn-primary" onclick="refreshGoogleCalendar()">Refresh</button>
-              <button class="btn btn-outline-secondary" onclick="clearGoogleCalCache()">Clear cache</button>
+            <div class="row mb-4 col-md-8">
+              <div class="col-8 offset-4">
+                <div class="small text-white mb-3">Uses the <code>calendar.readonly</code> scope. The fetched feed is cached under <code>cmd_google_cal</code>. Refresh it from the Google menu.</div>
+              </div>
+            </div>
+
+            <div class="row mb-4 col-md-8">
+              <div class="col-8 offset-4 d-flex gap-2">
+                <button class="btn btn-primary" onclick="refreshGoogleCalendar()">Refresh</button>
+                <button class="btn btn-success" onclick="loadGCalSampleData()">Load sample data</button>
+                <button class="btn btn-secondary" onclick="clearGoogleCalCache()">Clear cache</button>
+              </div>
             </div>
           </div>
         </div>
