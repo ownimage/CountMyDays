@@ -176,6 +176,44 @@ function formatDate(date) {
 }
 
 // -------------------------------
+// GOOGLE CALENDAR -> DATE TILES
+// -------------------------------
+
+function gcalEventToDate(evt) {
+  const start = evt.start || {};
+  let y, m, d;
+  if (start.date) {
+    const parts = String(start.date).split("-");
+    y = parseInt(parts[0], 10);
+    m = parseInt(parts[1], 10);
+    d = parseInt(parts[2], 10);
+  } else if (start.dateTime) {
+    const dt = new Date(start.dateTime);
+    y = dt.getFullYear();
+    m = dt.getMonth() + 1;
+    d = dt.getDate();
+  } else {
+    return null;
+  }
+  if (!y || !m || !d) return null;
+  return {
+    name: evt.summary || "(Untitled event)",
+    category: "",
+    gcal: true,
+    type: "once",
+    year: y,
+    month: m,
+    day: d
+  };
+}
+
+function loadGoogleCalendarEntries() {
+  const feed = loadGoogleCalFeed();
+  if (!feed || !Array.isArray(feed.items)) return [];
+  return feed.items.map(gcalEventToDate).filter(Boolean);
+}
+
+// -------------------------------
 // RENDER COUNTDOWNS
 // -------------------------------
 
@@ -191,7 +229,7 @@ function renderCountdowns() {
   const maxCountdowns = parseInt(localStorage.getItem("maxCountdowns") || "10", 10);
   const showAll = container.dataset.showAll === "true" || maxCountdowns === 0;
 
-  const withDays = dates
+  const withDays = [...dates, ...loadGoogleCalendarEntries()]
     .map(d => ({ ...d, days: daysUntil(d) }))
     .sort((a, b) => a.days - b.days);
 
