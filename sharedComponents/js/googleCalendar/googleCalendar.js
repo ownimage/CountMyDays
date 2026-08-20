@@ -89,6 +89,26 @@ function fetchEvents() {
 // Menu handler: Google -> Refresh. Fetch, store via app.js, report
 // -------------------------------
 
+// -------------------------------
+// App info modal (replaces system alert dialogs)
+// -------------------------------
+
+function showAppInfoModal(title, message) {
+  const modal = document.getElementById("appInfoModal");
+  if (!modal) {
+    alert(message);
+    return;
+  }
+  document.getElementById("appInfoTitle").textContent = title;
+  document.getElementById("appInfoMessage").textContent = message;
+  modal.classList.remove("d-none");
+}
+
+function closeAppInfoModal() {
+  const modal = document.getElementById("appInfoModal");
+  if (modal) modal.classList.add("d-none");
+}
+
 function refreshGoogleCalendar() {
   showSpinner();
   fetchEvents()
@@ -96,17 +116,17 @@ function refreshGoogleCalendar() {
       storeGoogleCalFeed(json);
       hideSpinner();
       const count = (json.items && json.items.length) || 0;
-      alert("Google Calendar refreshed: " + count + " events cached.");
+      showAppInfoModal("Google Calendar", "Refreshed: " + count + " events cached.");
     })
     .catch(err => {
       hideSpinner();
-      alert("Failed to refresh Google Calendar: " + err.message);
+      showAppInfoModal("Google Calendar", "Failed to refresh: " + err.message);
     });
 }
 
 function clearGoogleCalCache() {
   localStorage.removeItem(GOOGLE_CAL_CACHE_KEY);
-  alert("Cached Google Calendar feed cleared.");
+  showAppInfoModal("Google Calendar", "Cached feed cleared.");
 }
 
 // -------------------------------
@@ -125,14 +145,14 @@ function loadGCalSampleData() {
     .then(json => {
       hideSpinner();
       if (!json.items) {
-        alert("Sample Google Calendar data is invalid.");
+        showAppInfoModal("Sample Data", "Sample Google Calendar data is invalid.");
         return;
       }
       storeGoogleCalFeed(json);
-      alert("Sample Google Calendar data loaded: " + json.items.length + " events cached under cmd_google_cal.");
+      showAppInfoModal("Sample Data", json.items.length + " events cached under cmd_google_cal.");
     })
     .catch(err => {
       hideSpinner();
-      alert("Failed to load sample Google Calendar data: " + err.message);
+      showAppInfoModal("Sample Data", "Failed to load: " + err.message);
     });
 }
