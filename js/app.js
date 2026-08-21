@@ -199,9 +199,24 @@ function gcalEventToDate(evt) {
     return null;
   }
   if (!y || !m || !d) return null;
+
+  let category = "";
+  let image = "";
+  if (evt._cmd) {
+    category = evt._cmd.category || "";
+    image = evt._cmd.image || "";
+  } else if (typeof parseCmdPayloadFromDescription === "function") {
+    const cmd = parseCmdPayloadFromDescription(evt.description);
+    if (cmd) {
+      category = cmd.category || "";
+      image = cmd.image || "";
+    }
+  }
+
   return {
     name: evt.summary || "(Untitled event)",
-    category: "",
+    category: category,
+    image: image,
     gcal: true,
     type: "once",
     year: y,

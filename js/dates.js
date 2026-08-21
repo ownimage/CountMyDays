@@ -126,8 +126,8 @@ function renderDatesEditor() {
               </select>
             </div>
             <div class="d-flex gap-2">
-              <button class="btn btn-success editor-btn" onclick="doneEditing()">OK</button>
-              <button class="btn btn-secondary editor-btn ms-auto" onclick="cancelEditing()">Cancel</button>
+              <button class="btn btn-secondary editor-btn" onclick="cancelEditing()">Cancel</button>
+              <button class="btn btn-success editor-btn ms-auto" onclick="doneEditing()">OK</button>
             </div>
           </div>
         </div>

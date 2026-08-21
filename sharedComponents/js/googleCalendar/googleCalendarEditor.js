@@ -2,12 +2,13 @@
 // googleCalendarEditor.js - Edit Google Calendar events
 // Same layout as Edit -> Dates, but driven by cmd_google_cal feed.
 // No delete. Edit button sits where Delete sits on the Dates list.
-// OK button is intentionally not wired yet.
+// Title / Date / Once|Annual are read-only. OK patches description on Google.
 // -------------------------------
 
 let gcalEditingIndex = -1;
 let gcalEditBuffer = null;
 let gcalTitleSearch = "";
+let gcalEditingEventId = null;
 
 function openGoogleEventsEditor() {
   document.getElementById("countdownContainer").classList.add("d-none");
@@ -19,6 +20,7 @@ function openGoogleEventsEditor() {
   if (el) el.classList.remove("d-none");
   gcalEditingIndex = -1;
   gcalEditBuffer = null;
+  gcalEditingEventId = null;
   gcalTitleSearch = "";
   renderGoogleEventsEditor();
 }
@@ -29,6 +31,7 @@ function closeGoogleEventsEditor() {
   document.getElementById("countdownContainer").classList.remove("d-none");
   gcalEditingIndex = -1;
   gcalEditBuffer = null;
+  gcalEditingEventId = null;
   gcalTitleSearch = "";
   renderCountdowns();
 }
@@ -92,19 +95,8 @@ function renderGoogleEventsEditor() {
     const day = dateData.day || 1;
     const month = dateData.month || 1;
     const year = dateData.year || now.getFullYear();
-
-    let dateHtml;
-    if (showYear) {
-      dateHtml = `<input type="text" class="form-control flatpickr-date" data-gcal-index="${gcalEditingIndex}" data-showyear="true" placeholder="dd/mm/yyyy">`;
-    } else {
-      dateHtml = `
-        <select class="form-select date-day-select" onchange="gcalEditBufferField('day', parseInt(this.value))">
-          ${Array.from({length: 31}, (_, i) => `<option value="${i+1}" ${i+1 === day ? "selected" : ""}>${i+1}</option>`).join("")}
-        </select>
-        <select class="form-select date-month-select" onchange="gcalEditBufferField('month', parseInt(this.value))">
-          ${months.map((m, i) => `<option value="${i+1}" ${i+1 === month ? "selected" : ""}>${m}</option>`).join("")}
-        </select>`;
-    }
+    const dateStr = showYear ? `${day} ${months[month - 1]} ${year}` : `${day} ${months[month - 1]}`;
+    const typeStr = dateData.type === "annual" ? "Annual" : "Once";
 
     const catImgMap = {};
     categories.forEach(c => {
@@ -160,25 +152,23 @@ function renderGoogleEventsEditor() {
           </div>
           <div class="flex-fill" style="min-width:0">
             <div class="mb-2">
-              <input class="form-control" value="${escapeHtml(dateData.name || "")}" oninput="gcalEditBufferField('name', this.value)">
+              <input class="form-control" value="${escapeHtml(dateData.name || "")}" readonly>
             </div>
             <div class="d-flex mb-1">
-              <div class="d-flex flex-nowrap gap-1 flex-fill">${dateHtml}</div>
-              <select class="form-select ms-3 type-select" onchange="gcalEditBufferField('type', this.value)">
-                <option value="annual" ${dateData.type === "annual" ? "selected" : ""}>Annual</option>
-                <option value="once" ${dateData.type === "once" ? "selected" : ""}>Once</option>
-              </select>
+              <div class="d-flex flex-nowrap gap-1 flex-fill">
+                <input class="form-control" value="${escapeHtml(dateStr)}" readonly>
+              </div>
+              <input class="form-control ms-3 type-select" value="${escapeHtml(typeStr)}" readonly>
             </div>
             <div class="d-flex gap-2">
-              <button class="btn btn-success editor-btn">OK</button>
-              <button class="btn btn-secondary editor-btn ms-auto" onclick="cancelGcalEditing()">Cancel</button>
+              <button class="btn btn-secondary editor-btn" onclick="cancelGcalEditing()">Cancel</button>
+              <button class="btn btn-success editor-btn ms-auto" onclick="doneGcalEditing()">OK</button>
             </div>
           </div>
         </div>
       </div>
     `;
 
-    initGcalFlatpickr(gcalEditingIndex);
     updateNavState();
     return;
   }
@@ -278,52 +268,79 @@ function editGoogleEvent(index) {
   if (!entry) return;
   gcalEditBuffer = JSON.parse(JSON.stringify(entry.d));
   gcalEditingIndex = index;
+  gcalEditingEventId = entry.evt && entry.evt.id ? entry.evt.id : null;
   renderGoogleEventsEditor();
 }
 
 function cancelGcalEditing() {
   gcalEditingIndex = -1;
   gcalEditBuffer = null;
+  gcalEditingEventId = null;
   renderGoogleEventsEditor();
 }
 
 function gcalEditBufferField(field, value) {
   if (!gcalEditBuffer) return;
+  if (field !== "category" && field !== "image") return;
   gcalEditBuffer[field] = value;
-  if (field === "type") {
-    if (value === "annual") {
-      delete gcalEditBuffer.year;
-    } else {
-      gcalEditBuffer.year = new Date().getFullYear();
-    }
-    renderGoogleEventsEditor();
-  }
-  if (field === "category" || field === "image") {
-    renderGoogleEventsEditor();
-  }
+  renderGoogleEventsEditor();
 }
 
-function initGcalFlatpickr(index) {
-  if (typeof flatpickr === "undefined") return;
-  const input = document.querySelector(`.flatpickr-date[data-gcal-index="${index}"]`);
-  if (!input || !gcalEditBuffer) return;
-  const showYear = input.dataset.showyear === "true";
-  const day = gcalEditBuffer.day || 1;
-  const month = gcalEditBuffer.month || 1;
-  const year = gcalEditBuffer.year || new Date().getFullYear();
-  const defaultDate = new Date(year, month - 1, day);
+function doneGcalEditing() {
+  if (gcalEditingIndex < 0 || !gcalEditBuffer) {
+    cancelGcalEditing();
+    return;
+  }
 
-  flatpickr(input, {
-    dateFormat: showYear ? "d/m/Y" : "d/m",
-    defaultDate: defaultDate,
-    allowInput: true,
-    onChange: function(selectedDates) {
-      if (selectedDates.length > 0 && gcalEditBuffer) {
-        const sel = selectedDates[0];
-        gcalEditBuffer.day = sel.getDate();
-        gcalEditBuffer.month = sel.getMonth() + 1;
-        if (showYear) gcalEditBuffer.year = sel.getFullYear();
-      }
-    }
-  });
+  const feed = loadGoogleCalFeed();
+  if (!feed || !Array.isArray(feed.items)) {
+    showAppInfoModal("Google Calendar", "No cached Google Calendar feed.");
+    return;
+  }
+
+  const evt = feed.items[gcalEditingIndex];
+  if (!evt) {
+    showAppInfoModal("Google Calendar", "Event not found in cache.");
+    return;
+  }
+
+  if (isGcalSequenceEvent(evt)) {
+    showAppInfoModal("Google Calendar", "This event is part of a sequence and cannot be updated yet.");
+    return;
+  }
+
+  if (!evt.id) {
+    showAppInfoModal("Google Calendar", "Event has no Google event id.");
+    return;
+  }
+
+  const newDescription = buildDescriptionWithCmdPayload(
+    evt.description,
+    gcalEditBuffer.category || "",
+    gcalEditBuffer.image || ""
+  );
+
+  showSpinner();
+  updateGoogleEventDescription(evt.id, newDescription)
+    .then(updated => {
+      feed.items[gcalEditingIndex] = Object.assign({}, evt, updated, {
+        description: updated.description != null ? updated.description : newDescription
+      });
+      // Keep local category/image on the cached item for display until a full refresh.
+      feed.items[gcalEditingIndex]._cmd = {
+        category: gcalEditBuffer.category || "",
+        image: gcalEditBuffer.image || ""
+      };
+      storeGoogleCalFeed(feed);
+      hideSpinner();
+      gcalEditingIndex = -1;
+      gcalEditBuffer = null;
+      gcalEditingEventId = null;
+      renderGoogleEventsEditor();
+      showAppInfoModal("Google Calendar", "Event description updated.");
+    })
+    .catch(err => {
+      hideSpinner();
+      showAppInfoModal("Google Calendar", "Failed to update event: " + err.message);
+    });
 }
