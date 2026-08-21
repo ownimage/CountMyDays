@@ -152,13 +152,13 @@ function refreshMainDisplay() {
   if (typeof renderCountdowns === "function") renderCountdowns();
 }
 
-// Extract trailing {count_my_days{...}} block (brace-balanced).
+// Extract {count_my_days{...}} block (brace-balanced), keeping text before and after.
 // Shape: {count_my_days{'name': {category: "...", image: "..."}, ...}}
 function extractCmdPayloadBlock(description) {
   const text = String(description || "");
   const marker = "{count_my_days";
   const idx = text.lastIndexOf(marker);
-  if (idx === -1) return { base: text.trimEnd(), block: null, users: {} };
+  if (idx === -1) return { base: text, suffix: "", block: null, users: {} };
 
   // Brace-balance from the opening '{' of the marker
   let depth = 0;
@@ -199,7 +199,8 @@ function extractCmdPayloadBlock(description) {
   }
 
   return {
-    base: text.slice(0, idx).trimEnd(),
+    base: text.slice(0, idx),
+    suffix: text.slice(endIdx),
     block: block,
     users: parseCmdUsersObject(usersInner)
   };
@@ -254,8 +255,17 @@ function buildDescriptionWithCmdPayload(existingDescription, category, image, sh
   };
 
   const payloadText = "{count_my_days{" + serializeCmdUsersObject(users) + "}}";
-  if (!extracted.base) return payloadText;
-  return extracted.base + "\n" + payloadText;
+  const before = extracted.base || "";
+  const after = extracted.suffix || "";
+  // Preserve surrounding description text; only replace the payload block.
+  if (!before && !after) return payloadText;
+  if (!before) return payloadText + after;
+  if (!after) {
+    // Keep a single newline between body text and payload when needed
+    const sep = /\s$/.test(before) ? "" : (before.endsWith("\n") ? "" : "\n");
+    return before + sep + payloadText;
+  }
+  return before + payloadText + after;
 }
 
 // Returns category/image/show for the configured Name only.
