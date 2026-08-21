@@ -91,12 +91,13 @@ function renderGoogleEventsEditor() {
     })();
     const dateImgSrc = dateData.image ? (images.find(i => i.name === dateData.image)?.data || "") : "";
 
-    const showYear = dateData.type === "once";
     const day = dateData.day || 1;
     const month = dateData.month || 1;
     const year = dateData.year || now.getFullYear();
-    const dateStr = showYear ? `${day} ${months[month - 1]} ${year}` : `${day} ${months[month - 1]}`;
-    const typeStr = dateData.type === "annual" ? "Annual" : "Once";
+    const dateStr = `${day} ${months[month - 1]} ${year}`;
+    const isRecurring = !!(entry && entry.evt && (entry.evt.recurringEventId || (entry.evt.recurrence && entry.evt.recurrence.length)));
+    const typeStr = isRecurring ? "Recurring" : "Once";
+    const showChecked = dateData.show !== false;
 
     const catImgMap = {};
     categories.forEach(c => {
@@ -154,11 +155,15 @@ function renderGoogleEventsEditor() {
             <div class="mb-2">
               <input class="form-control" value="${escapeHtml(dateData.name || "")}" readonly>
             </div>
-            <div class="d-flex mb-1">
-              <div class="d-flex flex-nowrap gap-1 flex-fill">
-                <input class="form-control" value="${escapeHtml(dateStr)}" readonly>
-              </div>
-              <input class="form-control ms-3 type-select" value="${escapeHtml(typeStr)}" readonly>
+            <div class="mb-2">
+              <input class="form-control" value="${escapeHtml(dateStr)}" readonly>
+            </div>
+            <div class="mb-2">
+              <input class="form-control" value="${escapeHtml(typeStr)}" readonly>
+            </div>
+            <div class="mb-3 form-check">
+              <input class="form-check-input" type="checkbox" id="gcalShowCheck" ${showChecked ? "checked" : ""} onchange="gcalEditBufferField('show', this.checked)">
+              <label class="form-check-label" for="gcalShowCheck">Show</label>
             </div>
             <div class="d-flex gap-2">
               <button class="btn btn-secondary editor-btn" onclick="cancelGcalEditing()">Cancel</button>
@@ -267,6 +272,7 @@ function editGoogleEvent(index) {
   const entry = entries.find(e => e.index === index);
   if (!entry) return;
   gcalEditBuffer = JSON.parse(JSON.stringify(entry.d));
+  if (typeof gcalEditBuffer.show === "undefined") gcalEditBuffer.show = true;
   gcalEditingIndex = index;
   gcalEditingEventId = entry.evt && entry.evt.id ? entry.evt.id : null;
   renderGoogleEventsEditor();
@@ -281,14 +287,21 @@ function cancelGcalEditing() {
 
 function gcalEditBufferField(field, value) {
   if (!gcalEditBuffer) return;
-  if (field !== "category" && field !== "image") return;
+  if (field !== "category" && field !== "image" && field !== "show") return;
   gcalEditBuffer[field] = value;
-  renderGoogleEventsEditor();
+  if (field === "category" || field === "image") {
+    renderGoogleEventsEditor();
+  }
 }
 
 function doneGcalEditing() {
   if (gcalEditingIndex < 0 || !gcalEditBuffer) {
     cancelGcalEditing();
+    return;
+  }
+
+  if (!getGCalUserName()) {
+    showAppInfoModal("Google Calendar", "Set your Name in Settings → G Cal before saving event icons.");
     return;
   }
 
@@ -306,20 +319,20 @@ function doneGcalEditing() {
 
   const category = gcalEditBuffer.category || "";
   const image = gcalEditBuffer.image || "";
-  const cmd = { category: category, image: image };
+  const show = gcalEditBuffer.show !== false;
+  const cmd = { category: category, image: image, show: show };
 
-  // Recurring instance: patch the master series event; apply category/image to all local siblings.
+  // Recurring instance: patch the master series event; apply settings to all local siblings.
   if (evt.recurringEventId) {
     const masterId = evt.recurringEventId;
     const seriesItems = feed.items.filter(item =>
       item && (item.recurringEventId === masterId || item.id === masterId)
     );
-    // Prefer description from the master event in cache, else this instance.
     const masterInCache = feed.items.find(item => item && item.id === masterId);
     const baseDescription = (masterInCache && masterInCache.description != null)
       ? masterInCache.description
       : evt.description;
-    const newDescription = buildDescriptionWithCmdPayload(baseDescription, category, image);
+    const newDescription = buildDescriptionWithCmdPayload(baseDescription, category, image, show);
 
     showSpinner();
     updateGoogleEventDescription(masterId, newDescription)
@@ -337,7 +350,6 @@ function doneGcalEditing() {
             }
           }
         });
-        // Ensure the instance we edited is updated even if filter missed edge cases.
         feed.items[gcalEditingIndex] = Object.assign({}, feed.items[gcalEditingIndex], {
           _cmd: Object.assign({}, cmd)
         });
@@ -348,7 +360,7 @@ function doneGcalEditing() {
         gcalEditingEventId = null;
         renderGoogleEventsEditor();
         const n = seriesItems.length || 1;
-        showAppInfoModal("Google Calendar", "Series description updated. Applied category/image to " + n + " local event(s).");
+        showAppInfoModal("Google Calendar", "Series description updated. Applied settings to " + n + " local event(s).");
       })
       .catch(err => {
         hideSpinner();
@@ -362,7 +374,7 @@ function doneGcalEditing() {
     return;
   }
 
-  const newDescription = buildDescriptionWithCmdPayload(evt.description, category, image);
+  const newDescription = buildDescriptionWithCmdPayload(evt.description, category, image, show);
 
   showSpinner();
   updateGoogleEventDescription(evt.id, newDescription)

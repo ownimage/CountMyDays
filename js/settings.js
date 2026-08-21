@@ -133,6 +133,9 @@ function openSettings() {
   const densitySel = document.getElementById("densitySelector");
   if (densitySel) densitySel.value = savedDensity;
 
+  const gcalName = document.getElementById("gcalName");
+  if (gcalName) gcalName.value = localStorage.getItem("cmd_gcal_name") || "";
+
   const gcalClientId = document.getElementById("gcalClientId");
   if (gcalClientId) gcalClientId.value = localStorage.getItem("cmd_gcal_client_id") || "";
 
@@ -165,8 +168,10 @@ function changeFormat(value) {
 // -------------------------------
 
 function saveGCalSettings() {
+  const nameInput = document.getElementById("gcalName");
   const clientIdInput = document.getElementById("gcalClientId");
   const calIdInput = document.getElementById("gcalCalendarId");
+  if (nameInput) localStorage.setItem("cmd_gcal_name", nameInput.value.trim());
   if (clientIdInput) localStorage.setItem("cmd_gcal_client_id", clientIdInput.value.trim());
   if (calIdInput) localStorage.setItem("cmd_gcal_calendar_id", calIdInput.value.trim() || "primary");
 }

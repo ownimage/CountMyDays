@@ -202,14 +202,17 @@ function gcalEventToDate(evt) {
 
   let category = "";
   let image = "";
+  let show = true;
   if (evt._cmd) {
     category = evt._cmd.category || "";
     image = evt._cmd.image || "";
+    show = evt._cmd.show !== false;
   } else if (typeof parseCmdPayloadFromDescription === "function") {
     const cmd = parseCmdPayloadFromDescription(evt.description);
     if (cmd) {
       category = cmd.category || "";
       image = cmd.image || "";
+      show = cmd.show !== false;
     }
   }
 
@@ -217,6 +220,8 @@ function gcalEventToDate(evt) {
     name: evt.summary || "(Untitled event)",
     category: category,
     image: image,
+    show: show,
+    recurring: !!(evt.recurringEventId || (evt.recurrence && evt.recurrence.length)),
     gcal: true,
     type: "once",
     year: y,
@@ -228,7 +233,7 @@ function gcalEventToDate(evt) {
 function loadGoogleCalendarEntries() {
   const feed = loadGoogleCalFeed();
   if (!feed || !Array.isArray(feed.items)) return [];
-  return feed.items.map(gcalEventToDate).filter(Boolean);
+  return feed.items.map(gcalEventToDate).filter(d => d && d.show !== false);
 }
 
 // -------------------------------

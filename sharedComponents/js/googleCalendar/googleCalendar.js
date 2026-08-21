@@ -12,7 +12,6 @@ const GOOGLE_CAL_CACHE_KEY = "cmd_google_cal";
 const GOOGLE_CAL_TOKEN_KEY = "cmd_gcal_access_token";
 const GOOGLE_CAL_TOKEN_EXP_KEY = "cmd_gcal_access_token_exp";
 const CMD_PAYLOAD_MARKER = "count_my_days";
-const CMD_USER_KEY = "keith";
 
 function getGCalClientId() {
   return localStorage.getItem("cmd_gcal_client_id") || "";
@@ -20,6 +19,10 @@ function getGCalClientId() {
 
 function getGCalCalendarId() {
   return localStorage.getItem("cmd_gcal_calendar_id") || "primary";
+}
+
+function getGCalUserName() {
+  return (localStorage.getItem("cmd_gcal_name") || "").trim();
 }
 
 function getCachedGoogleAccessToken() {
@@ -149,41 +152,123 @@ function refreshMainDisplay() {
   if (typeof renderCountdowns === "function") renderCountdowns();
 }
 
-// Match trailing {count_my_days{...}} blocks (including nested braces).
-function stripCmdPayloadFromDescription(description) {
-  let text = String(description || "");
-  const marker = "{count_my_days";
-  const idx = text.lastIndexOf(marker);
-  if (idx === -1) return text.trimEnd();
-  return text.slice(0, idx).trimEnd();
-}
-
-// User-requested shape: {count_my_days{'keith': {category: "...", image: "..."}}}
-function buildDescriptionWithCmdPayload(existingDescription, category, image) {
-  const base = stripCmdPayloadFromDescription(existingDescription);
-  const cat = String(category || "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-  const img = String(image || "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-  const payloadText = "{count_my_days{'" + CMD_USER_KEY + "': {category: \"" + cat + "\", image: \"" + img + "\"}}}";
-  if (!base) return payloadText;
-  return base + "\n" + payloadText;
-}
-
-function parseCmdPayloadFromDescription(description) {
+// Extract trailing {count_my_days{...}} block (brace-balanced).
+// Shape: {count_my_days{'name': {category: "...", image: "..."}, ...}}
+function extractCmdPayloadBlock(description) {
   const text = String(description || "");
   const marker = "{count_my_days";
   const idx = text.lastIndexOf(marker);
-  if (idx === -1) return null;
-  const block = text.slice(idx);
-  const userRe = new RegExp("['\"]" + CMD_USER_KEY + "['\"]\\s*:\\s*\\{([^}]*)\\}");
-  const userMatch = block.match(userRe);
-  if (!userMatch) return null;
-  const body = userMatch[1];
-  const catMatch = body.match(/category\s*:\s*"((?:\\.|[^"\\])*)"/);
-  const imgMatch = body.match(/image\s*:\s*"((?:\\.|[^"\\])*)"/);
-  const unescape = s => String(s || "").replace(/\\"/g, '"').replace(/\\\\/g, "\\");
+  if (idx === -1) return { base: text.trimEnd(), block: null, users: {} };
+
+  // Brace-balance from the opening '{' of the marker
+  let depth = 0;
+  let endIdx = -1;
+  for (let i = idx; i < text.length; i++) {
+    if (text[i] === "{") depth++;
+    else if (text[i] === "}") {
+      depth--;
+      if (depth === 0) {
+        endIdx = i + 1;
+        break;
+      }
+    }
+  }
+  if (endIdx === -1) endIdx = text.length;
+
+  const block = text.slice(idx, endIdx);
+  // Inner users object starts at first '{' after marker text
+  const afterMarker = idx + marker.length;
+  let usersOpen = afterMarker;
+  while (usersOpen < endIdx && text[usersOpen] !== "{") usersOpen++;
+  let usersInner = "";
+  if (text[usersOpen] === "{") {
+    let d = 0;
+    let start = -1;
+    for (let i = usersOpen; i < endIdx; i++) {
+      if (text[i] === "{") {
+        d++;
+        if (d === 1) start = i + 1;
+      } else if (text[i] === "}") {
+        d--;
+        if (d === 0 && start !== -1) {
+          usersInner = text.slice(start, i);
+          break;
+        }
+      }
+    }
+  }
+
   return {
-    category: catMatch ? unescape(catMatch[1]) : "",
-    image: imgMatch ? unescape(imgMatch[1]) : ""
+    base: text.slice(0, idx).trimEnd(),
+    block: block,
+    users: parseCmdUsersObject(usersInner)
+  };
+}
+
+function parseCmdUsersObject(body) {
+  const users = {};
+  const unescape = s => String(s || "").replace(/\\"/g, '"').replace(/\\\\/g, "\\");
+  // Match 'name': { ... } or "name": { ... }
+  const entryRe = /['"]([^'"]+)['"]\s*:\s*\{([^}]*)\}/g;
+  let m;
+  while ((m = entryRe.exec(body)) !== null) {
+    const name = m[1];
+    const inner = m[2];
+    const catMatch = inner.match(/category\s*:\s*"((?:\\.|[^"\\])*)"/);
+    const imgMatch = inner.match(/image\s*:\s*"((?:\\.|[^"\\])*)"/);
+    const showMatch = inner.match(/show\s*:\s*(true|false)/i);
+    users[name] = {
+      category: catMatch ? unescape(catMatch[1]) : "",
+      image: imgMatch ? unescape(imgMatch[1]) : "",
+      show: showMatch ? showMatch[1].toLowerCase() === "true" : true
+    };
+  }
+  return users;
+}
+
+function serializeCmdUsersObject(users) {
+  const escape = s => String(s || "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const parts = Object.keys(users).map(name => {
+    const u = users[name] || {};
+    const safeName = String(name).replace(/'/g, "");
+    const showVal = u.show === false ? "false" : "true";
+    return "'" + safeName + "': {category: \"" + escape(u.category) + "\", image: \"" + escape(u.image) + "\", show: " + showVal + "}";
+  });
+  return parts.join(", ");
+}
+
+// Shape: {count_my_days{'keith': {category: "...", image: "...", show: true}, ...}}
+// Amends the named user entry; leaves other names intact.
+function buildDescriptionWithCmdPayload(existingDescription, category, image, show) {
+  const userName = getGCalUserName();
+  if (!userName) {
+    throw new Error("Set your Name in Settings -> G Cal before saving event icons.");
+  }
+
+  const extracted = extractCmdPayloadBlock(existingDescription);
+  const users = Object.assign({}, extracted.users);
+  users[userName] = {
+    category: category || "",
+    image: image || "",
+    show: show !== false
+  };
+
+  const payloadText = "{count_my_days{" + serializeCmdUsersObject(users) + "}}";
+  if (!extracted.base) return payloadText;
+  return extracted.base + "\n" + payloadText;
+}
+
+// Returns category/image/show for the configured Name only.
+function parseCmdPayloadFromDescription(description) {
+  const userName = getGCalUserName();
+  if (!userName) return null;
+  const extracted = extractCmdPayloadBlock(description);
+  if (!extracted.users || !extracted.users[userName]) return null;
+  const u = extracted.users[userName];
+  return {
+    category: u.category || "",
+    image: u.image || "",
+    show: u.show !== false
   };
 }
 
