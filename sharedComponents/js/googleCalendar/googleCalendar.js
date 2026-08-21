@@ -134,7 +134,7 @@ function isGcalSequenceEvent(evt) {
   return false;
 }
 
-// PATCH event description on Google Calendar (non-sequence events only).
+// PATCH event description on Google Calendar (single event or series master id).
 function updateGoogleEventDescription(eventId, description) {
   const calendarId = getGCalCalendarId();
 

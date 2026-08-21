@@ -304,8 +304,56 @@ function doneGcalEditing() {
     return;
   }
 
-  if (isGcalSequenceEvent(evt)) {
-    showAppInfoModal("Google Calendar", "This event is part of a sequence and cannot be updated yet.");
+  const category = gcalEditBuffer.category || "";
+  const image = gcalEditBuffer.image || "";
+  const cmd = { category: category, image: image };
+
+  // Recurring instance: patch the master series event; apply category/image to all local siblings.
+  if (evt.recurringEventId) {
+    const masterId = evt.recurringEventId;
+    const seriesItems = feed.items.filter(item =>
+      item && (item.recurringEventId === masterId || item.id === masterId)
+    );
+    // Prefer description from the master event in cache, else this instance.
+    const masterInCache = feed.items.find(item => item && item.id === masterId);
+    const baseDescription = (masterInCache && masterInCache.description != null)
+      ? masterInCache.description
+      : evt.description;
+    const newDescription = buildDescriptionWithCmdPayload(baseDescription, category, image);
+
+    showSpinner();
+    updateGoogleEventDescription(masterId, newDescription)
+      .then(updated => {
+        const desc = updated.description != null ? updated.description : newDescription;
+        feed.items.forEach((item, i) => {
+          if (!item) return;
+          if (item.recurringEventId === masterId || item.id === masterId) {
+            feed.items[i] = Object.assign({}, item, {
+              description: item.id === masterId ? desc : item.description,
+              _cmd: Object.assign({}, cmd)
+            });
+            if (item.id === masterId && updated && updated.etag) {
+              feed.items[i].etag = updated.etag;
+            }
+          }
+        });
+        // Ensure the instance we edited is updated even if filter missed edge cases.
+        feed.items[gcalEditingIndex] = Object.assign({}, feed.items[gcalEditingIndex], {
+          _cmd: Object.assign({}, cmd)
+        });
+        storeGoogleCalFeed(feed);
+        hideSpinner();
+        gcalEditingIndex = -1;
+        gcalEditBuffer = null;
+        gcalEditingEventId = null;
+        renderGoogleEventsEditor();
+        const n = seriesItems.length || 1;
+        showAppInfoModal("Google Calendar", "Series description updated. Applied category/image to " + n + " local event(s).");
+      })
+      .catch(err => {
+        hideSpinner();
+        showAppInfoModal("Google Calendar", "Failed to update series: " + err.message);
+      });
     return;
   }
 
@@ -314,23 +362,15 @@ function doneGcalEditing() {
     return;
   }
 
-  const newDescription = buildDescriptionWithCmdPayload(
-    evt.description,
-    gcalEditBuffer.category || "",
-    gcalEditBuffer.image || ""
-  );
+  const newDescription = buildDescriptionWithCmdPayload(evt.description, category, image);
 
   showSpinner();
   updateGoogleEventDescription(evt.id, newDescription)
     .then(updated => {
       feed.items[gcalEditingIndex] = Object.assign({}, evt, updated, {
-        description: updated.description != null ? updated.description : newDescription
+        description: updated.description != null ? updated.description : newDescription,
+        _cmd: Object.assign({}, cmd)
       });
-      // Keep local category/image on the cached item for display until a full refresh.
-      feed.items[gcalEditingIndex]._cmd = {
-        category: gcalEditBuffer.category || "",
-        image: gcalEditBuffer.image || ""
-      };
       storeGoogleCalFeed(feed);
       hideSpinner();
       gcalEditingIndex = -1;
