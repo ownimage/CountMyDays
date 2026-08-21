@@ -93,6 +93,8 @@ function openSettings() {
   document.getElementById("datesEditor").classList.add("d-none");
   document.getElementById("categoriesEditor").classList.add("d-none");
   document.getElementById("imagesEditor").classList.add("d-none");
+  const gcalEd = document.getElementById("googleEventsEditor");
+  if (gcalEd) gcalEd.classList.add("d-none");
   document.getElementById("settingsPage").classList.remove("d-none");
 
   const savedTheme = localStorage.getItem("theme") || "darkly";
@@ -203,10 +205,12 @@ function showNav() {
 function hideNav() {
   const nav = document.getElementById("mainNav");
   if (!nav) return;
+  const gcalEd = document.getElementById("googleEventsEditor");
   if (document.getElementById("settingsPage").classList.contains("d-none") &&
       document.getElementById("datesEditor").classList.contains("d-none") &&
       document.getElementById("categoriesEditor").classList.contains("d-none") &&
-      document.getElementById("imagesEditor").classList.contains("d-none")) {
+      document.getElementById("imagesEditor").classList.contains("d-none") &&
+      (!gcalEd || gcalEd.classList.contains("d-none"))) {
     nav.classList.add("nav-hidden");
     autoHideCooldown = true;
     setTimeout(() => { autoHideCooldown = false; }, 600);

@@ -59,6 +59,7 @@
     <div class="dropdown" id="googleMenu">
       <button class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown">Google</button>
       <ul class="dropdown-menu">
+        <li><a class="dropdown-item" onclick="openGoogleEventsEditor()">Edit</a></li>
         <li><a class="dropdown-item" onclick="refreshGoogleCalendar()">Refresh</a></li>
       </ul>
     </div>
@@ -80,6 +81,17 @@
       <div id="editorList"></div>
       <div id="addDateTile" class="mt-3"></div>
       <div id="singleDateEditor" class="d-none"></div>
+    </div>
+
+    <!-- GOOGLE EVENTS EDITOR -->
+    <div id="googleEventsEditor" class="d-none">
+      <div id="googleEventsEditorHeader">
+        <h2 class="mb-3">Edit Google Events</h2>
+        <div id="gcalAddTileTop" class="mb-3"></div>
+        <div id="gcalEditorFilters" class="mb-3"></div>
+      </div>
+      <div id="gcalEditorList"></div>
+      <div id="singleGcalEditor" class="d-none"></div>
     </div>
 
     <!-- CATEGORIES EDITOR -->
@@ -412,6 +424,7 @@
   document.write('<script src="js/export.js?v=' + BUILD_NUMBER + '"><\/script>');
   document.write('<script src="js/import-wizard.js?v=' + BUILD_NUMBER + '"><\/script>');
   document.write('<script src="sharedComponents/js/googleCalendar/googleCalendar.js?v=' + BUILD_NUMBER + '"><\/script>');
+  document.write('<script src="sharedComponents/js/googleCalendar/googleCalendarEditor.js?v=' + BUILD_NUMBER + '"><\/script>');
   </script>
 
   <script>

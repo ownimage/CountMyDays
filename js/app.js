@@ -127,6 +127,8 @@ function hideAllEditors() {
   document.getElementById("datesEditor").classList.add("d-none");
   document.getElementById("categoriesEditor").classList.add("d-none");
   document.getElementById("imagesEditor").classList.add("d-none");
+  const gcalEd = document.getElementById("googleEventsEditor");
+  if (gcalEd) gcalEd.classList.add("d-none");
   document.getElementById("settingsPage").classList.add("d-none");
 }
 
@@ -136,7 +138,8 @@ function updateNavState() {
   const editing = (
     (typeof editingIndex !== 'undefined' && editingIndex >= 0) ||
     (typeof editingCategoryIndex !== 'undefined' && editingCategoryIndex >= 0) ||
-    (typeof editingImageIndex !== 'undefined' && editingImageIndex >= 0)
+    (typeof editingImageIndex !== 'undefined' && editingImageIndex >= 0) ||
+    (typeof gcalEditingIndex !== 'undefined' && gcalEditingIndex >= 0)
   );
   nav.classList.toggle("nav-inactive", editing);
 }
@@ -345,6 +348,8 @@ function openDatesEditor() {
   document.getElementById("datesEditor").classList.remove("d-none");
   document.getElementById("categoriesEditor").classList.add("d-none");
   document.getElementById("imagesEditor").classList.add("d-none");
+  const gcalEd = document.getElementById("googleEventsEditor");
+  if (gcalEd) gcalEd.classList.add("d-none");
   document.getElementById("settingsPage").classList.add("d-none");
   renderDatesEditor();
 }
@@ -354,6 +359,8 @@ function openCategoriesEditor() {
   document.getElementById("datesEditor").classList.add("d-none");
   document.getElementById("categoriesEditor").classList.remove("d-none");
   document.getElementById("imagesEditor").classList.add("d-none");
+  const gcalEd = document.getElementById("googleEventsEditor");
+  if (gcalEd) gcalEd.classList.add("d-none");
   document.getElementById("settingsPage").classList.add("d-none");
   renderCategoriesEditor();
 }
@@ -363,6 +370,8 @@ function openImagesEditor() {
   document.getElementById("datesEditor").classList.add("d-none");
   document.getElementById("categoriesEditor").classList.add("d-none");
   document.getElementById("imagesEditor").classList.remove("d-none");
+  const gcalEd = document.getElementById("googleEventsEditor");
+  if (gcalEd) gcalEd.classList.add("d-none");
   document.getElementById("settingsPage").classList.add("d-none");
   imagesPage = 0;
   renderImagesEditor();

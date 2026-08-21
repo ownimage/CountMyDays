@@ -16,7 +16,8 @@ const PRECACHE_URLS = [
   "js/images.js",
   "js/export.js",
   "js/import-wizard.js",
-  "sharedComponents/js/googleCalendar/googleCalendar.js"
+  "sharedComponents/js/googleCalendar/googleCalendar.js",
+  "sharedComponents/js/googleCalendar/googleCalendarEditor.js"
 ];
 
 self.addEventListener("install", event => {
