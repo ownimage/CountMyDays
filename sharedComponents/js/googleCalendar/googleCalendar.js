@@ -9,6 +9,8 @@
 const GSI_SCRIPT_URL = "https://accounts.google.com/gsi/client";
 const GOOGLE_CAL_SCOPE = "https://www.googleapis.com/auth/calendar.events";
 const GOOGLE_CAL_CACHE_KEY = "cmd_google_cal";
+const GOOGLE_CAL_TOKEN_KEY = "cmd_gcal_access_token";
+const GOOGLE_CAL_TOKEN_EXP_KEY = "cmd_gcal_access_token_exp";
 const CMD_PAYLOAD_MARKER = "count_my_days";
 const CMD_USER_KEY = "keith";
 
@@ -18,6 +20,26 @@ function getGCalClientId() {
 
 function getGCalCalendarId() {
   return localStorage.getItem("cmd_gcal_calendar_id") || "primary";
+}
+
+function getCachedGoogleAccessToken() {
+  const token = localStorage.getItem(GOOGLE_CAL_TOKEN_KEY);
+  const exp = parseInt(localStorage.getItem(GOOGLE_CAL_TOKEN_EXP_KEY) || "0", 10);
+  // Refresh 60s before expiry
+  if (token && exp > Date.now() + 60000) return token;
+  return null;
+}
+
+function storeGoogleAccessToken(tokenResponse) {
+  if (!tokenResponse || !tokenResponse.access_token) return;
+  localStorage.setItem(GOOGLE_CAL_TOKEN_KEY, tokenResponse.access_token);
+  const expiresInSec = parseInt(tokenResponse.expires_in, 10) || 3600;
+  localStorage.setItem(GOOGLE_CAL_TOKEN_EXP_KEY, String(Date.now() + expiresInSec * 1000));
+}
+
+function clearGoogleAccessToken() {
+  localStorage.removeItem(GOOGLE_CAL_TOKEN_KEY);
+  localStorage.removeItem(GOOGLE_CAL_TOKEN_EXP_KEY);
 }
 
 function loadGoogleIdentityScript() {
@@ -37,7 +59,7 @@ function loadGoogleIdentityScript() {
   });
 }
 
-function requestGoogleAccessToken() {
+function requestGoogleAccessToken(forcePrompt) {
   if (localStorage.getItem("cmd_gcal_enabled") !== "true") {
     return Promise.reject(new Error("Google Calendar is not enabled. Turn it on in Settings -> G Cal."));
   }
@@ -47,22 +69,62 @@ function requestGoogleAccessToken() {
     return Promise.reject(new Error("Google Calendar is not configured. Add your OAuth Client ID in Settings -> G Cal."));
   }
 
+  if (!forcePrompt) {
+    const cached = getCachedGoogleAccessToken();
+    if (cached) return Promise.resolve(cached);
+  }
+
   return loadGoogleIdentityScript().then(() => {
     return new Promise((resolve, reject) => {
+      let triedSilent = !forcePrompt;
+
+      function handleTokenResponse(tokenResponse) {
+        if (tokenResponse.error) {
+          // Silent re-auth failed — fall back to interactive once
+          if (triedSilent) {
+            triedSilent = false;
+            tokenClient.requestAccessToken({ prompt: "consent" });
+            return;
+          }
+          reject(new Error("OAuth failed: " + (tokenResponse.error_description || tokenResponse.error)));
+          return;
+        }
+        storeGoogleAccessToken(tokenResponse);
+        resolve(tokenResponse.access_token);
+      }
+
       const tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: clientId,
         scope: GOOGLE_CAL_SCOPE,
-        callback: tokenResponse => {
-          if (tokenResponse.error) {
-            reject(new Error("OAuth failed: " + (tokenResponse.error_description || tokenResponse.error)));
-            return;
-          }
-          resolve(tokenResponse.access_token);
-        }
+        callback: handleTokenResponse
       });
-      tokenClient.requestAccessToken();
+
+      // prompt: "" tries to reuse prior consent without UI
+      tokenClient.requestAccessToken(forcePrompt ? { prompt: "consent" } : { prompt: "" });
     });
   });
+}
+
+function googleApiFetch(url, options) {
+  options = options || {};
+  return requestGoogleAccessToken(false)
+    .then(accessToken => {
+      const headers = Object.assign({}, options.headers || {}, {
+        Authorization: "Bearer " + accessToken
+      });
+      return fetch(url, Object.assign({}, options, { headers: headers }));
+    })
+    .then(res => {
+      if (res.status !== 401) return res;
+      // Token rejected — clear and retry once with interactive auth
+      clearGoogleAccessToken();
+      return requestGoogleAccessToken(true).then(accessToken => {
+        const headers = Object.assign({}, options.headers || {}, {
+          Authorization: "Bearer " + accessToken
+        });
+        return fetch(url, Object.assign({}, options, { headers: headers }));
+      });
+    });
 }
 
 // -------------------------------
@@ -71,22 +133,20 @@ function requestGoogleAccessToken() {
 
 function fetchEvents() {
   const calendarId = getGCalCalendarId();
+  const url = "https://www.googleapis.com/calendar/v3/calendars/" +
+    encodeURIComponent(calendarId) +
+    "/events?maxResults=250&orderBy=startTime&singleEvents=true&timeMin=" +
+    encodeURIComponent(new Date().toISOString());
 
-  return requestGoogleAccessToken()
-    .then(accessToken => {
-      const url = "https://www.googleapis.com/calendar/v3/calendars/" +
-        encodeURIComponent(calendarId) +
-        "/events?maxResults=250&orderBy=startTime&singleEvents=true&timeMin=" +
-        encodeURIComponent(new Date().toISOString());
-
-      return fetch(url, {
-        headers: { Authorization: "Bearer " + accessToken }
-      })
-        .then(res => {
-          if (!res.ok) throw new Error("Calendar API " + res.status + " " + res.statusText);
-          return res.json();
-        });
+  return googleApiFetch(url)
+    .then(res => {
+      if (!res.ok) throw new Error("Calendar API " + res.status + " " + res.statusText);
+      return res.json();
     });
+}
+
+function refreshMainDisplay() {
+  if (typeof renderCountdowns === "function") renderCountdowns();
 }
 
 // Match trailing {count_my_days{...}} blocks (including nested braces).
@@ -137,25 +197,18 @@ function isGcalSequenceEvent(evt) {
 // PATCH event description on Google Calendar (single event or series master id).
 function updateGoogleEventDescription(eventId, description) {
   const calendarId = getGCalCalendarId();
+  const url = "https://www.googleapis.com/calendar/v3/calendars/" +
+    encodeURIComponent(calendarId) +
+    "/events/" + encodeURIComponent(eventId);
 
-  return requestGoogleAccessToken()
-    .then(accessToken => {
-      const url = "https://www.googleapis.com/calendar/v3/calendars/" +
-        encodeURIComponent(calendarId) +
-        "/events/" + encodeURIComponent(eventId);
-
-      return fetch(url, {
-        method: "PATCH",
-        headers: {
-          Authorization: "Bearer " + accessToken,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ description: description })
-      })
-        .then(res => {
-          if (!res.ok) throw new Error("Calendar API " + res.status + " " + res.statusText);
-          return res.json();
-        });
+  return googleApiFetch(url, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ description: description })
+  })
+    .then(res => {
+      if (!res.ok) throw new Error("Calendar API " + res.status + " " + res.statusText);
+      return res.json();
     });
 }
 
@@ -189,6 +242,7 @@ function refreshGoogleCalendar() {
     .then(json => {
       storeGoogleCalFeed(json);
       hideSpinner();
+      refreshMainDisplay();
       const count = (json.items && json.items.length) || 0;
       showAppInfoModal("Google Calendar", "Refreshed: " + count + " events cached.");
     })
@@ -200,6 +254,7 @@ function refreshGoogleCalendar() {
 
 function clearGoogleCalCache() {
   localStorage.removeItem(GOOGLE_CAL_CACHE_KEY);
+  refreshMainDisplay();
   showAppInfoModal("Google Calendar", "Cached feed cleared.");
 }
 
@@ -223,6 +278,7 @@ function loadGCalSampleData() {
         return;
       }
       storeGoogleCalFeed(json);
+      refreshMainDisplay();
       showAppInfoModal("Sample Data", json.items.length + " events cached under cmd_google_cal.");
     })
     .catch(err => {
