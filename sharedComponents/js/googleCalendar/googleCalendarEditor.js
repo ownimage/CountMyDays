@@ -9,8 +9,10 @@ let gcalEditingIndex = -1;
 let gcalEditBuffer = null;
 let gcalTitleSearch = "";
 let gcalEditingEventId = null;
+let gcalReturnToDates = false;
 
 function openGoogleEventsEditor() {
+  gcalReturnToDates = false;
   document.getElementById("countdownContainer").classList.add("d-none");
   document.getElementById("datesEditor").classList.add("d-none");
   document.getElementById("categoriesEditor").classList.add("d-none");
@@ -25,14 +27,49 @@ function openGoogleEventsEditor() {
   renderGoogleEventsEditor();
 }
 
+// Open a single Google event editor from Edit -> Dates, then return there on close.
+function openGoogleEventFromDates(index) {
+  gcalReturnToDates = true;
+  document.getElementById("countdownContainer").classList.add("d-none");
+  document.getElementById("datesEditor").classList.add("d-none");
+  document.getElementById("categoriesEditor").classList.add("d-none");
+  document.getElementById("imagesEditor").classList.add("d-none");
+  document.getElementById("settingsPage").classList.add("d-none");
+  const el = document.getElementById("googleEventsEditor");
+  if (el) el.classList.remove("d-none");
+
+  const feed = loadGoogleCalFeed();
+  if (!feed || !Array.isArray(feed.items) || !feed.items[index]) {
+    closeGoogleEventsEditor();
+    return;
+  }
+  const d = gcalEventToDate(feed.items[index]);
+  if (!d) {
+    closeGoogleEventsEditor();
+    return;
+  }
+  gcalEditBuffer = JSON.parse(JSON.stringify(d));
+  if (typeof gcalEditBuffer.show === "undefined") gcalEditBuffer.show = true;
+  gcalEditingIndex = index;
+  gcalEditingEventId = feed.items[index].id || null;
+  gcalTitleSearch = "";
+  renderGoogleEventsEditor();
+}
+
 function closeGoogleEventsEditor() {
   const el = document.getElementById("googleEventsEditor");
   if (el) el.classList.add("d-none");
-  document.getElementById("countdownContainer").classList.remove("d-none");
   gcalEditingIndex = -1;
   gcalEditBuffer = null;
   gcalEditingEventId = null;
   gcalTitleSearch = "";
+  if (gcalReturnToDates) {
+    gcalReturnToDates = false;
+    document.getElementById("datesEditor").classList.remove("d-none");
+    if (typeof renderDatesEditor === "function") renderDatesEditor();
+    return;
+  }
+  document.getElementById("countdownContainer").classList.remove("d-none");
   renderCountdowns();
 }
 
@@ -41,6 +78,7 @@ function getGoogleEventEntries() {
   if (!feed || !Array.isArray(feed.items)) return [];
   return feed.items
     .map((evt, index) => {
+      // Editor list needs hidden events too — gcalEventToDate always maps them.
       const d = gcalEventToDate(evt);
       if (!d) return null;
       return { d, index, evt };
@@ -279,6 +317,10 @@ function editGoogleEvent(index) {
 }
 
 function cancelGcalEditing() {
+  if (gcalReturnToDates) {
+    closeGoogleEventsEditor();
+    return;
+  }
   gcalEditingIndex = -1;
   gcalEditBuffer = null;
   gcalEditingEventId = null;
@@ -355,11 +397,16 @@ function doneGcalEditing() {
         });
         storeGoogleCalFeed(feed);
         hideSpinner();
+        const n = seriesItems.length || 1;
+        if (gcalReturnToDates) {
+          closeGoogleEventsEditor();
+          showAppInfoModal("Google Calendar", "Series description updated. Applied settings to " + n + " local event(s).");
+          return;
+        }
         gcalEditingIndex = -1;
         gcalEditBuffer = null;
         gcalEditingEventId = null;
         renderGoogleEventsEditor();
-        const n = seriesItems.length || 1;
         showAppInfoModal("Google Calendar", "Series description updated. Applied settings to " + n + " local event(s).");
       })
       .catch(err => {
@@ -385,6 +432,11 @@ function doneGcalEditing() {
       });
       storeGoogleCalFeed(feed);
       hideSpinner();
+      if (gcalReturnToDates) {
+        closeGoogleEventsEditor();
+        showAppInfoModal("Google Calendar", "Event description updated.");
+        return;
+      }
       gcalEditingIndex = -1;
       gcalEditBuffer = null;
       gcalEditingEventId = null;

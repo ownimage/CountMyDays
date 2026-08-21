@@ -552,6 +552,34 @@ body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
   font-weight: 800;
 }
 
+/* SOURCE / REPEAT BADGES ON EDITOR TILES */
+.event-badge {
+  display: inline-block;
+  font-size: 0.7em;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.25em 0.5em;
+  border-radius: 0.35rem;
+  vertical-align: middle;
+  margin-left: 0.35rem;
+}
+.event-badge-local {
+  background: var(--bs-secondary);
+  color: var(--bs-body-bg);
+}
+.event-badge-google {
+  background: #4285f4;
+  color: #fff;
+}
+.event-badge-repeat {
+  background: var(--bs-info);
+  color: #fff;
+}
+#editorFilters .dropdown-menu {
+  min-width: 240px;
+  padding: 0.75rem;
+}
+
 /* COLOUR SWATCH */
 .color-swatch {
   display: inline-block;
