@@ -109,6 +109,26 @@ body.compact .btn-wide {
   flex-wrap: wrap;
 }
 
+.app-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.app-modal-content {
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  padding: 24px;
+  border-radius: 10px;
+  width: min(90vw, 420px);
+  max-width: 90vw;
+  text-align: center;
+}
+
 
 .qr-scroll {
   flex: 1;
@@ -237,6 +257,11 @@ body.font-size-xsmall #datesEditor .btn,
 body.font-size-xsmall #datesEditor .form-label,
 body.font-size-xsmall #datesEditor .form-control,
 body.font-size-xsmall #datesEditor .form-select,
+body.font-size-xsmall #googleEventsEditor,
+body.font-size-xsmall #googleEventsEditor .btn,
+body.font-size-xsmall #googleEventsEditor .form-label,
+body.font-size-xsmall #googleEventsEditor .form-control,
+body.font-size-xsmall #googleEventsEditor .form-select,
 body.font-size-xsmall #categoriesEditor,
 body.font-size-xsmall #categoriesEditor .btn,
 body.font-size-xsmall #categoriesEditor .form-label,
@@ -268,6 +293,11 @@ body.font-size-small #datesEditor .btn,
 body.font-size-small #datesEditor .form-label,
 body.font-size-small #datesEditor .form-control,
 body.font-size-small #datesEditor .form-select,
+body.font-size-small #googleEventsEditor,
+body.font-size-small #googleEventsEditor .btn,
+body.font-size-small #googleEventsEditor .form-label,
+body.font-size-small #googleEventsEditor .form-control,
+body.font-size-small #googleEventsEditor .form-select,
 body.font-size-small #categoriesEditor,
 body.font-size-small #categoriesEditor .btn,
 body.font-size-small #categoriesEditor .form-label,
@@ -299,6 +329,11 @@ body.font-size-large #datesEditor .btn,
 body.font-size-large #datesEditor .form-label,
 body.font-size-large #datesEditor .form-control,
 body.font-size-large #datesEditor .form-select,
+body.font-size-large #googleEventsEditor,
+body.font-size-large #googleEventsEditor .btn,
+body.font-size-large #googleEventsEditor .form-label,
+body.font-size-large #googleEventsEditor .form-control,
+body.font-size-large #googleEventsEditor .form-select,
 body.font-size-large #categoriesEditor,
 body.font-size-large #categoriesEditor .btn,
 body.font-size-large #categoriesEditor .form-label,
@@ -330,6 +365,11 @@ body.font-size-xlarge #datesEditor .btn,
 body.font-size-xlarge #datesEditor .form-label,
 body.font-size-xlarge #datesEditor .form-control,
 body.font-size-xlarge #datesEditor .form-select,
+body.font-size-xlarge #googleEventsEditor,
+body.font-size-xlarge #googleEventsEditor .btn,
+body.font-size-xlarge #googleEventsEditor .form-label,
+body.font-size-xlarge #googleEventsEditor .form-control,
+body.font-size-xlarge #googleEventsEditor .form-select,
 body.font-size-xlarge #categoriesEditor,
 body.font-size-xlarge #categoriesEditor .btn,
 body.font-size-xlarge #categoriesEditor .form-label,
@@ -361,6 +401,11 @@ body.font-size-jumbo #datesEditor .btn,
 body.font-size-jumbo #datesEditor .form-label,
 body.font-size-jumbo #datesEditor .form-control,
 body.font-size-jumbo #datesEditor .form-select,
+body.font-size-jumbo #googleEventsEditor,
+body.font-size-jumbo #googleEventsEditor .btn,
+body.font-size-jumbo #googleEventsEditor .form-label,
+body.font-size-jumbo #googleEventsEditor .form-control,
+body.font-size-jumbo #googleEventsEditor .form-select,
 body.font-size-jumbo #categoriesEditor,
 body.font-size-jumbo #categoriesEditor .btn,
 body.font-size-jumbo #categoriesEditor .form-label,
@@ -455,6 +500,20 @@ body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
   overflow-y: auto;
   min-height: 0;
 }
+#googleEventsEditor {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 56px);
+  padding-top: 20px;
+}
+#googleEventsEditorHeader {
+  flex-shrink: 0;
+}
+#googleEventsEditor #gcalEditorList {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
 #imagesEditor {
   display: flex;
   flex-direction: column;
@@ -488,8 +547,37 @@ body.auto-hide-menu #mainNav.nav-hidden ~ .container-fluid {
 }
 
 /* EDITOR TITLE WEIGHT */
-#datesEditor .editor-title {
+#datesEditor .editor-title,
+#googleEventsEditor .editor-title {
   font-weight: 800;
+}
+
+/* SOURCE / REPEAT BADGES ON EDITOR TILES */
+.event-badge {
+  display: inline-block;
+  font-size: 0.7em;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.25em 0.5em;
+  border-radius: 0.35rem;
+  vertical-align: middle;
+  margin-left: 0.35rem;
+}
+.event-badge-local {
+  background: var(--bs-secondary);
+  color: var(--bs-body-bg);
+}
+.event-badge-google {
+  background: #4285f4;
+  color: #fff;
+}
+.event-badge-repeat {
+  background: var(--bs-info);
+  color: #fff;
+}
+#editorFilters .dropdown-menu {
+  min-width: 240px;
+  padding: 0.75rem;
 }
 
 /* COLOUR SWATCH */

@@ -4,6 +4,9 @@ let isNewDate = false;
 let categoryFilter = "";
 let titleSearch = "";
 let deletePendingIndex = -1;
+let filterShowLocal = true;
+let filterShowGoogle = true;
+let filterShowGoogleHidden = false;
 
 function renderDatesEditor() {
   const list = document.getElementById("editorList");
@@ -126,8 +129,8 @@ function renderDatesEditor() {
               </select>
             </div>
             <div class="d-flex gap-2">
-              <button class="btn btn-success editor-btn" onclick="doneEditing()">OK</button>
-              <button class="btn btn-secondary editor-btn ms-auto" onclick="cancelEditing()">Cancel</button>
+              <button class="btn btn-secondary editor-btn" onclick="cancelEditing()">Cancel</button>
+              <button class="btn btn-success editor-btn ms-auto" onclick="doneEditing()">OK</button>
             </div>
           </div>
         </div>
@@ -145,20 +148,22 @@ function renderDatesEditor() {
   filterEl.classList.remove("d-none");
   singleEditor.classList.add("d-none");
 
-  const filtered = allDates
-    .map((d, index) => ({ d, index }))
-    .filter(({ d, index }) => {
+  const filtered = getUnifiedEditorEntries()
+    .filter(entry => {
+      const d = entry.d;
       if (categoryFilter && d.category !== categoryFilter) return false;
-      if (titleSearch && !d.name.toLowerCase().includes(titleSearch.toLowerCase())) return false;
+      if (titleSearch && !(d.name || "").toLowerCase().includes(titleSearch.toLowerCase())) return false;
+      if (entry.source === "local") return filterShowLocal;
+      if (entry.source === "google") {
+        if (d.show === false) return filterShowGoogleHidden;
+        return filterShowGoogle;
+      }
       return true;
     })
-    .sort((a, b) => {
-      const ta = targetDate(a.d);
-      const tb = targetDate(b.d);
-      return ta - tb;
-    });
+    .sort((a, b) => targetDate(a.d) - targetDate(b.d));
 
-  filtered.forEach(({ d, index }) => {
+  filtered.forEach(entry => {
+    const d = entry.d;
     const category = d.category ? categories.find(c => c.name === d.category) : null;
     const imgSrc = (() => {
       if (!category) return "";
@@ -168,11 +173,34 @@ function renderDatesEditor() {
     })();
     const dateImgSrc = d.image ? (images.find(i => i.name === d.image)?.data || "") : "";
 
-    const showYear = d.type === "once";
     const day = d.day || 1;
     const month = d.month || 1;
     const year = d.year || now.getFullYear();
-    const dateStr = showYear ? `${day} ${months[month-1]} ${year}` : `${day} ${months[month-1]}`;
+    let dateStr;
+    let typeStr;
+    if (entry.source === "google") {
+      dateStr = `${day} ${months[month - 1]} ${year}`;
+      typeStr = d.recurring ? "Recurring" : "Once";
+    } else {
+      const showYear = d.type === "once";
+      dateStr = showYear ? `${day} ${months[month - 1]} ${year}` : `${day} ${months[month - 1]}`;
+      typeStr = d.type === "annual" ? "Annual" : "Once";
+    }
+
+    const sourceBadge = entry.source === "google"
+      ? `<span class="event-badge event-badge-google">Google</span>`
+      : `<span class="event-badge event-badge-local">Local</span>`;
+    const repeatBadge = (entry.source === "google" && d.recurring)
+      ? `<span class="event-badge event-badge-repeat">Repeat</span>`
+      : "";
+    const hiddenBadge = (entry.source === "google" && d.show === false)
+      ? `<span class="event-badge event-badge-local">Hidden</span>`
+      : "";
+
+    const actions = entry.source === "google"
+      ? `<button class="btn btn-primary editor-btn ms-auto" onclick="editUnifiedEntry('google', ${entry.index})">Edit</button>`
+      : `<button class="btn btn-primary editor-btn" onclick="editUnifiedEntry('local', ${entry.index})">Edit</button>
+         <button class="btn btn-danger editor-btn ms-auto" onclick="confirmDeleteDate(${entry.index})">Delete</button>`;
 
     const card = document.createElement("div");
     card.className = "card p-3 mb-3";
@@ -188,14 +216,13 @@ function renderDatesEditor() {
           </div>
         </div>
         <div class="flex-fill" style="min-width:0">
-          <div class="fw-bold editor-title mb-2">${escapeHtml(d.name)}</div>
+          <div class="fw-bold editor-title mb-2">${escapeHtml(d.name)}${sourceBadge}${repeatBadge}${hiddenBadge}</div>
           <div class="d-flex mb-1">
             <span>${dateStr}</span>
-            <span class="ms-3">${d.type === "annual" ? "Annual" : "Once"}</span>
+            <span class="ms-3">${typeStr}</span>
           </div>
           <div class="d-flex gap-2">
-            <button class="btn btn-primary editor-btn" onclick="editDate(${index})">Edit</button>
-            <button class="btn btn-danger editor-btn ms-auto" onclick="confirmDeleteDate(${index})">Delete</button>
+            ${actions}
           </div>
         </div>
       </div>
@@ -203,7 +230,7 @@ function renderDatesEditor() {
     list.appendChild(card);
   });
 
-  renderEditorFilters(allDates);
+  renderEditorFilters();
 
   topTile.innerHTML = `
     <div class="d-flex gap-2">
@@ -215,7 +242,38 @@ function renderDatesEditor() {
   updateNavState();
 }
 
-function renderEditorFilters(allDates) {
+function getUnifiedEditorEntries() {
+  const entries = [];
+  const allDates = loadDates();
+  allDates.forEach((d, index) => {
+    entries.push({ source: "local", index: index, d: d });
+  });
+
+  if (typeof loadGoogleCalFeed === "function" && typeof gcalEventToDate === "function") {
+    const feed = loadGoogleCalFeed();
+    if (feed && Array.isArray(feed.items)) {
+      feed.items.forEach((evt, index) => {
+        const d = gcalEventToDate(evt);
+        if (!d) return;
+        // Include hidden events in the editor list (filter decides visibility)
+        entries.push({ source: "google", index: index, d: d, evt: evt });
+      });
+    }
+  }
+  return entries;
+}
+
+function editUnifiedEntry(source, index) {
+  if (source === "google") {
+    if (typeof openGoogleEventFromDates === "function") {
+      openGoogleEventFromDates(index);
+    }
+    return;
+  }
+  editDate(index);
+}
+
+function renderEditorFilters() {
   const el = document.getElementById("editorFilters");
   if (!el) return;
   if (editingIndex >= 0) {
@@ -225,19 +283,61 @@ function renderEditorFilters(allDates) {
   el.classList.remove("d-none");
   const cats = loadCategories().map(c => c.name).filter(Boolean);
   el.innerHTML = `
-    <div class="d-flex gap-2 align-items-center">
-      <select class="form-select" style="width:auto;min-width:160px" onchange="setCategoryFilter(this.value)">
-        <option value="">All</option>
-        ${cats.map(c => `<option value="${c}" ${categoryFilter === c ? 'selected' : ''}>${c}</option>`).join("")}
-      </select>
-      <input class="form-control" type="search" placeholder="Search titles..." value="${escapeHtml(titleSearch)}" oninput="setTitleSearch(this.value)">
-      <button class="btn btn-outline-secondary btn-sm" onclick="categoryFilter='';titleSearch='';renderDatesEditor()">Clear</button>
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+      <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">Filter</button>
+        <div class="dropdown-menu">
+          <label class="form-label mb-1">Category</label>
+          <select class="form-select form-select-sm mb-3" onchange="setCategoryFilter(this.value)">
+            <option value="">All</option>
+            ${cats.map(c => `<option value="${escapeHtml(c)}" ${categoryFilter === c ? "selected" : ""}>${escapeHtml(c)}</option>`).join("")}
+          </select>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="filterShowLocal" ${filterShowLocal ? "checked" : ""} onchange="setFilterShowLocal(this.checked)">
+            <label class="form-check-label" for="filterShowLocal">Show local</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="filterShowGoogle" ${filterShowGoogle ? "checked" : ""} onchange="setFilterShowGoogle(this.checked)">
+            <label class="form-check-label" for="filterShowGoogle">Show google</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="filterShowGoogleHidden" ${filterShowGoogleHidden ? "checked" : ""} onchange="setFilterShowGoogleHidden(this.checked)">
+            <label class="form-check-label" for="filterShowGoogleHidden">Show google hidden</label>
+          </div>
+        </div>
+      </div>
+      <input class="form-control" type="search" placeholder="Search titles..." value="${escapeHtml(titleSearch)}" oninput="setTitleSearch(this.value)" style="min-width:140px;flex:1">
+      <button class="btn btn-outline-secondary btn-sm" onclick="clearEditorFilters()">Clear</button>
     </div>
   `;
 }
 
 function setCategoryFilter(val) {
   categoryFilter = val;
+  renderDatesEditor();
+}
+
+function setFilterShowLocal(val) {
+  filterShowLocal = !!val;
+  renderDatesEditor();
+}
+
+function setFilterShowGoogle(val) {
+  filterShowGoogle = !!val;
+  renderDatesEditor();
+}
+
+function setFilterShowGoogleHidden(val) {
+  filterShowGoogleHidden = !!val;
+  renderDatesEditor();
+}
+
+function clearEditorFilters() {
+  categoryFilter = "";
+  titleSearch = "";
+  filterShowLocal = true;
+  filterShowGoogle = true;
+  filterShowGoogleHidden = false;
   renderDatesEditor();
 }
 

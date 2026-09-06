@@ -32,6 +32,14 @@ function saveImages(images) {
   localStorage.setItem("images", JSON.stringify(images));
 }
 
+function loadGoogleCalFeed() {
+  return JSON.parse(localStorage.getItem("cmd_google_cal") || "null");
+}
+
+function storeGoogleCalFeed(feed) {
+  localStorage.setItem("cmd_google_cal", JSON.stringify(feed));
+}
+
 // -------------------------------
 // JSON IMPORT
 // -------------------------------
@@ -119,6 +127,8 @@ function hideAllEditors() {
   document.getElementById("datesEditor").classList.add("d-none");
   document.getElementById("categoriesEditor").classList.add("d-none");
   document.getElementById("imagesEditor").classList.add("d-none");
+  const gcalEd = document.getElementById("googleEventsEditor");
+  if (gcalEd) gcalEd.classList.add("d-none");
   document.getElementById("settingsPage").classList.add("d-none");
 }
 
@@ -128,7 +138,8 @@ function updateNavState() {
   const editing = (
     (typeof editingIndex !== 'undefined' && editingIndex >= 0) ||
     (typeof editingCategoryIndex !== 'undefined' && editingCategoryIndex >= 0) ||
-    (typeof editingImageIndex !== 'undefined' && editingImageIndex >= 0)
+    (typeof editingImageIndex !== 'undefined' && editingImageIndex >= 0) ||
+    (typeof gcalEditingIndex !== 'undefined' && gcalEditingIndex >= 0)
   );
   nav.classList.toggle("nav-inactive", editing);
 }
@@ -168,6 +179,64 @@ function formatDate(date) {
 }
 
 // -------------------------------
+// GOOGLE CALENDAR -> DATE TILES
+// -------------------------------
+
+function gcalEventToDate(evt) {
+  const start = evt.start || {};
+  let y, m, d;
+  if (start.date) {
+    const parts = String(start.date).split("-");
+    y = parseInt(parts[0], 10);
+    m = parseInt(parts[1], 10);
+    d = parseInt(parts[2], 10);
+  } else if (start.dateTime) {
+    const dt = new Date(start.dateTime);
+    y = dt.getFullYear();
+    m = dt.getMonth() + 1;
+    d = dt.getDate();
+  } else {
+    return null;
+  }
+  if (!y || !m || !d) return null;
+
+  let category = "";
+  let image = "";
+  let show = true;
+  if (evt._cmd) {
+    category = evt._cmd.category || "";
+    image = evt._cmd.image || "";
+    show = evt._cmd.show !== false;
+  } else if (typeof parseCmdPayloadFromDescription === "function") {
+    const cmd = parseCmdPayloadFromDescription(evt.description);
+    if (cmd) {
+      category = cmd.category || "";
+      image = cmd.image || "";
+      show = cmd.show !== false;
+    }
+  }
+
+  return {
+    name: evt.summary || "(Untitled event)",
+    category: category,
+    image: image,
+    show: show,
+    recurring: !!(evt.recurringEventId || (evt.recurrence && evt.recurrence.length)),
+    gcal: true,
+    type: "once",
+    year: y,
+    month: m,
+    day: d
+  };
+}
+
+function loadGoogleCalendarEntries() {
+  const feed = loadGoogleCalFeed();
+  if (!feed || !Array.isArray(feed.items)) return [];
+  return feed.items.map(gcalEventToDate).filter(d => d && d.show !== false);
+}
+
+// -------------------------------
 // RENDER COUNTDOWNS
 // -------------------------------
 
@@ -183,7 +252,7 @@ function renderCountdowns() {
   const maxCountdowns = parseInt(localStorage.getItem("maxCountdowns") || "10", 10);
   const showAll = container.dataset.showAll === "true" || maxCountdowns === 0;
 
-  const withDays = dates
+  const withDays = [...dates, ...loadGoogleCalendarEntries()]
     .map(d => ({ ...d, days: daysUntil(d) }))
     .sort((a, b) => a.days - b.days);
 
@@ -299,6 +368,8 @@ function openDatesEditor() {
   document.getElementById("datesEditor").classList.remove("d-none");
   document.getElementById("categoriesEditor").classList.add("d-none");
   document.getElementById("imagesEditor").classList.add("d-none");
+  const gcalEd = document.getElementById("googleEventsEditor");
+  if (gcalEd) gcalEd.classList.add("d-none");
   document.getElementById("settingsPage").classList.add("d-none");
   renderDatesEditor();
 }
@@ -308,6 +379,8 @@ function openCategoriesEditor() {
   document.getElementById("datesEditor").classList.add("d-none");
   document.getElementById("categoriesEditor").classList.remove("d-none");
   document.getElementById("imagesEditor").classList.add("d-none");
+  const gcalEd = document.getElementById("googleEventsEditor");
+  if (gcalEd) gcalEd.classList.add("d-none");
   document.getElementById("settingsPage").classList.add("d-none");
   renderCategoriesEditor();
 }
@@ -317,6 +390,8 @@ function openImagesEditor() {
   document.getElementById("datesEditor").classList.add("d-none");
   document.getElementById("categoriesEditor").classList.add("d-none");
   document.getElementById("imagesEditor").classList.remove("d-none");
+  const gcalEd = document.getElementById("googleEventsEditor");
+  if (gcalEd) gcalEd.classList.add("d-none");
   document.getElementById("settingsPage").classList.add("d-none");
   imagesPage = 0;
   renderImagesEditor();

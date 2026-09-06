@@ -93,6 +93,8 @@ function openSettings() {
   document.getElementById("datesEditor").classList.add("d-none");
   document.getElementById("categoriesEditor").classList.add("d-none");
   document.getElementById("imagesEditor").classList.add("d-none");
+  const gcalEd = document.getElementById("googleEventsEditor");
+  if (gcalEd) gcalEd.classList.add("d-none");
   document.getElementById("settingsPage").classList.remove("d-none");
 
   const savedTheme = localStorage.getItem("theme") || "darkly";
@@ -131,6 +133,20 @@ function openSettings() {
   const densitySel = document.getElementById("densitySelector");
   if (densitySel) densitySel.value = savedDensity;
 
+  const gcalName = document.getElementById("gcalName");
+  if (gcalName) gcalName.value = localStorage.getItem("cmd_gcal_name") || "";
+
+  const gcalClientId = document.getElementById("gcalClientId");
+  if (gcalClientId) gcalClientId.value = localStorage.getItem("cmd_gcal_client_id") || "";
+
+  const gcalCalId = document.getElementById("gcalCalendarId");
+  if (gcalCalId) gcalCalId.value = localStorage.getItem("cmd_gcal_calendar_id") || "primary";
+
+  const gcalEnabled = localStorage.getItem("cmd_gcal_enabled") === "true";
+  const gcalEnabledCb = document.getElementById("gcalEnabled");
+  if (gcalEnabledCb) gcalEnabledCb.checked = gcalEnabled;
+  setGCalVisible(gcalEnabled);
+
   const qrContainer = document.getElementById("shareQrCode");
   if (qrContainer) {
     qrContainer.innerHTML = "";
@@ -145,6 +161,31 @@ function openSettings() {
 
 function changeFormat(value) {
   localStorage.setItem("countdownFormat", value);
+}
+
+// -------------------------------
+// GOOGLE CALENDAR SETTINGS
+// -------------------------------
+
+function saveGCalSettings() {
+  const nameInput = document.getElementById("gcalName");
+  const clientIdInput = document.getElementById("gcalClientId");
+  const calIdInput = document.getElementById("gcalCalendarId");
+  if (nameInput) localStorage.setItem("cmd_gcal_name", nameInput.value.trim());
+  if (clientIdInput) localStorage.setItem("cmd_gcal_client_id", clientIdInput.value.trim());
+  if (calIdInput) localStorage.setItem("cmd_gcal_calendar_id", calIdInput.value.trim() || "primary");
+}
+
+function setGCalVisible(enabled) {
+  const options = document.getElementById("gcalOptions");
+  if (options) options.classList.toggle("d-none", !enabled);
+  const menu = document.getElementById("googleMenu");
+  if (menu) menu.classList.toggle("d-none", !enabled);
+}
+
+function changeGCalEnabled(enabled) {
+  localStorage.setItem("cmd_gcal_enabled", enabled);
+  setGCalVisible(enabled);
 }
 
 function closeSettings() {
@@ -169,10 +210,12 @@ function showNav() {
 function hideNav() {
   const nav = document.getElementById("mainNav");
   if (!nav) return;
+  const gcalEd = document.getElementById("googleEventsEditor");
   if (document.getElementById("settingsPage").classList.contains("d-none") &&
       document.getElementById("datesEditor").classList.contains("d-none") &&
       document.getElementById("categoriesEditor").classList.contains("d-none") &&
-      document.getElementById("imagesEditor").classList.contains("d-none")) {
+      document.getElementById("imagesEditor").classList.contains("d-none") &&
+      (!gcalEd || gcalEd.classList.contains("d-none"))) {
     nav.classList.add("nav-hidden");
     autoHideCooldown = true;
     setTimeout(() => { autoHideCooldown = false; }, 600);
@@ -226,6 +269,9 @@ function changeAutoHideMenu(enabled) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  const gcalEnabled = localStorage.getItem("cmd_gcal_enabled") === "true";
+  setGCalVisible(gcalEnabled);
+
   const savedFontSize = localStorage.getItem("fontSize") || "xlarge";
   if (savedFontSize !== "normal") {
     document.body.classList.add("font-size-" + savedFontSize);
